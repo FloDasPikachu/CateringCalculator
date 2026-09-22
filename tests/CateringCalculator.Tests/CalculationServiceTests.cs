@@ -3,7 +3,7 @@ using CateringCalculator.Core.Models;
 using CateringCalculator.Core.Services;
 using Xunit;
 
-namespace CateringCalculator.Core.Tests.Services;
+namespace CateringCalculator.Tests;
 
 public class CalculationServiceTests {
     private readonly CalculationService _sut = new();
@@ -39,12 +39,12 @@ public class CalculationServiceTests {
             Id = Guid.NewGuid(),
             Name = "Mojito",
             IceInGrams = 150,
-            Items = new List<RecipeItem>
-            {
+            Items =
+            [
                 new() { IngredientId = rum.Id, Ingredient = rum, Amount = 60m },     // 60 ml
                 new() { IngredientId = lime.Id, Ingredient = lime, Amount = 0.5m },  // 0.5 Stück
                 new() { IngredientId = sugar.Id, Ingredient = sugar, Amount = 10m }  // 10 g
-            }
+            ]
         };
 
         var plan = new EventPlan {
@@ -53,7 +53,7 @@ public class CalculationServiceTests {
             GuestCount = 10,
             AverageDrinksPerGuest = 2, // 20 Drinks gesamt
             WasteBufferPercent = 10,  // 10 % Verschnitt
-            SelectedRecipes = new List<Recipe> { recipe }
+            SelectedRecipes = [recipe]
         };
 
         // Act
@@ -94,7 +94,7 @@ public class CalculationServiceTests {
         var plan = new EventPlan {
             GuestCount = 50,
             AverageDrinksPerGuest = 2,
-            SelectedRecipes = new List<Recipe>()
+            SelectedRecipes = []
         };
 
         // Act
