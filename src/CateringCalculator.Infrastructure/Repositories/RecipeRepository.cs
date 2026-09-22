@@ -5,15 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CateringCalculator.Infrastructure.Repositories;
 
-public class RecipeRepository : IRecipeRepository {
-    private readonly AppDbContext _context;
-
-    public RecipeRepository(AppDbContext context) {
-        _context = context;
-    }
-
+public class RecipeRepository(AppDbContext context) : IRecipeRepository {
     public async Task<List<Recipe>> GetAllRecipesAsync() {
-        return await _context.Recipes
+        return await context.Recipes
             .Include(r => r.Items)
             .ThenInclude(i => i.Ingredient)
             .AsNoTracking()
@@ -21,7 +15,7 @@ public class RecipeRepository : IRecipeRepository {
     }
 
     public async Task<Recipe?> GetRecipeByIdAsync(Guid id) {
-        return await _context.Recipes
+        return await context.Recipes
             .Include(r => r.Items)
             .ThenInclude(i => i.Ingredient)
             .FirstOrDefaultAsync(r => r.Id == id);
@@ -33,33 +27,33 @@ public class RecipeRepository : IRecipeRepository {
                 item.Ingredient = null!;
             }
         }
-        await _context.Recipes.AddAsync(recipe);
-        await _context.SaveChangesAsync();
+        await context.Recipes.AddAsync(recipe);
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateRecipeAsync(Recipe recipe) {
-        _context.Recipes.Update(recipe);
-        await _context.SaveChangesAsync();
+        context.Recipes.Update(recipe);
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteRecipeAsync(Guid id) {
-        var recipe = await _context.Recipes
+        var recipe = await context.Recipes
             .Include(r => r.Items)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (recipe != null) {
-            _context.RecipeItems.RemoveRange(recipe.Items);
-            _context.Recipes.Remove(recipe);
-            await _context.SaveChangesAsync();
+            context.RecipeItems.RemoveRange(recipe.Items);
+            context.Recipes.Remove(recipe);
+            await context.SaveChangesAsync();
         }
     }
 
     public async Task<List<Ingredient>> GetAllIngredientsAsync() {
-        return await _context.Ingredients.AsNoTracking().ToListAsync();
+        return await context.Ingredients.AsNoTracking().ToListAsync();
     }
 
     public async Task AddIngredientAsync(Ingredient ingredient) {
-        _context.Ingredients.Add(ingredient);
-        await _context.SaveChangesAsync();
+        context.Ingredients.Add(ingredient);
+        await context.SaveChangesAsync();
     }
 }
