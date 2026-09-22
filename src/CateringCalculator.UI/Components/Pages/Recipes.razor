@@ -5,43 +5,169 @@
 
 <PageTitle>Rezepte - CateringCalculator</PageTitle>
 
-<h1>Cocktails & Rezepte</h1>
-<p>Verwalte hier deine Rezepturen und Zutatenmengen.</p>
-
-<div class="mb-4">
-    <button class="btn btn-primary" @onclick="CreateSampleRecipeAsync">
-        + Beispiel-Cocktail hinzufügen (Gin & Tonic)
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1>Cocktails & Rezepte</h1>
+        <p class="text-muted mb-0">Verwalte hier deine Rezepturen und Zutatenmengen.</p>
+    </div>
+    <button class="btn btn-primary" @onclick="OpenCreateDialog">
+        + Neues Rezept anlegen
     </button>
 </div>
 
 @if (_isLoading) {
-    <p><em>Lade Rezepte...</em></p>
-} else if (_recipes.Count == 0) {
+    <p><em>Lade Daten...</em></p>
+} else if (_recipes.Count == 0 && !_showForm) {
     <div class="alert alert-info">
-        Noch keine Rezepte vorhanden. Klicke auf den Button oben, um dein erstes Rezept anzulegen!
+        Noch keine Rezepte vorhanden. Klicke oben auf <strong>"+ Neues Rezept anlegen"</strong>!
     </div>
-} else {
+}
+
+<!-- FORMULAR ZUM ERSTELLEN EINES REZEPTS -->
+@if (_showForm) {
+    <div class="card shadow mb-4 border-primary">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Neues Rezept erstellen</h5>
+            <button type="button" class="btn-close btn-close-white" @onclick="CloseForm"></button>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label font-weight-bold">Name des Cocktails *</label>
+                    <input type="text" class="form-control" @bind="_newRecipe.Name" placeholder="z. B. Mojito, Caipirinha..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-weight-bold">Eisbedarf pro Drink (g)</label>
+                    <input type="number" class="form-control" @bind="_newRecipe.IceInGrams" step="10" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label font-weight-bold">Beschreibung</label>
+                    <input type="text" class="form-control" @bind="_newRecipe.Description" placeholder="Kurze Beschreibung" />
+                </div>
+            </div>
+
+            <h5 class="mt-4 mb-2">Zutaten des Rezeptes</h5>
+
+            <!-- Liste der aktuell im neuen Rezept enthaltenen Zutaten -->
+            @if (_newRecipe.Items.Count == 0) {
+                <div class="alert alert-warning p-2 small">
+                    Füge unten mindestens eine Zutat hinzu.
+                </div>
+            } else {
+                <table class="table table-sm table-bordered align-middle mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Zutat</th>
+                            <th style="width: 150px;">Menge (ml)</th>
+                            <th style="width: 80px;">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in _newRecipe.Items) {
+                            var ing = _availableIngredients.FirstOrDefault(i => i.Id == item.IngredientId);
+                            <tr>
+                                <td>@(ing?.Name ?? "Unbekannt")</td>
+                                <td>@item.AmountMl ml</td>
+                                <td>
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveItemFromRecipe(item)">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+            <!-- Zutat zum Rezept hinzufügen (Bestehend ODER Neu) -->
+            <div class="card p-3 bg-light mb-3">
+                <h6>Zutat hinzufügen</h6>
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small">Existierende Zutat wählen</label>
+                        <select class="form-select" @bind="_selectedIngredientId">
+                            <option value="@Guid.Empty">-- Wählen oder neu anlegen --</option>
+                            @foreach (var ing in _availableIngredients) {
+                                <option value="@ing.Id">@ing.Name (@ing.BottleVolumeMl ml - @ing.BottlePrice.ToString("C2"))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small">Benötigte Menge im Drink (ml)</label>
+                        <input type="number" class="form-control" @bind="_amountMl" min="1" step="5" />
+                    </div>
+
+                    <div class="col-md-5 d-flex gap-2">
+                        <button class="btn btn-outline-primary w-100" @onclick="AddSelectedIngredientToRecipe" disabled="@(_selectedIngredientId == Guid.Empty)">
+                            + Hinzufügen
+                        </button>
+                        <button class="btn btn-outline-secondary text-nowrap" @onclick="ToggleNewIngredientFields">
+                            @(_showNewIngredientInput ? "Abbrechen" : "+ Völlig neue Zutat")
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Unter-Formular: Völlig neue Zutat anlegen & direkt verwenden -->
+                @if (_showNewIngredientInput) {
+                    <div class="border-top mt-3 pt-3">
+                        <h6 class="text-primary">Neue Zutat im Stammdaten-Katalog anlegen</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" @bind="_newIngName" placeholder="Zutatenname (z. B. Lime Juice)" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" @bind="_newIngVolume" placeholder="Flascheninhalt (ml)" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" @bind="_newIngPrice" step="0.01" placeholder="Flaschenpreis (€)" />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-success w-100" @onclick="CreateAndAddIngredient">
+                                    Speichern
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary" @onclick="CloseForm">Abbrechen</button>
+                <button class="btn btn-success" @onclick="SaveRecipeAsync" disabled="@(string.IsNullOrWhiteSpace(_newRecipe.Name) || _newRecipe.Items.Count == 0)">
+                    💾 Rezept speichern
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- REZEPTÜBERSICHT (KARTEN) -->
+@if (_recipes.Count > 0) {
     <div class="row">
         @foreach (var recipe in _recipes) {
             <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card h-100">
+                <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">@recipe.Name</h5>
-                        <p class="card-text text-muted">@recipe.Description</p>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">@recipe.Name</h5>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteRecipeAsync(recipe.Id)">🗑️</button>
+                        </div>
+                        <p class="card-text text-muted small">@recipe.Description</p>
 
                         <h6>Zutaten:</h6>
                         <ul class="list-group list-group-flush mb-3">
                             @foreach (var item in recipe.Items) {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
                                     <span>@(item.Ingredient?.Name ?? "Unbekannt")</span>
                                     <span class="badge bg-secondary rounded-pill">@item.AmountMl ml</span>
                                 </li>
                             }
                         </ul>
 
-                        <div class="d-flex justify-content-between align-items-center text-secondary small">
+                        <div class="d-flex justify-content-between align-items-center text-secondary small pt-2 border-top">
                             <span>Eis: @recipe.IceInGrams g</span>
-                            <strong>Kosten: @recipe.TotalCostPerDrink.ToString("C2") / Drink</strong>
+                            <strong class="text-success">@recipe.TotalCostPerDrink.ToString("C2") / Drink</strong>
                         </div>
                     </div>
                 </div>
@@ -52,49 +178,97 @@
 
 @code {
     private List<Recipe> _recipes = new();
+    private List<Ingredient> _availableIngredients = new();
     private bool _isLoading = true;
+    private bool _showForm = false;
+    private bool _showNewIngredientInput = false;
+
+    // Model für neues Rezept
+    private Recipe _newRecipe = new();
+    private Guid _selectedIngredientId = Guid.Empty;
+    private int _amountMl = 50;
+
+    // Felder für völlig neue Zutat
+    private string _newIngName = "";
+    private int _newIngVolume = 700;
+    private decimal _newIngPrice = 12.99m;
 
     protected override async Task OnInitializedAsync() {
-        await LoadRecipesAsync();
+        await LoadDataAsync();
     }
 
-    private async Task LoadRecipesAsync() {
+    private async Task LoadDataAsync() {
         _isLoading = true;
         _recipes = await RecipeRepository.GetAllRecipesAsync();
+        _availableIngredients = await RecipeRepository.GetAllIngredientsAsync();
         _isLoading = false;
     }
 
-    private async Task CreateSampleRecipeAsync() {
-        var sampleRecipe = new Recipe {
-            Name = $"Gin & Tonic #{_recipes.Count + 1}",
-            Description = "Klassischer Longdrink mit Gin und Tonic Water.",
-            IceInGrams = 150,
-            Items = new List<RecipeItem>
-            {
-                new RecipeItem
-                {
-                    AmountMl = 50,
-                    Ingredient = new Ingredient
-                    {
-                        Name = "Dry Gin",
-                        BottleVolumeMl = 700,
-                        BottlePrice = 19.99m
-                    }
-                },
-                new RecipeItem
-                {
-                    AmountMl = 150,
-                    Ingredient = new Ingredient
-                    {
-                        Name = "Tonic Water",
-                        BottleVolumeMl = 1000,
-                        BottlePrice = 2.29m
-                    }
-                }
-            }
+    private void OpenCreateDialog() {
+        _newRecipe = new Recipe { IceInGrams = 150 };
+        _showForm = true;
+    }
+
+    private void CloseForm() {
+        _showForm = false;
+        _showNewIngredientInput = false;
+    }
+
+    private void AddSelectedIngredientToRecipe() {
+        if (_selectedIngredientId == Guid.Empty || _amountMl <= 0)
+            return;
+
+        // Prüfen ob Zutat bereits im Rezept vorhanden ist
+        if (_newRecipe.Items.Any(i => i.IngredientId == _selectedIngredientId))
+            return;
+
+        _newRecipe.Items.Add(new RecipeItem {
+            IngredientId = _selectedIngredientId,
+            AmountMl = _amountMl
+        });
+
+        _selectedIngredientId = Guid.Empty;
+        _amountMl = 50;
+    }
+
+    private void RemoveItemFromRecipe(RecipeItem item) {
+        _newRecipe.Items.Remove(item);
+    }
+
+    private void ToggleNewIngredientFields() {
+        _showNewIngredientInput = !_showNewIngredientInput;
+    }
+
+    private async Task CreateAndAddIngredient() {
+        if (string.IsNullOrWhiteSpace(_newIngName) || _newIngVolume <= 0 || _newIngPrice <= 0)
+            return;
+
+        var newIng = new Ingredient {
+            Name = _newIngName,
+            BottleVolumeMl = _newIngVolume,
+            BottlePrice = _newIngPrice
         };
 
-        await RecipeRepository.AddRecipeAsync(sampleRecipe);
-        await LoadRecipesAsync();
+        await RecipeRepository.AddIngredientAsync(newIng);
+        _availableIngredients = await RecipeRepository.GetAllIngredientsAsync();
+
+        // Automatisch als gewählte Zutat eintragen
+        _selectedIngredientId = newIng.Id;
+        _showNewIngredientInput = false;
+        _newIngName = "";
+    }
+
+    private async Task SaveRecipeAsync() {
+        if (string.IsNullOrWhiteSpace(_newRecipe.Name) || _newRecipe.Items.Count == 0)
+            return;
+
+        await RecipeRepository.AddRecipeAsync(_newRecipe);
+        CloseForm();
+        await LoadDataAsync();
+    }
+
+    private async Task DeleteRecipeAsync(Guid recipeId) {
+        await RecipeRepository.DeleteRecipeAsync(recipeId);
+        await LoadDataAsync();
     }
 }

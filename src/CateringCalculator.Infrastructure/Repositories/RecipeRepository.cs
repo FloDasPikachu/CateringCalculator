@@ -28,6 +28,11 @@ public class RecipeRepository : IRecipeRepository {
     }
 
     public async Task AddRecipeAsync(Recipe recipe) {
+        foreach (var item in recipe.Items) {
+            if (item.IngredientId != Guid.Empty) {
+                item.Ingredient = null!;
+            }
+        }
         await _context.Recipes.AddAsync(recipe);
         await _context.SaveChangesAsync();
     }
@@ -38,10 +43,23 @@ public class RecipeRepository : IRecipeRepository {
     }
 
     public async Task DeleteRecipeAsync(Guid id) {
-        var recipe = await _context.Recipes.FindAsync(id);
+        var recipe = await _context.Recipes
+            .Include(r => r.Items)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
         if (recipe != null) {
+            _context.RecipeItems.RemoveRange(recipe.Items);
             _context.Recipes.Remove(recipe);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<List<Ingredient>> GetAllIngredientsAsync() {
+        return await _context.Ingredients.AsNoTracking().ToListAsync();
+    }
+
+    public async Task AddIngredientAsync(Ingredient ingredient) {
+        _context.Ingredients.Add(ingredient);
+        await _context.SaveChangesAsync();
     }
 }
