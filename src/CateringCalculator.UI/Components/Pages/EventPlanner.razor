@@ -1,0 +1,162 @@
+﻿@page "/event-planner"
+@using CateringCalculator.Core.Interfaces
+@using CateringCalculator.Core.Models
+@using CateringCalculator.Core.Services
+@inject IRecipeRepository RecipeRepository
+@inject CalculationService CalculationService
+
+<PageTitle>Event Kalkulator - CateringCalculator</PageTitle>
+
+<h1>Event-Planung & Kalkulation</h1>
+<p>Berechne die benötigten Zutaten, Flaschenzahlen und Materialkosten für deine Veranstaltung.</p>
+
+<div class="row">
+    <!-- Linke Spalte: Event-Parameter & Rezeptauswahl -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">1. Event-Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Veranstaltungsname</label>
+                    <input type="text" class="form-control" @bind="_eventPlan.Title" placeholder="z. B. Sommerfest 2026" />
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="form-label font-weight-bold">Anzahl Gäste</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.GuestCount" min="1" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label font-weight-bold">Drinks / Gast</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.AverageDrinksPerGuest" min="1" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Puffer für Schwund (%)</label>
+                    <input type="number" class="form-control" @bind="_eventPlan.WasteBufferPercent" min="0" max="50" />
+                    <small class="text-muted">Aufschlag für Verschnitt, Kleckern & Gratis-Drinks.</small>
+                </div>
+
+                <h5 class="mt-4 mb-2">2. Cocktails auswählen</h5>
+                @if (_availableRecipes.Count == 0) {
+                    <div class="alert alert-warning small">
+                        Keine Rezepte vorhanden. Bitte erst unter "Rezepte" Cocktails anlegen!
+                    </div>
+                } else {
+                    <div class="list-group mb-3" style="max-height: 200px; overflow-y: auto;">
+                        @foreach (var recipe in _availableRecipes) {
+                            var isSelected = _eventPlan.SelectedRecipes.Any(r => r.Id == recipe.Id);
+                            <button type="button"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(isSelected ? "active" : "")"
+                                    @onclick="() => ToggleRecipeSelection(recipe)">
+                                <span>@recipe.Name</span>
+                                <span class="badge @(isSelected ? "bg-light text-dark" : "bg-secondary")">
+                                    @recipe.TotalCostPerDrink.ToString("C2")
+                                </span>
+                            </button>
+                        }
+                    </div>
+                }
+
+                <button class="btn btn-success w-100 mt-2"
+                        @onclick="CalculateEvent"
+                        disabled="@(_eventPlan.SelectedRecipes.Count == 0 || _eventPlan.GuestCount <= 0)">
+                    🧮 Event jetzt berechnen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rechte Spalte: Ergebnisse & Einkaufsliste -->
+    <div class="col-md-7">
+        @if (_calculationResult == null) {
+            <div class="card border-dashed p-5 text-center text-muted">
+                <h4>Noch keine Kalkulation vorhanden</h4>
+                <p>Wähle links Gästezahl und Rezepte aus und klicke auf "Event jetzt berechnen".</p>
+            </div>
+        } else {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Ergebnis: @_calculationResult.EventTitle</h5>
+                    <span class="badge bg-info text-dark">@_calculationResult.TotalDrinksCount Drinks gesamt</span>
+                </div>
+                <div class="card-body">
+                    <!-- Kennzahlen-Kacheln -->
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted d-block">Wareneinsatz</small>
+                                <strong class="h5 text-success">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted d-block">Kosten / Drink</small>
+                                <strong class="h5">@_calculationResult.CostPerDrink.ToString("C2")</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted d-block">Eisbedarf</small>
+                                <strong class="h5 text-primary">@_calculationResult.TotalIceInKg kg</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6>🛒 Automatische Einkaufsliste</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Zutat</th>
+                                    <th>Bedarf (ml)</th>
+                                    <th class="text-center">Kaufm. Gebinde</th>
+                                    <th class="text-end">Gesamtkosten</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in _calculationResult.ShoppingList) {
+                                    <tr>
+                                        <td><strong>@item.IngredientName</strong></td>
+                                        <td>@item.TotalVolumeNeededMl ml</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary fs-6">
+                                                @item.BottlesToBuy x (@item.BottleVolumeMl ml)
+                                            </span>
+                                        </td>
+                                        <td class="text-end">@item.TotalCost.ToString("C2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private EventPlan _eventPlan = new() { Title = "Neues Event", GuestCount = 30, AverageDrinksPerGuest = 3 };
+    private List<Recipe> _availableRecipes = new();
+    private CalculationResult? _calculationResult;
+
+    protected override async Task OnInitializedAsync() {
+        _availableRecipes = await RecipeRepository.GetAllRecipesAsync();
+    }
+
+    private void ToggleRecipeSelection(Recipe recipe) {
+        if (_eventPlan.SelectedRecipes.Any(r => r.Id == recipe.Id)) {
+            _eventPlan.SelectedRecipes.RemoveAll(r => r.Id == recipe.Id);
+        } else {
+            _eventPlan.SelectedRecipes.Add(recipe);
+        }
+    }
+
+    private void CalculateEvent() {
+        _calculationResult = CalculationService.Calculate(_eventPlan);
+    }
+}

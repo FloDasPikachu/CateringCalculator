@@ -2,7 +2,9 @@
   <Folder Name="/src/">
     <Project Path="src/CateringCalculator.Core/CateringCalculator.Core.csproj" />
     <Project Path="src/CateringCalculator.Infrastructure/CateringCalculator.Infrastructure.csproj" />
-    <Project Path="src/CateringCalculator.UI/CateringCalculator.UI.csproj" />
+    <Project Path="src/CateringCalculator.UI/CateringCalculator.UI.csproj">
+      <Deploy Solution="Debug|*" />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CateringCalculator.Tests/CateringCalculator.Tests.csproj" />
