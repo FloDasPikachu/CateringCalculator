@@ -14,15 +14,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // Precision für Decimal-Werte in SQLite festlegen
         modelBuilder.Entity<Ingredient>()
-            .Property(i => i.BottlePrice)
+            .Property(i => i.PackagePrice)
             .HasConversion<double>();
 
         modelBuilder.Entity<Ingredient>()
-            .Property(i => i.BottleVolumeMl)
+            .Property(i => i.PackageSize)
             .HasConversion<double>();
 
         modelBuilder.Entity<RecipeItem>()
-            .Property(r => r.AmountMl)
+            .Property(r => r.Amount)
             .HasConversion<double>();
 
         modelBuilder.Entity<EventPlan>()

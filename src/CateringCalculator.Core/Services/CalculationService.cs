@@ -19,7 +19,7 @@ public class CalculationService {
         int drinksPerRecipe = eventPlan.TotalDrinksToServe / eventPlan.SelectedRecipes.Count;
         int remainingDrinks = eventPlan.TotalDrinksToServe % eventPlan.SelectedRecipes.Count;
 
-        var ingredientVolumes = new Dictionary<Guid, (Ingredient Ingredient, decimal TotalVolumeMl)>();
+        var ingredientAmounts = new Dictionary<Guid, (Ingredient Ingredient, decimal TotalAmount)>();
         decimal totalIceGrams = 0;
 
         for (int i = 0; i < eventPlan.SelectedRecipes.Count; i++) {
@@ -33,34 +33,35 @@ public class CalculationService {
                     continue;
                 }
 
-                decimal volumeNeeded = item.AmountMl * countForThisRecipe;
+                decimal amountNeeded = item.Amount * countForThisRecipe;
 
-                if (ingredientVolumes.TryGetValue(item.Ingredient.Id, out (Ingredient Ingredient, decimal TotalVolumeMl) current)) {
-                    ingredientVolumes[item.Ingredient.Id] = (current.Ingredient, current.TotalVolumeMl + volumeNeeded);
+                if (ingredientAmounts.TryGetValue(item.Ingredient.Id, out (Ingredient Ingredient, decimal TotalAmount) current)) {
+                    ingredientAmounts[item.Ingredient.Id] = (current.Ingredient, current.TotalAmount + amountNeeded);
                 } else {
-                    ingredientVolumes[item.Ingredient.Id] = (item.Ingredient, volumeNeeded);
+                    ingredientAmounts[item.Ingredient.Id] = (item.Ingredient, amountNeeded);
                 }
             }
         }
 
         decimal wasteMultiplier = 1m + (eventPlan.WasteBufferPercent / 100m);
 
-        foreach (var entry in ingredientVolumes.Values) {
+        foreach (var entry in ingredientAmounts.Values) {
             var ingredient = entry.Ingredient;
-            decimal totalMlWithWaste = entry.TotalVolumeMl * wasteMultiplier;
+            decimal totalMlWithWaste = entry.TotalAmount * wasteMultiplier;
 
             int bottlesToBuy = 0;
-            if (ingredient.BottleVolumeMl > 0) {
-                bottlesToBuy = (int)Math.Ceiling(totalMlWithWaste / ingredient.BottleVolumeMl);
+            if (ingredient.PackageSize > 0) {
+                bottlesToBuy = (int)Math.Ceiling(totalMlWithWaste / ingredient.PackageSize);
             }
 
             result.ShoppingList.Add(new IngredientShoppingItem {
                 IngredientId = ingredient.Id,
                 IngredientName = ingredient.Name,
-                TotalVolumeNeededMl = Math.Round(totalMlWithWaste, 2),
-                BottleVolumeMl = ingredient.BottleVolumeMl,
-                BottlePrice = ingredient.BottlePrice,
-                BottlesToBuy = bottlesToBuy
+                Unit = ingredient.Unit,
+                TotalAmountNeeded = Math.Round(totalMlWithWaste, 2),
+                PackageSize = ingredient.PackageSize,
+                PackagePrice = ingredient.PackagePrice,
+                PackagesToBuy = bottlesToBuy
             });
         }
 

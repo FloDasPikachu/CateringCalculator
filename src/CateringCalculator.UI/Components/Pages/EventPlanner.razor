@@ -118,7 +118,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Zutat</th>
-                                    <th>Bedarf (ml)</th>
+                                    <th>Gesamtbedarf</th>
                                     <th class="text-center">Kaufm. Gebinde</th>
                                     <th class="text-end">Gesamtkosten</th>
                                 </tr>
@@ -127,10 +127,10 @@
                                 @foreach (var item in _calculationResult.ShoppingList) {
                                     <tr>
                                         <td><strong>@item.IngredientName</strong></td>
-                                        <td>@item.TotalVolumeNeededMl ml</td>
+                                        <td>@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
                                         <td class="text-center">
                                             <span class="badge bg-primary fs-6">
-                                                @item.BottlesToBuy x (@item.BottleVolumeMl ml)
+                                                @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
                                             </span>
                                         </td>
                                         <td class="text-end">@item.TotalCost.ToString("C2")</td>
@@ -175,4 +175,11 @@
 
         await FileSaveService.SaveAndOpenFileAsync(fileName, pdfBytes);
     }
+
+    private static string GetUnitSuffix(CateringCalculator.Core.Enums.IngredientUnit unit) => unit switch {
+        CateringCalculator.Core.Enums.IngredientUnit.Piece => "Stk.",
+        CateringCalculator.Core.Enums.IngredientUnit.Gram => "g",
+        CateringCalculator.Core.Enums.IngredientUnit.Milliliter => "ml",
+        _ => "ml"
+    };
 }

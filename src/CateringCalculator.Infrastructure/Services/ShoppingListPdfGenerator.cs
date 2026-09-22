@@ -1,4 +1,5 @@
-﻿using CateringCalculator.Core.Models;
+﻿using CateringCalculator.Core.Enums;
+using CateringCalculator.Core.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -36,10 +37,10 @@ public class ShoppingListPdfGenerator {
                 page.Content().PaddingVertical(10).Column(column => {
                     column.Item().Table(table => {
                         table.ColumnsDefinition(columns => {
-                            columns.ConstantColumn(30); // Checkbox [ ]
+                            columns.ConstantColumn(30); // [x] Checkbox
                             columns.RelativeColumn(3);  // Zutat
-                            columns.RelativeColumn(2);  // Bedarf (ml)
-                            columns.RelativeColumn(2);  // Kaufm. Gebinde
+                            columns.RelativeColumn(2);  // Bedarf
+                            columns.RelativeColumn(2.5f); // Kaufm. Gebinde
                             columns.RelativeColumn(2);  // Gesamtkosten
                         });
 
@@ -59,10 +60,10 @@ public class ShoppingListPdfGenerator {
 
                         // Datenzeilen
                         foreach (var item in result.ShoppingList) {
-                            table.Cell().Element(CellStyle).Text("[  ]"); // Checkbox zum Abhaken
+                            table.Cell().Element(CellStyle).Text("[  ]");
                             table.Cell().Element(CellStyle).Text(item.IngredientName).Bold();
-                            table.Cell().Element(CellStyle).Text($"{item.TotalVolumeNeededMl} ml");
-                            table.Cell().Element(CellStyle).Text($"{item.BottlesToBuy}x ({item.BottleVolumeMl} ml)");
+                            table.Cell().Element(CellStyle).Text(FormatAmount(item.TotalAmountNeeded, item.Unit));
+                            table.Cell().Element(CellStyle).Text(FormatPackage(item));
                             table.Cell().Element(CellStyle).AlignRight().Text($"{item.TotalCost:C2}");
 
                             static IContainer CellStyle(IContainer container) =>
@@ -91,5 +92,33 @@ public class ShoppingListPdfGenerator {
         });
 
         return document.GeneratePdf();
+    }
+
+    private static string FormatAmount(decimal amount, IngredientUnit unit) {
+        return unit switch {
+            IngredientUnit.Piece => $"{amount:0.##} Stk.",
+            IngredientUnit.Gram => amount >= 1000m
+                ? $"{(amount / 1000m):0.##} kg"
+                : $"{amount:0.##} g",
+            IngredientUnit.Milliliter => amount >= 1000m
+                ? $"{(amount / 1000m):0.##} l"
+                : $"{amount:0.##} ml",
+            _ => $"{amount:0.##}"
+        };
+    }
+
+    private static string FormatPackage(IngredientShoppingItem item) {
+        string packageText = item.Unit switch {
+            IngredientUnit.Piece => $"{item.PackageSize:0.##} Stk. Packung",
+            IngredientUnit.Gram => item.PackageSize >= 1000m
+                ? $"{(item.PackageSize / 1000m):0.##} kg Packung"
+                : $"{item.PackageSize:0.##} g Packung",
+            IngredientUnit.Milliliter => item.PackageSize >= 1000m
+                ? $"{(item.PackageSize / 1000m):0.##} l Flasche"
+                : $"{item.PackageSize:0.##} ml Flasche",
+            _ => $"{item.PackageSize:0.##}"
+        };
+
+        return $"{item.PackagesToBuy}x ({packageText})";
     }
 }
