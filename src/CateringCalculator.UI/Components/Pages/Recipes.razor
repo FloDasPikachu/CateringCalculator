@@ -1,0 +1,111 @@
+﻿@page "/recipes"
+@using CateringCalculator.Core.Interfaces
+@using CateringCalculator.Core.Models
+@inject IRecipeRepository RecipeRepository
+
+<PageTitle>Rezepte - CateringCalculator</PageTitle>
+
+<h1>Cocktails & Rezepte</h1>
+<p>Verwalte hier deine Rezepturen und Zutatenmengen.</p>
+
+<div class="mb-4">
+    <button class="btn btn-primary" @onclick="CreateSampleRecipeAsync">
+        + Beispiel-Cocktail hinzufügen (Gin & Tonic)
+    </button>
+</div>
+
+@if (_isLoading)
+{
+    <p><em>Lade Rezepte...</em></p>
+}
+else if (_recipes.Count == 0)
+{
+    <div class="alert alert-info">
+        Noch keine Rezepte vorhanden. Klicke auf den Button oben, um dein erstes Rezept anzulegen!
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var recipe in _recipes)
+        {
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@recipe.Name</h5>
+                        <p class="card-text text-muted">@recipe.Description</p>
+                        
+                        <h6>Zutaten:</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var item in recipe.Items)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@(item.Ingredient?.Name ?? "Unbekannt")</span>
+                                    <span class="badge bg-secondary rounded-pill">@item.AmountMl ml</span>
+                                </li>
+                            }
+                        </ul>
+                        
+                        <div class="d-flex justify-content-between align-items-center text-secondary small">
+                            <span>Eis: @recipe.IceInGrams g</span>
+                            <strong>Kosten: @recipe.TotalCostPerDrink.ToString("C2") / Drink</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Recipe> _recipes = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecipesAsync();
+    }
+
+    private async Task LoadRecipesAsync()
+    {
+        _isLoading = true;
+        _recipes = await RecipeRepository.GetAllRecipesAsync();
+        _isLoading = false;
+    }
+
+    private async Task CreateSampleRecipeAsync()
+    {
+        var sampleRecipe = new Recipe
+        {
+            Name = $"Gin & Tonic #{_recipes.Count + 1}",
+            Description = "Klassischer Longdrink mit Gin und Tonic Water.",
+            IceInGrams = 150,
+            Items = new List<RecipeItem>
+            {
+                new RecipeItem
+                {
+                    AmountMl = 50,
+                    Ingredient = new Ingredient
+                    {
+                        Name = "Dry Gin",
+                        BottleVolumeMl = 700,
+                        BottlePrice = 19.99m
+                    }
+                },
+                new RecipeItem
+                {
+                    AmountMl = 150,
+                    Ingredient = new Ingredient
+                    {
+                        Name = "Tonic Water",
+                        BottleVolumeMl = 1000,
+                        BottlePrice = 2.29m
+                    }
+                }
+            }
+        };
+
+        await RecipeRepository.AddRecipeAsync(sampleRecipe);
+        await LoadRecipesAsync();
+    }
+}
