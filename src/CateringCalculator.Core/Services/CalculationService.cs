@@ -35,8 +35,7 @@ public class CalculationService {
 
                 decimal volumeNeeded = item.AmountMl * countForThisRecipe;
 
-                if (ingredientVolumes.ContainsKey(item.Ingredient.Id)) {
-                    var current = ingredientVolumes[item.Ingredient.Id];
+                if (ingredientVolumes.TryGetValue(item.Ingredient.Id, out (Ingredient Ingredient, decimal TotalVolumeMl) current)) {
                     ingredientVolumes[item.Ingredient.Id] = (current.Ingredient, current.TotalVolumeMl + volumeNeeded);
                 } else {
                     ingredientVolumes[item.Ingredient.Id] = (item.Ingredient, volumeNeeded);

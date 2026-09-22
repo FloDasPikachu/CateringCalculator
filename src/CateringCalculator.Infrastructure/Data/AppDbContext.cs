@@ -3,14 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CateringCalculator.Infrastructure.Data;
 
-public class AppDbContext : DbContext {
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options) {
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<RecipeItem> RecipeItems => Set<RecipeItem>();
     public DbSet<EventPlan> EventPlans => Set<EventPlan>();
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

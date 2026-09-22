@@ -4,6 +4,7 @@
 @using CateringCalculator.Core.Services
 @inject IRecipeRepository RecipeRepository
 @inject CalculationService CalculationService
+@inject CateringCalculator.UI.Services.FileSaveService FileSaveService
 
 <PageTitle>Event Kalkulator - CateringCalculator</PageTitle>
 
@@ -81,7 +82,12 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Ergebnis: @_calculationResult.EventTitle</h5>
-                    <span class="badge bg-info text-dark">@_calculationResult.TotalDrinksCount Drinks gesamt</span>
+                    <div>
+                        <span class="badge bg-info text-dark me-2">@_calculationResult.TotalDrinksCount Drinks gesamt</span>
+                        <button class="btn btn-sm btn-success" @onclick="ExportPdf">
+                            📄 PDF Exportieren
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Kennzahlen-Kacheln -->
@@ -158,5 +164,15 @@
 
     private void CalculateEvent() {
         _calculationResult = CalculationService.Calculate(_eventPlan);
+    }
+
+    private async Task ExportPdf() {
+        if (_calculationResult == null)
+            return;
+
+        var pdfBytes = CateringCalculator.Infrastructure.Services.ShoppingListPdfGenerator.GeneratePdf(_calculationResult);
+        var fileName = $"Einkaufsliste_{_calculationResult.EventTitle.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
+
+        await FileSaveService.SaveAndOpenFileAsync(fileName, pdfBytes);
     }
 }

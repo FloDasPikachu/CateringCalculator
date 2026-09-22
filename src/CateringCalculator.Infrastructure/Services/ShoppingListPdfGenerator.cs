@@ -16,7 +16,7 @@ public class ShoppingListPdfGenerator {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
                 page.PageColor(Colors.White);
-                page.DefaultTextStyle(x => x.FontSize(11).FontFamily(Fonts.Lato));
+                page.DefaultTextStyle(x => x.FontSize(11).FontFamily("Lato"));
 
                 // Header
                 page.Header().Column(column => {

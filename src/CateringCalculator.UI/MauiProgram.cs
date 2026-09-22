@@ -2,6 +2,7 @@
 using CateringCalculator.Core.Services;
 using CateringCalculator.Infrastructure.Data;
 using CateringCalculator.Infrastructure.Repositories;
+using CateringCalculator.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -33,6 +34,8 @@ public static class MauiProgram {
         // 3. Application Services & Repositories registrieren
         builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
         builder.Services.AddScoped<CalculationService>();
+
+        builder.Services.AddSingleton<FileSaveService>();
 
         var app = builder.Build();
 
