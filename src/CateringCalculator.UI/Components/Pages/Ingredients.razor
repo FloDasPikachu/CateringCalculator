@@ -4,102 +4,117 @@
 @using CateringCalculator.Core.Enums
 @inject IRecipeRepository RecipeRepository
 
-<PageTitle>Zutatenübersicht</PageTitle>
+<PageTitle>Zutatenübersicht - Catering Calculator</PageTitle>
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Zutatenverwaltung</h3>
-        <button class="btn btn-primary" @onclick="OpenAddModal">
-            <i class="bi bi-plus-lg"></i> Neue Zutat anlegen
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Zutatenverwaltung</h1>
+            <p class="text-muted" style="margin-bottom: 0;">Verwalte Gebindegrößen und Preise für deine Kalkulationen.</p>
+        </div>
+        <button class="btn-primary" @onclick="OpenAddModal">
+            <span>➕</span> Neue Zutat anlegen
         </button>
     </div>
 
     @if (_ingredients == null) {
-        <p><em>Zutaten werden geladen...</em></p>
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p class="text-muted" style="margin: 0;"><em>Zutaten werden geladen...</em></p>
+        </div>
     } else if (!_ingredients.Any()) {
-        <div class="alert alert-info">
-            Noch keine Zutaten vorhanden. Lege jetzt die erste Zutat an!
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Zutaten vorhanden</p>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Lege deine erste Zutat mit Gebindegröße und Preis an, um Rezepte berechnen zu können.</p>
+            <button class="btn-primary" @onclick="OpenAddModal">Erste Zutat anlegen</button>
         </div>
     } else {
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Einheit</th>
-                    <th>Gebindegröße</th>
-                    <th>Gebindepreis (€)</th>
-                    <th>Preis / Einheit (€)</th>
-                    <th style="width: 150px;" class="text-end">Aktionen</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var ingredient in _ingredients) {
+        <div class="card-panel" style="padding: 0; overflow-x: auto;">
+            <table class="table-custom">
+                <thead>
                     <tr>
-                        <td><strong>@ingredient.Name</strong></td>
-                        <td><span class="badge bg-secondary">@ingredient.Unit</span></td>
-                        <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
-                        <td>@ingredient.PackagePrice.ToString("C2")</td>
-                        <td><strong>@ingredient.PricePerUnit.ToString("C4")</strong> / @ingredient.Unit</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(ingredient)">
-                                Bearbeiten
-                            </button>
-                        </td>
+                        <th>Name</th>
+                        <th>Einheit</th>
+                        <th>Gebindegröße</th>
+                        <th>Gebindepreis</th>
+                        <th>Preis / Einheit</th>
+                        <th style="width: 140px; text-align: right;">Aktionen</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var ingredient in _ingredients) {
+                        <tr>
+                            <td><strong>@ingredient.Name</strong></td>
+                            <td><span class="badge badge-primary">@ingredient.Unit</span></td>
+                            <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
+                            <td>@ingredient.PackagePrice.ToString("C2")</td>
+                            <td><strong>@ingredient.PricePerUnit.ToString("C4")</strong> / @ingredient.Unit</td>
+                            <td style="text-align: right;">
+                                <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
+                                    Bearbeiten
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>
 
-@* Modal zum Erstellen / Bearbeiten *@
+@* Modal-Dialog zum Erstellen / Bearbeiten *@
 @if (_showModal) {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        @(_editingIngredient.Id == Guid.Empty ? "Neue Zutat anlegen" : "Zutat bearbeiten")
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
-                <EditForm Model="_editingIngredient" OnValidSubmit="SaveIngredientAsync">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Name der Zutat</label>
-                            <InputText class="form-control" @bind-Value="_editingIngredient.Name" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Einheit</label>
-                            <InputSelect class="form-select" @bind-Value="_editingIngredient.Unit">
-                                @foreach (var unit in Enum.GetValues<IngredientUnit>()) {
-                                    <option value="@unit">@unit</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Packungsgröße (@_editingIngredient.Unit)</label>
-                                <InputNumber class="form-control" @bind-Value="_editingIngredient.PackageSize" step="0.01" min="0.01" required />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Packungspreis (€)</label>
-                                <InputNumber class="form-control" @bind-Value="_editingIngredient.PackagePrice" step="0.01" min="0" required />
-                            </div>
+    <div class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="margin: 0;">
+                    @(_editingIngredient.Id == Guid.Empty ? "Neue Zutat anlegen" : "Zutat bearbeiten")
+                </h3>
+                <button type="button" class="btn-close-custom" @onclick="CloseModal">✕</button>
+            </div>
+
+            <EditForm Model="_editingIngredient" OnValidSubmit="SaveIngredientAsync">
+                <DataAnnotationsValidator />
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Name der Zutat</label>
+                        <InputText class="form-control" @bind-Value="_editingIngredient.Name" placeholder="z. B. Havanna Club 3 Jahre" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Einheit</label>
+                        <InputSelect class="form-control" @bind-Value="_editingIngredient.Unit">
+                            @foreach (var unit in Enum.GetValues<IngredientUnit>()) {
+                                <option value="@unit">@unit</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Gebindegröße (@_editingIngredient.Unit)</label>
+                            <InputNumber class="form-control" @bind-Value="_editingIngredient.PackageSize" step="0.01" min="0.01" required />
                         </div>
 
-                        <div class="alert alert-light border mt-2">
-                            <small class="text-muted d-block">Errechneter Preis pro Einheit:</small>
-                            <strong>@_editingIngredient.PricePerUnit.ToString("C4") / @_editingIngredient.Unit</strong>
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Gebindepreis (€)</label>
+                            <InputNumber class="form-control" @bind-Value="_editingIngredient.PackagePrice" step="0.01" min="0" required />
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Abbrechen</button>
-                        <button type="submit" class="btn btn-success">Speichern</button>
+
+                    <div class="price-preview-box">
+                        <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Errechneter Preis pro Einheit:</span>
+                        <strong style="color: var(--primary); font-size: 1.1rem;">
+                            @_editingIngredient.PricePerUnit.ToString("C4") / @_editingIngredient.Unit
+                        </strong>
                     </div>
-                </EditForm>
-            </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" @onclick="CloseModal">Abbrechen</button>
+                    <button type="submit" class="btn-primary">Speichern</button>
+                </div>
+            </EditForm>
         </div>
     </div>
 }

@@ -1,4 +1,5 @@
 ﻿@page "/event-planner"
+@using CateringCalculator.Core.Enums
 @using CateringCalculator.Core.Interfaces
 @using CateringCalculator.Core.Models
 @using CateringCalculator.Core.Services
@@ -7,17 +8,36 @@
 @inject CalculationService CalculationService
 @inject CateringCalculator.UI.Services.FileSaveService FileSaveService
 
-<PageTitle>Event Kalkulator - CateringCalculator</PageTitle>
+<PageTitle>Event-Planung - Catering Calculator</PageTitle>
 
-<h1>Event-Planung & Kalkulation</h1>
-<p>Berechne die benötigten Zutaten, Flaschenzahlen und Materialkosten für deine Veranstaltung.</p>
+<div class="page-container">
+    <!-- Header-Bereich -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Event-Planung & Kalkulation</h1>
+            <p class="text-muted" style="margin-bottom: 0;">Berechne die benötigten Zutaten, Gebinde und Materialkosten für deine Veranstaltung.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn-primary" @onclick="CreateNewEvent">
+                <span>➕</span> Neues Event
+            </button>
+            <button class="btn-primary" @onclick="SaveCurrentEvent" disabled="@(string.IsNullOrWhiteSpace(_eventPlan.Title))" style="background-color: #28a745;">
+                <span>💾</span> Speichern
+            </button>
+            @if (_savedEventPlans.Any(p => p.Id == _eventPlan.Id))
+            {
+                <button class="btn-secondary" @onclick="DeleteCurrentEvent" style="color: #dc3545;">
+                    <span>🗑️</span> Löschen
+                </button>
+            }
+        </div>
+    </div>
 
-<!-- Event-Auswahl & Aktionen Bar -->
-<div class="card shadow-sm mb-4 bg-light">
-    <div class="card-body py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 500px;">
-            <label class="form-label font-weight-bold mb-0 text-nowrap">Gespeicherte Events:</label>
-            <select class="form-select" @onchange="OnEventSelected" value="@(_eventPlan.Id.ToString())">
+    <!-- Event-Auswahl-Panel -->
+    <div class="card-panel" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <label style="font-weight: 600; white-space: nowrap; font-size: 0.95rem;">Gespeichertes Event:</label>
+            <select class="form-control" style="flex: 1; min-width: 240px;" @onchange="OnEventSelected" value="@(_eventPlan.Id.ToString())">
                 <option value="@Guid.Empty.ToString()">-- Neues Event (nicht gespeichert) --</option>
                 @foreach (var plan in _savedEventPlans)
                 {
@@ -25,97 +45,94 @@
                 }
             </select>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary" @onclick="CreateNewEvent">
-                ➕ Neues Event
-            </button>
-            <button class="btn btn-primary" @onclick="SaveCurrentEvent" disabled="@(string.IsNullOrWhiteSpace(_eventPlan.Title))">
-                💾 Plan Speichern
-            </button>
-            @if (_savedEventPlans.Any(p => p.Id == _eventPlan.Id))
-            {
-                <button class="btn btn-outline-danger" @onclick="DeleteCurrentEvent">
-                    🗑️ Löschen
-                </button>
-            }
-        </div>
     </div>
-</div>
 
-<div class="row">
-    <!-- Linke Spalte: Event-Parameter & Rezeptauswahl -->
-    <div class="col-md-5 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">1. Event-Details</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Veranstaltungsname</label>
+    <!-- Haupt-Content Layout (2-Spalten Grid) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; align-items: start;">
+        
+        <!-- Linke Spalte: Konfiguration & Rezeptauswahl -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- 1. Event-Parameters Panel -->
+            <div class="card-panel">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
+                    1. Event-Parameter
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Veranstaltungsname *</label>
                     <input type="text" class="form-control" @bind="_eventPlan.Title" placeholder="z. B. Sommerfest 2026" />
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <label class="form-label font-weight-bold">Anzahl Gäste</label>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Anzahl Gäste</label>
                         <input type="number" class="form-control" @bind="_eventPlan.GuestCount" min="1" />
                     </div>
-                    <div class="col-6">
-                        <label class="form-label font-weight-bold">Drinks / Gast</label>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Drinks / Gast</label>
                         <input type="number" class="form-control" @bind="_eventPlan.AverageDrinksPerGuest" min="1" />
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Puffer für Schwund (%)</label>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Schwund-Puffer (%)</label>
                     <input type="number" class="form-control" @bind="_eventPlan.WasteBufferPercent" min="0" max="50" />
-                    <small class="text-muted">Aufschlag für Verschnitt, Kleckern & Gratis-Drinks.</small>
+                    <span class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                        Aufschlag für Verschnitt, Kleckern & Gratis-Drinks.
+                    </span>
                 </div>
+            </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
-                    <h5 class="mb-0">2. Cocktails auswählen</h5>
-                    @if (_eventPlan.SelectedRecipes.Count > 0) {
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="DistributeEvenly">
-                            ⚖️ Gleichmäßig aufteilen
+            <!-- 2. Cocktails auswählen Panel -->
+            <div class="card-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">2. Cocktails auswählen</h3>
+                    @if (_eventPlan.SelectedRecipes.Count > 0)
+                    {
+                        <button type="button" class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" @onclick="DistributeEvenly">
+                            ⚖️ Gleichmäßig verteilen
                         </button>
                     }
                 </div>
 
-                @if (_availableRecipes.Count == 0) {
-                    <div class="alert alert-warning small">
+                @if (_availableRecipes.Count == 0)
+                {
+                    <div style="background-color: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 0.75rem; font-size: 0.875rem; color: #856404;">
                         Keine Rezepte vorhanden. Bitte erst unter "Rezepte" Cocktails anlegen!
                     </div>
-                } else {
-                    <div class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
-                        @foreach (var recipe in _availableRecipes) {
+                }
+                else
+                {
+                    <div style="max-height: 320px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px;">
+                        @foreach (var recipe in _availableRecipes)
+                        {
                             var selection = _eventPlan.SelectedRecipes.FirstOrDefault(r => r.RecipeId == recipe.Id);
                             var isSelected = selection != null;
 
-                            <div class="list-group-item @(isSelected ? "border-primary bg-light" : "")">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
+                            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(0,0,0,0.05); background-color: @(isSelected ? "rgba(var(--primary-rgb, 13, 110, 253), 0.05)" : "transparent");">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; margin: 0; font-size: 0.95rem;">
+                                        <input type="checkbox"
                                                checked="@isSelected"
-                                               id="chk-@recipe.Id"
                                                @onchange="() => ToggleRecipeSelection(recipe)" />
-                                        <label class="form-check-label font-weight-bold" for="chk-@recipe.Id">
-                                            @recipe.Name
-                                        </label>
-                                    </div>
-                                    <span class="badge bg-secondary">
-                                        @recipe.TotalCostPerDrink.ToString("C2")
+                                        @recipe.Name
+                                    </label>
+                                    <span class="badge badge-primary">
+                                        @recipe.TotalCostPerDrink.ToString("C2") / Drink
                                     </span>
                                 </div>
 
-                                @if (isSelected && selection != null) {
-                                    <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top">
-                                        <small class="text-nowrap">Anteil:</small>
-                                        <input type="range" class="form-range flex-grow-1" style="min-width: 0;" min="0" max="100" step="5"
+                                @if (isSelected && selection != null)
+                                {
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.1);">
+                                        <span class="text-muted" style="font-size: 0.8rem;">Anteil:</span>
+                                        <input type="range" style="flex: 1;" min="0" max="100" step="5"
                                                @bind="selection.Percentage" @bind:event="oninput" />
-                                        <div class="input-group input-group-sm flex-shrink-0" style="width: 90px;">
-                                            <input type="number" class="form-control text-end px-1" min="0" max="100"
+                                        <div style="display: flex; align-items: center; gap: 0.2rem; width: 75px;">
+                                            <input type="number" class="form-control" style="padding: 0.2rem 0.4rem; font-size: 0.85rem; text-align: right;" min="0" max="100"
                                                    @bind="selection.Percentage" />
-                                            <span class="input-group-text px-1">%</span>
+                                            <span style="font-size: 0.85rem;">%</span>
                                         </div>
                                     </div>
                                 }
@@ -123,70 +140,72 @@
                         }
                     </div>
 
-                    @if (_eventPlan.SelectedRecipes.Count > 0) {
+                    @if (_eventPlan.SelectedRecipes.Count > 0)
+                    {
                         var totalPercent = TotalPercentage;
-                        <div class="alert @(totalPercent == 100m ? "alert-success" : "alert-danger") p-2 small d-flex justify-content-between align-items-center mb-3">
-                            <span>Gesamtsumme Verteilung:</span>
-                            <strong>@totalPercent % @(totalPercent != 100m ? "(Muss 100% ergeben)" : "✓")</strong>
+                        var is100 = totalPercent == 100m;
+                        <div style="background-color: @(is100 ? "rgba(40, 167, 69, 0.1)" : "rgba(220, 53, 69, 0.1)"); border: 1px solid @(is100 ? "rgba(40, 167, 69, 0.3)" : "rgba(220, 53, 69, 0.3)"); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.85rem; color: @(is100 ? "#155724" : "#721c24"); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span>Verteilung gesamt:</span>
+                            <strong>@totalPercent % @(is100 ? "✓" : "(Muss 100% ergeben)")</strong>
                         </div>
                     }
                 }
 
-                <button class="btn btn-success w-100 mt-2"
+                <button type="button" class="btn-primary" style="width: 100%; padding: 0.75rem;"
                         @onclick="CalculateEvent"
                         disabled="@(_eventPlan.SelectedRecipes.Count == 0 || _eventPlan.GuestCount <= 0 || TotalPercentage != 100m)">
                     🧮 Event jetzt berechnen
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- Rechte Spalte: Ergebnisse & Einkaufsliste -->
-    <div class="col-md-7">
-        @if (_calculationResult == null) {
-            <div class="card border-dashed p-5 text-center text-muted">
-                <h4>Noch keine Kalkulation vorhanden</h4>
-                <p>Wähle links Gästezahl und Rezepte aus und klicke auf "Event jetzt berechnen".</p>
-            </div>
-        } else {
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Ergebnis: @_calculationResult.EventTitle</h5>
-                    <div>
-                        <span class="badge bg-info text-dark me-2">@_calculationResult.TotalDrinksCount Drinks gesamt</span>
-                        <button class="btn btn-sm btn-success" @onclick="ExportPdf">
-                            📄 PDF Exportieren
-                        </button>
-                    </div>
+        <!-- Rechte Spalte: Ergebnisse & Einkaufsliste -->
+        <div>
+            @if (_calculationResult == null)
+            {
+                <div class="card-panel text-center" style="padding: 4rem 2rem;">
+                    <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Kalkulation vorhanden</p>
+                    <p class="text-muted" style="margin-bottom: 0;">Wähle links Gästezahl und Rezepte aus und klicke auf "Event jetzt berechnen".</p>
                 </div>
-                <div class="card-body">
-                    <!-- Kennzahlen-Kacheln -->
-                    <div class="row text-center mb-4">
-                        <div class="col-4">
-                            <div class="p-2 border rounded bg-light">
-                                <small class="text-muted d-block">Wareneinsatz</small>
-                                <strong class="h5 text-success">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2 border rounded bg-light">
-                                <small class="text-muted d-block">Kosten / Drink</small>
-                                <strong class="h5">@_calculationResult.CostPerDrink.ToString("C2")</strong>
-                            </div>
+            }
+            else
+            {
+                <div class="card-panel">
+                    <!-- Ergebnis-Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Ergebnis: @_calculationResult.EventTitle</h3>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="badge badge-primary">@_calculationResult.TotalDrinksCount Drinks</span>
+                            <button type="button" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="ExportPdf">
+                                📄 PDF Exportieren
+                            </button>
                         </div>
                     </div>
 
-                    <h6 class="mt-4">🍹 Kalkulation pro Cocktail</h6>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-hover table-striped align-middle">
-                            <thead class="table-light">
+                    <!-- Kennzahlen Boxen -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="price-preview-box text-center" style="padding: 0.75rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Wareneinsatz (Einkauf)</span>
+                            <strong style="color: #28a745; font-size: 1.2rem;">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
+                        </div>
+                        <div class="price-preview-box text-center" style="padding: 0.75rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Soll-Kosten / Drink (Ø)</span>
+                            <strong style="color: var(--primary); font-size: 1.2rem;">@_calculationResult.CostPerDrink.ToString("C2")</strong>
+                        </div>
+                    </div>
+
+                    <!-- 1. Tabelle: Kalkulation pro Cocktail -->
+                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 Kalkulation pro Cocktail</h4>
+                    <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+                        <table class="table-custom">
+                            <thead>
                                 <tr>
                                     <th>Cocktail</th>
-                                    <th class="text-center">Anteil</th>
-                                    <th class="text-center">Anzahl</th>
-                                    <th class="text-end text-muted">Soll / Drink</th>
-                                    <th class="text-end fw-bold">Real / Drink*</th>
-                                    <th class="text-end">Gesamtkosten</th>
+                                    <th style="text-align: center;">Anteil</th>
+                                    <th style="text-align: center;">Anzahl</th>
+                                    <th style="text-align: right;">Soll / Drink</th>
+                                    <th style="text-align: right;">Real / Drink*</th>
+                                    <th style="text-align: right;">Gesamt</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -194,50 +213,52 @@
                                 {
                                     <tr>
                                         <td><strong>@calc.RecipeName</strong></td>
-                                        <td class="text-center">@calc.Percentage.ToString("0.##") %</td>
-                                        <td class="text-center">@calc.TargetDrinkCount Stk.</td>
-                                        <td class="text-end text-muted">@calc.TheoreticalCostPerDrink.ToString("C2")</td>
-                                        <td class="text-end fw-bold text-success">@calc.RealCostPerDrink.ToString("C2")</td>
-                                        <td class="text-end">@calc.RealCostTotal.ToString("C2")</td>
+                                        <td style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
+                                        <td style="text-align: center;">@calc.TargetDrinkCount Stk.</td>
+                                        <td style="text-align: right;" class="text-muted">@calc.TheoreticalCostPerDrink.ToString("C2")</td>
+                                        <td style="text-align: right; color: #28a745; font-weight: 600;">@calc.RealCostPerDrink.ToString("C2")</td>
+                                        <td style="text-align: right;"><strong>@calc.RealCostTotal.ToString("C2")</strong></td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
-                        <small class="text-muted d-block ms-1">
-                            * <strong>Real / Drink:</strong> Anteilsmäßige tatsächliche Einkaufskosten inklusive ganzer Flaschen/Gebinde aus der Einkaufsliste.
-                        </small>
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.35rem;">
+                            * <strong>Real / Drink:</strong> Anteilsmäßige tatsächliche Einkaufskosten inklusive voller Gebinde aus der Einkaufsliste.
+                        </span>
                     </div>
 
-                    <h6>🛒 Automatische Einkaufsliste</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped align-middle">
-                            <thead class="table-light">
+                    <!-- 2. Tabelle: Einkaufsliste -->
+                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🛒 Automatische Einkaufsliste</h4>
+                    <div style="overflow-x: auto;">
+                        <table class="table-custom">
+                            <thead>
                                 <tr>
                                     <th>Zutat</th>
-                                    <th>Gesamtbedarf</th>
-                                    <th class="text-center">Kaufm. Gebinde</th>
-                                    <th class="text-end">Gesamtkosten</th>
+                                    <th>Bedarf</th>
+                                    <th style="text-align: center;">Kaufm. Gebinde</th>
+                                    <th style="text-align: right;">Gesamtkosten</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in _calculationResult.ShoppingList) {
+                                @foreach (var item in _calculationResult.ShoppingList)
+                                {
                                     <tr>
                                         <td><strong>@item.IngredientName</strong></td>
                                         <td>@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-primary fs-6">
+                                        <td style="text-align: center;">
+                                            <span class="badge badge-primary">
                                                 @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
                                             </span>
                                         </td>
-                                        <td class="text-end">@item.TotalCost.ToString("C2")</td>
+                                        <td style="text-align: right;"><strong>@item.TotalCost.ToString("C2")</strong></td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 
@@ -249,16 +270,19 @@
 
     private decimal TotalPercentage => _eventPlan.SelectedRecipes.Sum(r => r.Percentage);
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         _availableRecipes = await RecipeRepository.GetAllRecipesAsync();
         await LoadSavedEventPlansAsync();
     }
 
-    private async Task LoadSavedEventPlansAsync() {
+    private async Task LoadSavedEventPlansAsync()
+    {
         _savedEventPlans = await EventPlanRepository.GetAllEventPlansAsync();
     }
 
-    private static EventPlan CreateEmptyEventPlan() => new() {
+    private static EventPlan CreateEmptyEventPlan() => new()
+    {
         Id = Guid.NewGuid(),
         Title = "Neues Event",
         GuestCount = 30,
@@ -267,42 +291,56 @@
         SelectedRecipes = new List<EventRecipe>()
     };
 
-    private void CreateNewEvent() {
+    private void CreateNewEvent()
+    {
         _eventPlan = CreateEmptyEventPlan();
         _calculationResult = null;
     }
 
-    private async Task OnEventSelected(ChangeEventArgs e) {
-        if (Guid.TryParse(e.Value?.ToString(), out Guid id) && id != Guid.Empty) {
+    private async Task OnEventSelected(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out Guid id) && id != Guid.Empty)
+        {
             var loaded = await EventPlanRepository.GetEventPlanByIdAsync(id);
-            if (loaded != null) {
+            if (loaded != null)
+            {
                 _eventPlan = loaded;
                 _calculationResult = null;
             }
-        } else {
+        }
+        else
+        {
             CreateNewEvent();
         }
     }
 
-    private async Task SaveCurrentEvent() {
+    private async Task SaveCurrentEvent()
+    {
         await EventPlanRepository.SaveEventPlanAsync(_eventPlan);
         await LoadSavedEventPlansAsync();
     }
 
-    private async Task DeleteCurrentEvent() {
-        if (_eventPlan.Id != Guid.Empty) {
+    private async Task DeleteCurrentEvent()
+    {
+        if (_eventPlan.Id != Guid.Empty)
+        {
             await EventPlanRepository.DeleteEventPlanAsync(_eventPlan.Id);
             await LoadSavedEventPlansAsync();
             CreateNewEvent();
         }
     }
 
-    private void ToggleRecipeSelection(Recipe recipe) {
+    private void ToggleRecipeSelection(Recipe recipe)
+    {
         var existing = _eventPlan.SelectedRecipes.FirstOrDefault(r => r.RecipeId == recipe.Id);
-        if (existing != null) {
+        if (existing != null)
+        {
             _eventPlan.SelectedRecipes.Remove(existing);
-        } else {
-            _eventPlan.SelectedRecipes.Add(new EventRecipe {
+        }
+        else
+        {
+            _eventPlan.SelectedRecipes.Add(new EventRecipe
+            {
                 EventPlanId = _eventPlan.Id,
                 RecipeId = recipe.Id,
                 Recipe = recipe,
@@ -312,23 +350,27 @@
         }
     }
 
-    private void DistributeEvenly() {
+    private void DistributeEvenly()
+    {
         int count = _eventPlan.SelectedRecipes.Count;
         if (count == 0) return;
 
         decimal evenShare = Math.Floor(100m / count);
         decimal remainder = 100m - (evenShare * count);
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++)
+        {
             _eventPlan.SelectedRecipes[i].Percentage = evenShare + (i == 0 ? remainder : 0m);
         }
     }
 
-    private void CalculateEvent() {
+    private void CalculateEvent()
+    {
         _calculationResult = CalculationService.Calculate(_eventPlan);
     }
 
-    private async Task ExportPdf() {
+    private async Task ExportPdf()
+    {
         if (_calculationResult == null)
             return;
 
@@ -338,10 +380,11 @@
         await FileSaveService.SaveAndOpenFileAsync(fileName, pdfBytes);
     }
 
-    private static string GetUnitSuffix(CateringCalculator.Core.Enums.IngredientUnit unit) => unit switch {
-        CateringCalculator.Core.Enums.IngredientUnit.Piece => "Stk.",
-        CateringCalculator.Core.Enums.IngredientUnit.Gram => "g",
-        CateringCalculator.Core.Enums.IngredientUnit.Milliliter => "ml",
+    private static string GetUnitSuffix(IngredientUnit unit) => unit switch
+    {
+        IngredientUnit.Piece => "Stk.",
+        IngredientUnit.Gram => "g",
+        IngredientUnit.Milliliter => "ml",
         _ => "ml"
     };
 }
