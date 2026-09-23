@@ -24,33 +24,29 @@
     </div>
 }
 
-<!-- FORMULAR ZUM ERSTELLEN EINES REZEPTS -->
+<!-- FORMULAR ZUM ERSTELLEN ODER BEARBEITEN EINES REZEPTS -->
 @if (_showForm) {
     <div class="card shadow mb-4 border-primary">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Neues Rezept erstellen</h5>
+            <h5 class="mb-0">@(_isEditing ? "Rezept bearbeiten" : "Neues Rezept erstellen")</h5>
             <button type="button" class="btn-close btn-close-white" @onclick="CloseForm"></button>
         </div>
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label font-weight-bold">Name des Cocktails *</label>
-                    <input type="text" class="form-control" @bind="_newRecipe.Name" placeholder="z. B. Mojito, Caipirinha..." />
+                    <input type="text" class="form-control" @bind="_editingRecipe.Name" placeholder="z. B. Mojito, Caipirinha..." />
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label font-weight-bold">Eisbedarf pro Drink (g)</label>
-                    <input type="number" class="form-control" @bind="_newRecipe.IceInGrams" step="10" />
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label class="form-label font-weight-bold">Beschreibung</label>
-                    <input type="text" class="form-control" @bind="_newRecipe.Description" placeholder="Kurze Beschreibung" />
+                    <input type="text" class="form-control" @bind="_editingRecipe.Description" placeholder="Kurze Beschreibung" />
                 </div>
             </div>
 
             <h5 class="mt-4 mb-2">Zutaten des Rezeptes</h5>
 
-            <!-- Liste der aktuell im neuen Rezept enthaltenen Zutaten -->
-            @if (_newRecipe.Items.Count == 0) {
+            <!-- Liste der aktuell im Rezept enthaltenen Zutaten -->
+            @if (_editingRecipe.Items.Count == 0) {
                 <div class="alert alert-warning p-2 small">
                     Füge unten mindestens eine Zutat hinzu.
                 </div>
@@ -64,11 +60,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in _newRecipe.Items) {
+                        @foreach (var item in _editingRecipe.Items) {
                             var ing = _availableIngredients.FirstOrDefault(i => i.Id == item.IngredientId);
                             <tr>
-                                <td>@(ing?.Name ?? "Unbekannt")</td>
-                                <td>@FormatAmount(item.Amount, ing?.Unit)</td>
+                                <td>@(ing?.Name ?? item.Ingredient?.Name ?? "Unbekannt")</td>
+                                <td>@FormatAmount(item.Amount, ing?.Unit ?? item.Ingredient?.Unit)</td>
                                 <td>
                                     <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveItemFromRecipe(item)">
                                         🗑️
@@ -80,7 +76,7 @@
                 </table>
             }
 
-            <!-- Zutat zum Rezept hinzufügen (Bestehend ODER Neu) -->
+            <!-- Zutat zum Rezept hinzufügen -->
             <div class="card p-3 bg-light mb-3">
                 <h6>Zutat hinzufügen</h6>
                 <div class="row g-2 align-items-end">
@@ -111,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- Unter-Formular: Völlig neue Zutat anlegen & direkt verwenden -->
+                <!-- Unter-Formular: Völlig neue Zutat anlegen -->
                 @if (_showNewIngredientInput) {
                     <div class="border-top mt-3 pt-3">
                         <h6 class="text-primary">Neue Zutat im Stammdaten-Katalog anlegen</h6>
@@ -148,8 +144,8 @@
 
             <div class="d-flex justify-content-end gap-2">
                 <button class="btn btn-secondary" @onclick="CloseForm">Abbrechen</button>
-                <button class="btn btn-success" @onclick="SaveRecipeAsync" disabled="@(string.IsNullOrWhiteSpace(_newRecipe.Name) || _newRecipe.Items.Count == 0)">
-                    💾 Rezept speichern
+                <button class="btn btn-success" @onclick="SaveRecipeAsync" disabled="@(string.IsNullOrWhiteSpace(_editingRecipe.Name) || _editingRecipe.Items.Count == 0)">
+                    💾 @(_isEditing ? "Änderungen speichern" : "Rezept speichern")
                 </button>
             </div>
         </div>
@@ -162,15 +158,18 @@
         @foreach (var recipe in _recipes) {
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h5 class="card-title">@recipe.Name</h5>
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteRecipeAsync(recipe.Id)">🗑️</button>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">@recipe.Name</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => EditRecipe(recipe)" title="Rezept bearbeiten">✏️</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteRecipeAsync(recipe.Id)" title="Rezept löschen">🗑️</button>
+                            </div>
                         </div>
                         <p class="card-text text-muted small">@recipe.Description</p>
 
                         <h6>Zutaten:</h6>
-                        <ul class="list-group list-group-flush mb-3">
+                        <ul class="list-group list-group-flush mb-3 flex-grow-1">
                             @foreach (var item in recipe.Items) {
                                 <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
                                     <span>@(item.Ingredient?.Name ?? "Unbekannt")</span>
@@ -181,8 +180,7 @@
                             }
                         </ul>
 
-                        <div class="d-flex justify-content-between align-items-center text-secondary small pt-2 border-top">
-                            <span>Eis: @recipe.IceInGrams g</span>
+                        <div class="d-flex justify-content-between align-items-center text-secondary small pt-2 border-top mt-auto">
                             <strong class="text-success">@recipe.TotalCostPerDrink.ToString("C2") / Drink</strong>
                         </div>
                     </div>
@@ -197,10 +195,11 @@
     private List<Ingredient> _availableIngredients = new();
     private bool _isLoading = true;
     private bool _showForm = false;
+    private bool _isEditing = false;
     private bool _showNewIngredientInput = false;
 
-    // Model für neues Rezept
-    private Recipe _newRecipe = new();
+    // Model für das aktuell bearbeitete/erstellte Rezept
+    private Recipe _editingRecipe = new();
     private Guid _selectedIngredientId = Guid.Empty;
     private decimal _amount = 50m;
 
@@ -222,12 +221,31 @@
     }
 
     private void OpenCreateDialog() {
-        _newRecipe = new Recipe { IceInGrams = 150 };
+        _editingRecipe = new Recipe { Items = new List<RecipeItem>() };
+        _isEditing = false;
+        _showForm = true;
+    }
+
+    private void EditRecipe(Recipe recipe) {
+        // Tiefe Kopie erstellen, um ungespeicherte UI-Änderungen vom Originallayout zu trennen
+        _editingRecipe = new Recipe {
+            Id = recipe.Id,
+            Name = recipe.Name,
+            Description = recipe.Description,
+            Items = recipe.Items.Select(i => new RecipeItem {
+                Id = i.Id,
+                IngredientId = i.IngredientId,
+                Ingredient = i.Ingredient,
+                Amount = i.Amount
+            }).ToList()
+        };
+        _isEditing = true;
         _showForm = true;
     }
 
     private void CloseForm() {
         _showForm = false;
+        _isEditing = false;
         _showNewIngredientInput = false;
     }
 
@@ -235,11 +253,15 @@
         if (_selectedIngredientId == Guid.Empty || _amount <= 0)
             return;
 
-        if (_newRecipe.Items.Any(i => i.IngredientId == _selectedIngredientId))
+        if (_editingRecipe.Items.Any(i => i.IngredientId == _selectedIngredientId))
             return;
 
-        _newRecipe.Items.Add(new RecipeItem {
+        var selectedIng = _availableIngredients.FirstOrDefault(i => i.Id == _selectedIngredientId);
+
+        _editingRecipe.Items.Add(new RecipeItem {
+            Id = Guid.Empty, // <--- WICHTIG: Signalisiert "Noch nicht in Datenbank"
             IngredientId = _selectedIngredientId,
+            Ingredient = selectedIng,
             Amount = _amount
         });
 
@@ -248,7 +270,7 @@
     }
 
     private void RemoveItemFromRecipe(RecipeItem item) {
-        _newRecipe.Items.Remove(item);
+        _editingRecipe.Items.Remove(item);
     }
 
     private void ToggleNewIngredientFields() {
@@ -275,12 +297,15 @@
     }
 
     private async Task SaveRecipeAsync() {
-        if (string.IsNullOrWhiteSpace(_newRecipe.Name) || _newRecipe.Items.Count == 0)
-            return;
+        // Stelle sicher, dass beim Erstellen neuer Items/Rezepte die IDs korrekt passen
+        if (_editingRecipe.Id == Guid.Empty) {
+            await RecipeRepository.AddRecipeAsync(_editingRecipe);
+        } else {
+            await RecipeRepository.UpdateRecipeAsync(_editingRecipe);
+        }
 
-        await RecipeRepository.AddRecipeAsync(_newRecipe);
-        CloseForm();
-        await LoadDataAsync();
+        // Wichtig: Nach dem Speichern die Liste neu aus dem Repository laden!
+        _recipes = await RecipeRepository.GetAllRecipesAsync();
     }
 
     private async Task DeleteRecipeAsync(Guid recipeId) {

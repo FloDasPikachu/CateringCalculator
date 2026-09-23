@@ -27,9 +27,6 @@ public class ShoppingListPdfGenerator {
                     column.Item().PaddingTop(5).Text($"Veranstaltung: {result.EventTitle}")
                         .FontSize(14).SemiBold();
 
-                    column.Item().Text($"Berechnet für {result.TotalDrinksCount} Drinks gesamt | Eisbedarf: {result.TotalIceInKg} kg")
-                        .FontSize(10).FontColor(Colors.Grey.Darken1);
-
                     column.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
                 });
 
@@ -75,9 +72,6 @@ public class ShoppingListPdfGenerator {
 
                     // Kennzahlen unten
                     column.Item().PaddingTop(15).Row(row => {
-                        row.RelativeItem().Text($"Eisbedarf gesamt: {result.TotalIceInKg} kg")
-                            .FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
-
                         row.RelativeItem().AlignRight().Text($"Gesamtkosten: {result.TotalMaterialCost:C2}")
                             .FontSize(14).Bold().FontColor(Colors.Green.Darken2);
                     });

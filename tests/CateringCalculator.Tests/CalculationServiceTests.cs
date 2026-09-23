@@ -38,7 +38,6 @@ public class CalculationServiceTests {
         var recipe = new Recipe {
             Id = Guid.NewGuid(),
             Name = "Mojito",
-            IceInGrams = 150,
             Items =
             [
                 new() { IngredientId = rum.Id, Ingredient = rum, Amount = 60m },     // 60 ml
@@ -91,9 +90,6 @@ public class CalculationServiceTests {
         Assert.Equal(1, sugarItem.PackagesToBuy);
         Assert.Equal(2.50m, sugarItem.TotalCost);
         Assert.Equal(IngredientUnit.Gram, sugarItem.Unit);
-
-        // Eisbedarf-Berechnung: 20 Drinks * 150g = 3000g + 10% Waste = 3300g = 3.3 kg
-        Assert.Equal(3.3m, result.TotalIceInKg);
     }
 
     [Fact]
@@ -110,7 +106,6 @@ public class CalculationServiceTests {
 
         // Assert
         Assert.Empty(result.ShoppingList);
-        Assert.Equal(0, result.TotalIceInKg);
     }
 
     [Fact]
@@ -135,14 +130,12 @@ public class CalculationServiceTests {
         var mojito = new Recipe {
             Id = Guid.NewGuid(),
             Name = "Mojito",
-            IceInGrams = 150,
             Items = [new() { IngredientId = rum.Id, Ingredient = rum, Amount = 60m }]
         };
 
         var caipirinha = new Recipe {
             Id = Guid.NewGuid(),
             Name = "Caipirinha",
-            IceInGrams = 200,
             Items = [new() { IngredientId = cachaça.Id, Ingredient = cachaça, Amount = 5m }] // 50ml Korrekturwert für Test
         };
 
@@ -175,8 +168,5 @@ public class CalculationServiceTests {
         var cachaçaItem = result.ShoppingList.First(i => i.IngredientId == cachaça.Id);
         Assert.Equal(400m, cachaçaItem.TotalAmountNeeded);
         Assert.Equal(1, cachaçaItem.PackagesToBuy);
-
-        // Eisbedarf: (12 * 150g) + (8 * 200g) = 1800g + 1600g = 3400g = 3.4 kg
-        Assert.Equal(3.4m, result.TotalIceInKg);
     }
 }

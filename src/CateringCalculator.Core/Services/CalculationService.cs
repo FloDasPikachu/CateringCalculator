@@ -17,7 +17,6 @@ public class CalculationService {
         }
 
         var ingredientAmounts = new Dictionary<Guid, (Ingredient Ingredient, decimal TotalAmount)>();
-        decimal totalIceGrams = 0;
         decimal wasteMultiplier = 1m + (eventPlan.WasteBufferPercent / 100m);
 
         // Map zur Speicherung des verbrauchten Bedarfs pro Rezept & Zutat
@@ -31,7 +30,6 @@ public class CalculationService {
                 continue;
 
             int countForThisRecipe = (int)Math.Round(eventPlan.TotalDrinksToServe * (eventRecipe.Percentage / 100m));
-            totalIceGrams += recipe.IceInGrams * countForThisRecipe;
 
             decimal recipeTheoreticalCost = 0m;
             var usageDict = new Dictionary<Guid, decimal>();
@@ -98,8 +96,6 @@ public class CalculationService {
                 PackagesToBuy = packagesToBuy
             });
         }
-
-        result.TotalIceInKg = Math.Round((totalIceGrams * wasteMultiplier) / 1000m, 2);
 
         // 3. Realkosten verursachungsgerecht & proportional je Zutat verteilen
         foreach (var calc in result.RecipeCalculations) {

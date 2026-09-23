@@ -28,5 +28,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<EventPlan>()
             .Property(e => e.WasteBufferPercent)
             .HasConversion<double>();
+
+        modelBuilder.Entity<Recipe>()
+        .HasMany(r => r.Items)
+        .WithOne()
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }
