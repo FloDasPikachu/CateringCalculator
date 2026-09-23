@@ -18,7 +18,6 @@ public static class MauiProgram {
             });
 
         builder.Services.AddMauiBlazorWebView();
-
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
@@ -27,22 +26,26 @@ public static class MauiProgram {
         // 1. Pfad für lokale SQLite-Datenbank auf dem Gerät ermitteln
         string dbPath = Path.Combine(FileSystem.AppDataDirectory, "catering_calculator.db");
 
-        // 2. DbContext registrieren
-        builder.Services.AddDbContext<AppDbContext>(options =>
+        // 2. DbContextFactory registrieren (stabile Option für Blazor / Repositories)
+        builder.Services.AddDbContextFactory<AppDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
 
         // 3. Application Services & Repositories registrieren
         builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+        builder.Services.AddScoped<IEventPlanRepository, EventPlanRepository>(); // Neu hinzugefügt
         builder.Services.AddScoped<CalculationService>();
 
         builder.Services.AddSingleton<FileSaveService>();
 
         var app = builder.Build();
 
-        // 4. Automatische Migration / Datenbankerstellung beim Start
+        // 4. Migrationen beim Start automatisch auf die Gerätedatenbank anwenden
         using (var scope = app.Services.CreateScope()) {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            dbContext.Database.EnsureCreated();
+            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+            using var dbContext = dbContextFactory.CreateDbContext();
+
+            // Führt alle ausstehenden Migrationen (wie FixEventRecipeNavigation) auf catering_calculator.db aus
+            dbContext.Database.Migrate();
         }
 
         return app;

@@ -33,5 +33,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         .HasMany(r => r.Items)
         .WithOne()
         .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<EventRecipe>()
+            .HasKey(er => new { er.EventPlanId, er.RecipeId });
+
+        modelBuilder.Entity<EventRecipe>()
+            .HasOne(er => er.EventPlan)
+            .WithMany(ep => ep.SelectedRecipes)
+            .HasForeignKey(er => er.EventPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<EventRecipe>()
+            .HasOne(er => er.Recipe)
+            .WithMany()
+            .HasForeignKey(er => er.RecipeId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

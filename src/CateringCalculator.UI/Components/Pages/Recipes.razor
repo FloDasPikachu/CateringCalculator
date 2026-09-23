@@ -298,7 +298,7 @@
 
     private async Task SaveRecipeAsync() {
         // Stelle sicher, dass beim Erstellen neuer Items/Rezepte die IDs korrekt passen
-        if (_editingRecipe.Id == Guid.Empty) {
+        if (!_isEditing || _editingRecipe.Id == Guid.Empty) {
             await RecipeRepository.AddRecipeAsync(_editingRecipe);
         } else {
             await RecipeRepository.UpdateRecipeAsync(_editingRecipe);

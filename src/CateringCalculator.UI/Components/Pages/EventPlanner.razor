@@ -3,6 +3,7 @@
 @using CateringCalculator.Core.Models
 @using CateringCalculator.Core.Services
 @inject IRecipeRepository RecipeRepository
+@inject IEventPlanRepository EventPlanRepository
 @inject CalculationService CalculationService
 @inject CateringCalculator.UI.Services.FileSaveService FileSaveService
 
@@ -10,6 +11,36 @@
 
 <h1>Event-Planung & Kalkulation</h1>
 <p>Berechne die benötigten Zutaten, Flaschenzahlen und Materialkosten für deine Veranstaltung.</p>
+
+<!-- Event-Auswahl & Aktionen Bar -->
+<div class="card shadow-sm mb-4 bg-light">
+    <div class="card-body py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 500px;">
+            <label class="form-label font-weight-bold mb-0 text-nowrap">Gespeicherte Events:</label>
+            <select class="form-select" @onchange="OnEventSelected" value="@(_eventPlan.Id.ToString())">
+                <option value="@Guid.Empty.ToString()">-- Neues Event (nicht gespeichert) --</option>
+                @foreach (var plan in _savedEventPlans)
+                {
+                    <option value="@plan.Id.ToString()">@plan.Title (@plan.GuestCount Gäste)</option>
+                }
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" @onclick="CreateNewEvent">
+                ➕ Neues Event
+            </button>
+            <button class="btn btn-primary" @onclick="SaveCurrentEvent" disabled="@(string.IsNullOrWhiteSpace(_eventPlan.Title))">
+                💾 Plan Speichern
+            </button>
+            @if (_savedEventPlans.Any(p => p.Id == _eventPlan.Id))
+            {
+                <button class="btn btn-outline-danger" @onclick="DeleteCurrentEvent">
+                    🗑️ Löschen
+                </button>
+            }
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <!-- Linke Spalte: Event-Parameter & Rezeptauswahl -->
@@ -79,10 +110,8 @@
                                 @if (isSelected && selection != null) {
                                     <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top">
                                         <small class="text-nowrap">Anteil:</small>
-    
                                         <input type="range" class="form-range flex-grow-1" style="min-width: 0;" min="0" max="100" step="5"
                                                @bind="selection.Percentage" @bind:event="oninput" />
-           
                                         <div class="input-group input-group-sm flex-shrink-0" style="width: 90px;">
                                             <input type="number" class="form-control text-end px-1" min="0" max="100"
                                                    @bind="selection.Percentage" />
@@ -148,36 +177,36 @@
                     </div>
 
                     <h6 class="mt-4">🍹 Kalkulation pro Cocktail</h6>
-                        <div class="table-responsive mb-4">
-                            <table class="table table-hover table-striped align-middle">
-                                <thead class="table-light">
+                    <div class="table-responsive mb-4">
+                        <table class="table table-hover table-striped align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cocktail</th>
+                                    <th class="text-center">Anteil</th>
+                                    <th class="text-center">Anzahl</th>
+                                    <th class="text-end text-muted">Soll / Drink</th>
+                                    <th class="text-end fw-bold">Real / Drink*</th>
+                                    <th class="text-end">Gesamtkosten</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var calc in _calculationResult.RecipeCalculations)
+                                {
                                     <tr>
-                                        <th>Cocktail</th>
-                                        <th class="text-center">Anteil</th>
-                                        <th class="text-center">Anzahl</th>
-                                        <th class="text-end text-muted">Soll / Drink</th>
-                                        <th class="text-end fw-bold">Real / Drink*</th>
-                                        <th class="text-end">Gesamtkosten</th>
+                                        <td><strong>@calc.RecipeName</strong></td>
+                                        <td class="text-center">@calc.Percentage.ToString("0.##") %</td>
+                                        <td class="text-center">@calc.TargetDrinkCount Stk.</td>
+                                        <td class="text-end text-muted">@calc.TheoreticalCostPerDrink.ToString("C2")</td>
+                                        <td class="text-end fw-bold text-success">@calc.RealCostPerDrink.ToString("C2")</td>
+                                        <td class="text-end">@calc.RealCostTotal.ToString("C2")</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var calc in _calculationResult.RecipeCalculations)
-                                    {
-                                        <tr>
-                                            <td><strong>@calc.RecipeName</strong></td>
-                                            <td class="text-center">@calc.Percentage.ToString("0.##") %</td>
-                                            <td class="text-center">@calc.TargetDrinkCount Stk.</td>
-                                            <td class="text-end text-muted">@calc.TheoreticalCostPerDrink.ToString("C2")</td>
-                                            <td class="text-end fw-bold text-success">@calc.RealCostPerDrink.ToString("C2")</td>
-                                            <td class="text-end">@calc.RealCostTotal.ToString("C2")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <small class="text-muted d-block ms-1">
-                                * <strong>Real / Drink:</strong> Anteilsmäßige tatsächliche Einkaufskosten inklusive ganzer Flaschen/Gebinde aus der Einkaufsliste.
-                            </small>
-                        </div>
+                                }
+                            </tbody>
+                        </table>
+                        <small class="text-muted d-block ms-1">
+                            * <strong>Real / Drink:</strong> Anteilsmäßige tatsächliche Einkaufskosten inklusive ganzer Flaschen/Gebinde aus der Einkaufsliste.
+                        </small>
+                    </div>
 
                     <h6>🛒 Automatische Einkaufsliste</h6>
                     <div class="table-responsive">
@@ -213,7 +242,8 @@
 </div>
 
 @code {
-    private EventPlan _eventPlan = new() { Title = "Neues Event", GuestCount = 30, AverageDrinksPerGuest = 3 };
+    private EventPlan _eventPlan = CreateEmptyEventPlan();
+    private List<EventPlan> _savedEventPlans = new();
     private List<Recipe> _availableRecipes = new();
     private CalculationResult? _calculationResult;
 
@@ -221,6 +251,50 @@
 
     protected override async Task OnInitializedAsync() {
         _availableRecipes = await RecipeRepository.GetAllRecipesAsync();
+        await LoadSavedEventPlansAsync();
+    }
+
+    private async Task LoadSavedEventPlansAsync() {
+        _savedEventPlans = await EventPlanRepository.GetAllEventPlansAsync();
+    }
+
+    private static EventPlan CreateEmptyEventPlan() => new() {
+        Id = Guid.NewGuid(),
+        Title = "Neues Event",
+        GuestCount = 30,
+        AverageDrinksPerGuest = 3,
+        WasteBufferPercent = 10m,
+        SelectedRecipes = new List<EventRecipe>()
+    };
+
+    private void CreateNewEvent() {
+        _eventPlan = CreateEmptyEventPlan();
+        _calculationResult = null;
+    }
+
+    private async Task OnEventSelected(ChangeEventArgs e) {
+        if (Guid.TryParse(e.Value?.ToString(), out Guid id) && id != Guid.Empty) {
+            var loaded = await EventPlanRepository.GetEventPlanByIdAsync(id);
+            if (loaded != null) {
+                _eventPlan = loaded;
+                _calculationResult = null;
+            }
+        } else {
+            CreateNewEvent();
+        }
+    }
+
+    private async Task SaveCurrentEvent() {
+        await EventPlanRepository.SaveEventPlanAsync(_eventPlan);
+        await LoadSavedEventPlansAsync();
+    }
+
+    private async Task DeleteCurrentEvent() {
+        if (_eventPlan.Id != Guid.Empty) {
+            await EventPlanRepository.DeleteEventPlanAsync(_eventPlan.Id);
+            await LoadSavedEventPlansAsync();
+            CreateNewEvent();
+        }
     }
 
     private void ToggleRecipeSelection(Recipe recipe) {
