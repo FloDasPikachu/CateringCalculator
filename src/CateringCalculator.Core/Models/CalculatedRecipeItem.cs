@@ -11,4 +11,6 @@ public class CalculatedRecipeItem {
 
     public decimal RealCostTotal { get; set; }
     public decimal RealCostPerDrink => TargetDrinkCount > 0 ? RealCostTotal / TargetDrinkCount : 0m;
+
+    public decimal TargetSalesPrice { get; set; }
 }

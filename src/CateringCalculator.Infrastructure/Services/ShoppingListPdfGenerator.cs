@@ -24,66 +24,80 @@ public class ShoppingListPdfGenerator {
                     column.Item().Text($"Ergebnis: {result.EventTitle}")
                         .FontSize(18).Bold().FontColor(Colors.Blue.Darken3);
 
-                    column.Item().PaddingTop(2).Text($"{result.TotalDrinksCount} Drinks gesamt")
+                    var subtitle = $"{result.TotalDrinksCount} zahlende Drinks";
+                    if (result.FreeDrinksCount > 0) {
+                        subtitle += $" (+ {result.FreeDrinksCount} Freigetränke)";
+                    }
+
+                    column.Item().PaddingTop(2).Text(subtitle)
                         .FontSize(11).FontColor(Colors.Grey.Darken1);
 
                     column.Item().PaddingVertical(8).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
                 });
 
                 page.Content().PaddingVertical(5).Column(column => {
-                    // 1. Kennzahlen-Kacheln (Wareneinsatz & Ø Soll-Kosten)
-                    column.Item().PaddingBottom(15).Row(row => {
-                        row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(8).Column(c => {
-                            c.Item().Text("Wareneinsatz (Einkauf)").FontSize(9).FontColor(Colors.Grey.Darken1);
-                            c.Item().Text($"{result.TotalMaterialCost:C2}").FontSize(14).Bold().FontColor(Colors.Green.Darken2);
+                    // 1. Kennzahlen-Kacheln (4er-Grid passend zur UI)
+                    column.Item().PaddingBottom(15).Column(kBox => {
+                        kBox.Item().PaddingBottom(8).Row(row => {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
+                                c.Item().Text("Wareneinsatz (Einkauf)").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                c.Item().Text($"{result.TotalMaterialCost:C2}").FontSize(12).Bold().FontColor(Colors.Green.Darken2);
+                            });
+                            row.Spacing(8);
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
+                                c.Item().Text("Gesamtkosten (inkl. Fix/Pers)").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                c.Item().Text($"{result.TotalEventCosts:C2}").FontSize(12).Bold().FontColor(Colors.Red.Darken2);
+                            });
                         });
 
-                        row.Spacing(10);
-
-                        row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(8).Column(c => {
-                            c.Item().Text("Soll-Kosten / Drink (Ø)").FontSize(9).FontColor(Colors.Grey.Darken1);
-                            c.Item().Text($"{result.CostPerDrink:C2}").FontSize(14).Bold();
+                        kBox.Item().Row(row => {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
+                                c.Item().Text("Ziel-Umsatz (inkl. Gewinn)").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                c.Item().Text($"{result.TotalTargetRevenue:C2}").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
+                            });
+                            row.Spacing(8);
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
+                                c.Item().Text("Ø Verkaufspreis / Drink").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                c.Item().Text($"{result.TargetSalesPricePerDrink:C2}").FontSize(12).Bold().FontColor(Colors.Purple.Darken2);
+                            });
                         });
                     });
 
-                    // 2. Kalkulation pro Cocktail (ohne Emoji)
-                    column.Item().PaddingBottom(5).Text("Kalkulation pro Cocktail").FontSize(12).Bold();
+                    // 2. Kalkulation pro Cocktail & Verkaufspreis
+                    column.Item().PaddingBottom(5).Text("Cocktail-Kalkulation & Verkaufspreise").FontSize(12).Bold();
 
                     column.Item().PaddingBottom(15).Table(table => {
                         table.ColumnsDefinition(columns => {
-                            columns.RelativeColumn(3);    // Cocktail
-                            columns.RelativeColumn(1.2f); // Anteil
-                            columns.RelativeColumn(1.2f); // Anzahl
-                            columns.RelativeColumn(2);    // Soll / Drink
-                            columns.RelativeColumn(2);    // Real / Drink
-                            columns.RelativeColumn(2);    // Gesamtkosten
+                            columns.RelativeColumn(2.5f); // Cocktail
+                            columns.RelativeColumn(1f);   // Anteil
+                            columns.RelativeColumn(1f);   // Anzahl
+                            columns.RelativeColumn(1.8f); // Real / Drink
+                            columns.RelativeColumn(2.2f); // Empf. Verkaufspreis
                         });
 
                         table.Header(header => {
                             header.Cell().Element(HeaderStyle).Text("Cocktail");
                             header.Cell().Element(HeaderStyle).AlignCenter().Text("Anteil");
                             header.Cell().Element(HeaderStyle).AlignCenter().Text("Anzahl");
-                            header.Cell().Element(HeaderStyle).AlignRight().Text("Soll / Drink");
                             header.Cell().Element(HeaderStyle).AlignRight().Text("Real / Drink*");
-                            header.Cell().Element(HeaderStyle).AlignRight().Text("Gesamtkosten");
+                            header.Cell().Element(HeaderStyle).AlignRight().Text("Empf. Preis");
                         });
 
                         foreach (var calc in result.RecipeCalculations) {
                             table.Cell().Element(CellStyle).Text(calc.RecipeName).Bold();
                             table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.Percentage:0.##} %");
                             table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.TargetDrinkCount} Stk.");
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.TheoreticalCostPerDrink:C2}").FontColor(Colors.Grey.Darken1);
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.RealCostPerDrink:C2}").Bold().FontColor(Colors.Green.Darken2);
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.RealCostTotal:C2}").Bold();
+                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.RealCostPerDrink:C2}").FontColor(Colors.Green.Darken2);
+                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.TargetSalesPrice:C2}").Bold().FontColor(Colors.Purple.Darken2);
                         }
                     });
 
-                    // 3. Automatische Einkaufsliste (ohne Emoji)
+                    // 3. Automatische Einkaufsliste
                     column.Item().PaddingBottom(5).Text("Automatische Einkaufsliste").FontSize(12).Bold();
 
                     column.Item().Table(table => {
                         table.ColumnsDefinition(columns => {
-                            columns.ConstantColumn(25);  // Checkbox [ ]
+                            columns.ConstantColumn(20);  // Checkbox [ ]
                             columns.RelativeColumn(3);   // Zutat
                             columns.RelativeColumn(2);   // Gesamtbedarf
                             columns.RelativeColumn(3);   // Kaufm. Gebinde
@@ -122,13 +136,13 @@ public class ShoppingListPdfGenerator {
         static IContainer HeaderStyle(IContainer container) =>
             container.Background(Colors.Grey.Lighten3)
                      .Padding(5)
-                     .DefaultTextStyle(x => x.Bold().FontSize(9));
+                     .DefaultTextStyle(x => x.Bold().FontSize(8.5f));
 
         static IContainer CellStyle(IContainer container) =>
             container.BorderBottom(1)
                      .BorderColor(Colors.Grey.Lighten3)
                      .Padding(5)
-                     .DefaultTextStyle(x => x.FontSize(9));
+                     .DefaultTextStyle(x => x.FontSize(8.5f));
     }
 
     private static string FormatAmount(decimal amount, IngredientUnit unit) {

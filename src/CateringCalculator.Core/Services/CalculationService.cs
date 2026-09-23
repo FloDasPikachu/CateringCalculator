@@ -6,13 +6,21 @@ public class CalculationService {
     public CalculationResult Calculate(EventPlan eventPlan) {
         ArgumentNullException.ThrowIfNull(eventPlan);
 
+        int payingDrinksCount = eventPlan.TotalDrinksToServe;
+        int freeDrinksCount = eventPlan.FreeDrinksCount;
+        int totalProductionDrinks = payingDrinksCount + freeDrinksCount;
+
         var result = new CalculationResult {
             EventPlanId = eventPlan.Id,
             EventTitle = eventPlan.Title,
-            TotalDrinksCount = eventPlan.TotalDrinksToServe
+            TotalDrinksCount = payingDrinksCount,
+            FreeDrinksCount = freeDrinksCount,
+            FixedCosts = eventPlan.FixedCosts,
+            PersonnelCosts = eventPlan.PersonnelCosts,
+            TargetProfit = eventPlan.TargetProfit
         };
 
-        if (eventPlan.SelectedRecipes.Count == 0 || eventPlan.TotalDrinksToServe == 0) {
+        if (eventPlan.SelectedRecipes.Count == 0 || totalProductionDrinks == 0) {
             return result;
         }
 
@@ -23,13 +31,13 @@ public class CalculationService {
         // Key: RecipeId -> Value: (IngredientId -> Verbrauchte Menge inkl. Puffer)
         var recipeIngredientUsage = new Dictionary<Guid, Dictionary<Guid, decimal>>();
 
-        // 1. Zutatenmengen & Soll-Kosten berechnen
+        // 1. Zutatenmengen & Soll-Kosten berechnen (basierend auf der GESAMTPRODUKTION inkl. Freigetränke)
         foreach (var eventRecipe in eventPlan.SelectedRecipes) {
             var recipe = eventRecipe.Recipe;
             if (recipe == null)
                 continue;
 
-            int countForThisRecipe = (int)Math.Round(eventPlan.TotalDrinksToServe * (eventRecipe.Percentage / 100m));
+            int countForThisRecipe = (int)Math.Round(totalProductionDrinks * (eventRecipe.Percentage / 100m));
 
             decimal recipeTheoreticalCost = 0m;
             var usageDict = new Dictionary<Guid, decimal>();
@@ -62,7 +70,7 @@ public class CalculationService {
                 RecipeId = recipe.Id,
                 RecipeName = recipe.Name,
                 Percentage = eventRecipe.Percentage,
-                TargetDrinkCount = countForThisRecipe,
+                TargetDrinkCount = countForThisRecipe, // Gesamtproduktion für dieses Rezept
                 TheoreticalCostTotal = Math.Round(recipeTheoreticalCost, 2)
             });
         }
@@ -98,6 +106,11 @@ public class CalculationService {
         }
 
         // 3. Realkosten verursachungsgerecht & proportional je Zutat verteilen
+        // Plus Berechnung des empfohlenen Verkaufspreises je Cocktail
+        decimal fixedAndProfitSharePerPayingDrink = payingDrinksCount > 0
+            ? (eventPlan.FixedCosts + eventPlan.PersonnelCosts + eventPlan.TargetProfit) / payingDrinksCount
+            : 0m;
+
         foreach (var calc in result.RecipeCalculations) {
             decimal recipeRealCost = 0m;
 
@@ -115,6 +128,10 @@ public class CalculationService {
             }
 
             calc.RealCostTotal = Math.Round(recipeRealCost, 2);
+
+            // Empfohlener Verkaufspreis = Realer Kostenanteil pro Drink + anteiliger Fixkosten/Gewinn-Aufschlag
+            decimal realCostPerDrink = calc.TargetDrinkCount > 0 ? calc.RealCostTotal / calc.TargetDrinkCount : 0m;
+            calc.TargetSalesPrice = Math.Round(realCostPerDrink + fixedAndProfitSharePerPayingDrink, 2);
         }
 
         return result;

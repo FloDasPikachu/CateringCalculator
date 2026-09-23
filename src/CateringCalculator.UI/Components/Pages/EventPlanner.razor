@@ -15,7 +15,7 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">Event-Planung & Kalkulation</h1>
-            <p class="text-muted" style="margin-bottom: 0;">Berechne die benötigten Zutaten, Gebinde und Materialkosten für deine Veranstaltung.</p>
+            <p class="text-muted" style="margin-bottom: 0;">Berechne die benötigten Zutaten, Gebinde, Fixkosten und Ziel-Verkaufspreise.</p>
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button class="btn-primary" @onclick="CreateNewEvent">
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Haupt-Content Layout (2-Spalten Grid) -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; align-items: start;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
         
         <!-- Linke Spalte: Konfiguration & Rezeptauswahl -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -56,7 +56,7 @@
             <!-- 1. Event-Parameters Panel -->
             <div class="card-panel">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-                    1. Event-Parameter
+                    1. Event-Parameter & Mengen
                 </h3>
 
                 <div class="form-group">
@@ -75,19 +75,51 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Freigetränke (Stk.)</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.FreeDrinksCount" min="0" />
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Fließen als Kostentreiber in den Wareneinsatz.</span>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Schwund-Puffer (%)</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.WasteBufferPercent" min="0" max="50" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1b. Finanzielle Parameter (Fixkosten & Gewinn) -->
+            <div class="card-panel">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
+                    2. Kosten & Wunschgewinn
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Fixkosten (€)</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.FixedCosts" min="0" step="10" />
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Miete, Müll, Pauschalen etc.</span>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Personalkosten (€)</label>
+                        <input type="number" class="form-control" @bind="_eventPlan.PersonnelCosts" min="0" step="10" />
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Gesamtlohn Service/Bar.</span>
+                    </div>
+                </div>
+
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label">Schwund-Puffer (%)</label>
-                    <input type="number" class="form-control" @bind="_eventPlan.WasteBufferPercent" min="0" max="50" />
-                    <span class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 0.25rem;">
-                        Aufschlag für Verschnitt, Kleckern & Gratis-Drinks.
+                    <label class="form-label">Wunschgewinn (€)</label>
+                    <input type="number" class="form-control" @bind="_eventPlan.TargetProfit" min="0" step="50" />
+                    <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+                        Netto-Gewinnziel, das auf die zahlenden Drinks umgelegt wird.
                     </span>
                 </div>
             </div>
 
-            <!-- 2. Cocktails auswählen Panel -->
+            <!-- 3. Cocktails auswählen Panel -->
             <div class="card-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">2. Cocktails auswählen</h3>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">3. Cocktails auswählen</h3>
                     @if (_eventPlan.SelectedRecipes.Count > 0)
                     {
                         <button type="button" class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" @onclick="DistributeEvenly">
@@ -104,7 +136,7 @@
                 }
                 else
                 {
-                    <div style="max-height: 320px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px;">
+                    <div style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px;">
                         @foreach (var recipe in _availableRecipes)
                         {
                             var selection = _eventPlan.SelectedRecipes.FirstOrDefault(r => r.RecipeId == recipe.Id);
@@ -154,7 +186,7 @@
                 <button type="button" class="btn-primary" style="width: 100%; padding: 0.75rem;"
                         @onclick="CalculateEvent"
                         disabled="@(_eventPlan.SelectedRecipes.Count == 0 || _eventPlan.GuestCount <= 0 || TotalPercentage != 100m)">
-                    🧮 Event jetzt berechnen
+                    🧮 Event jetzt kalkulieren
                 </button>
             </div>
         </div>
@@ -165,7 +197,7 @@
             {
                 <div class="card-panel text-center" style="padding: 4rem 2rem;">
                     <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Kalkulation vorhanden</p>
-                    <p class="text-muted" style="margin-bottom: 0;">Wähle links Gästezahl und Rezepte aus und klicke auf "Event jetzt berechnen".</p>
+                    <p class="text-muted" style="margin-bottom: 0;">Fülle links die Parameter aus und klicke auf "Event jetzt kalkulieren".</p>
                 </div>
             }
             else
@@ -175,27 +207,35 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                         <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Ergebnis: @_calculationResult.EventTitle</h3>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="badge badge-primary">@_calculationResult.TotalDrinksCount Drinks</span>
+                            <span class="badge badge-primary">@_calculationResult.TotalDrinksCount zahlende Drinks</span>
                             <button type="button" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="ExportPdf">
                                 📄 PDF Exportieren
                             </button>
                         </div>
                     </div>
 
-                    <!-- Kennzahlen Boxen -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                        <div class="price-preview-box text-center" style="padding: 0.75rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Wareneinsatz (Einkauf)</span>
-                            <strong style="color: #28a745; font-size: 1.2rem;">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
+                    <!-- Kennzahlen-Grid (4 Boxen) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Wareneinsatz (Gesamt)</span>
+                            <strong style="color: #28a745; font-size: 1.1rem;">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
                         </div>
-                        <div class="price-preview-box text-center" style="padding: 0.75rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Soll-Kosten / Drink (Ø)</span>
-                            <strong style="color: var(--primary); font-size: 1.2rem;">@_calculationResult.CostPerDrink.ToString("C2")</strong>
+                        <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Gesamtkosten (inkl. Fix/Pers)</span>
+                            <strong style="color: #d9534f; font-size: 1.1rem;">@_calculationResult.TotalEventCosts.ToString("C2")</strong>
+                        </div>
+                        <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Ziel-Umsatz (inkl. Gewinn)</span>
+                            <strong style="color: var(--primary); font-size: 1.1rem;">@_calculationResult.TotalTargetRevenue.ToString("C2")</strong>
+                        </div>
+                        <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Ø Verkaufspreis / Drink</span>
+                            <strong style="color: #6f42c1; font-size: 1.1rem;">@_calculationResult.TargetSalesPricePerDrink.ToString("C2")</strong>
                         </div>
                     </div>
 
-                    <!-- 1. Tabelle: Kalkulation pro Cocktail -->
-                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 Kalkulation pro Cocktail</h4>
+                    <!-- 1. Tabelle: Kalkulation pro Cocktail & Ziel-Verkaufspreis -->
+                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 Cocktail-Kalkulation & Verkaufspreise</h4>
                     <div style="overflow-x: auto; margin-bottom: 1.5rem;">
                         <table class="table-custom">
                             <thead>
@@ -203,9 +243,8 @@
                                     <th>Cocktail</th>
                                     <th style="text-align: center;">Anteil</th>
                                     <th style="text-align: center;">Anzahl</th>
-                                    <th style="text-align: right;">Soll / Drink</th>
                                     <th style="text-align: right;">Real / Drink*</th>
-                                    <th style="text-align: right;">Gesamt</th>
+                                    <th style="text-align: right; color: #6f42c1;">Empf. Verkaufspreis</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -215,15 +254,14 @@
                                         <td><strong>@calc.RecipeName</strong></td>
                                         <td style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
                                         <td style="text-align: center;">@calc.TargetDrinkCount Stk.</td>
-                                        <td style="text-align: right;" class="text-muted">@calc.TheoreticalCostPerDrink.ToString("C2")</td>
-                                        <td style="text-align: right; color: #28a745; font-weight: 600;">@calc.RealCostPerDrink.ToString("C2")</td>
-                                        <td style="text-align: right;"><strong>@calc.RealCostTotal.ToString("C2")</strong></td>
+                                        <td style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("C2")</td>
+                                        <td style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("C2")</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                         <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.35rem;">
-                            * <strong>Real / Drink:</strong> Anteilsmäßige tatsächliche Einkaufskosten inklusive voller Gebinde aus der Einkaufsliste.
+                            * Inkl. vollem Gebinde und anteiliger Berücksichtigung von Freigetränken. Empfohlener Verkaufspreis beinhaltet Wareneinsatz plus gewerblichen Fixkosten- und Gewinnaufschlag.
                         </span>
                     </div>
 
@@ -234,7 +272,7 @@
                             <thead>
                                 <tr>
                                     <th>Zutat</th>
-                                    <th>Bedarf</th>
+                                    <th>Bedarf (inkl. Puffer/Freidrinks)</th>
                                     <th style="text-align: center;">Kaufm. Gebinde</th>
                                     <th style="text-align: right;">Gesamtkosten</th>
                                 </tr>
@@ -288,6 +326,10 @@
         GuestCount = 30,
         AverageDrinksPerGuest = 3,
         WasteBufferPercent = 10m,
+        FixedCosts = 150m,
+        PersonnelCosts = 300m,
+        TargetProfit = 500m,
+        FreeDrinksCount = 10,
         SelectedRecipes = new List<EventRecipe>()
     };
 
