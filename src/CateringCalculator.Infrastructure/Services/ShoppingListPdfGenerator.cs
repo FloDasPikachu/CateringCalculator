@@ -86,7 +86,7 @@ public class ShoppingListPdfGenerator {
                         foreach (var calc in result.RecipeCalculations) {
                             table.Cell().Element(CellStyle).Text(calc.RecipeName).Bold();
                             table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.Percentage:0.##} %");
-                            table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.TargetDrinkCount} Stk.");
+                            table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.PayingDrinkCount} ({calc.FreeDrinkCount}) Stk.");
                             table.Cell().Element(CellStyle).AlignRight().Text($"{calc.RealCostPerDrink:C2}").FontColor(Colors.Green.Darken2);
                             table.Cell().Element(CellStyle).AlignRight().Text($"{calc.TargetSalesPrice:C2}").Bold().FontColor(Colors.Purple.Darken2);
                         }

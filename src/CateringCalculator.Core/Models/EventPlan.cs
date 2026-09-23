@@ -14,4 +14,7 @@ public class EventPlan {
 
     public List<EventRecipe> SelectedRecipes { get; set; } = [];
     public int TotalDrinksToServe => GuestCount * AverageDrinksPerGuest;
+
+    public List<FixedCostItem> FixedCostItems { get; set; } = new();
+    public List<PersonnelCostItem> PersonnelCostItems { get; set; } = new();
 }

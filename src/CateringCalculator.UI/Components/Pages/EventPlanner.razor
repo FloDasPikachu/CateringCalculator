@@ -88,21 +88,30 @@
                 </div>
             </div>
 
-            <!-- 1b. Finanzielle Parameter (Fixkosten & Gewinn) -->
+            <!-- 2. Finanzielle Parameter (Fixkosten & Personal) -->
             <div class="card-panel">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
                     2. Kosten & Wunschgewinn
                 </h3>
 
                 <div class="form-row">
+                    <!-- Fixkosten mit Modal-Button -->
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Fixkosten (€)</label>
-                        <input type="number" class="form-control" @bind="_eventPlan.FixedCosts" min="0" step="10" />
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" class="form-control" @bind="_eventPlan.FixedCosts" min="0" step="10" style="flex: 1;" />
+                            <button type="button" class="btn-secondary" @onclick="OpenFixedModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Fixkosten im Detail berechnen">⚙️ Details</button>
+                        </div>
                         <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Miete, Müll, Pauschalen etc.</span>
                     </div>
+
+                    <!-- Personalkosten mit Modal-Button -->
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Personalkosten (€)</label>
-                        <input type="number" class="form-control" @bind="_eventPlan.PersonnelCosts" min="0" step="10" />
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" class="form-control" @bind="_eventPlan.PersonnelCosts" min="0" step="10" style="flex: 1;" />
+                            <button type="button" class="btn-secondary" @onclick="OpenPersonnelModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Personalkosten im Detail berechnen">⚙️ Details</button>
+                        </div>
                         <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Gesamtlohn Service/Bar.</span>
                     </div>
                 </div>
@@ -253,7 +262,7 @@
                                     <tr>
                                         <td><strong>@calc.RecipeName</strong></td>
                                         <td style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
-                                        <td style="text-align: center;">@calc.TargetDrinkCount Stk.</td>
+                                        <td style="text-align: center;">@calc.PayingDrinkCount (@calc.FreeDrinkCount) Stk.</td>
                                         <td style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("C2")</td>
                                         <td style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("C2")</td>
                                     </tr>
@@ -300,7 +309,91 @@
     </div>
 </div>
 
+@if (_showPersonnelModal)
+{
+    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="card-panel" style="background: white; width: 90%; max-width: 650px; padding: 1.5rem; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Personalkosten im Detail</h3>
+                <button class="btn-secondary" style="padding: 0.2rem 0.5rem;" @onclick="ClosePersonnelModal">✕</button>
+            </div>
+
+            <!-- Spalten-Überschriften -->
+            @if (_eventPlan.PersonnelCostItems.Any())
+            {
+                <div style="display: flex; gap: 0.5rem; padding: 0 0.5rem; margin-bottom: 0.3rem; font-size: 0.75rem; font-weight: 600; color: #6c757d;">
+                    <div style="flex: 2;">Rolle / Position</div>
+                    <div style="width: 70px; text-align: center;">Anzahl</div>
+                    <div style="width: 80px; text-align: center;">Stunden</div>
+                    <div style="width: 80px; text-align: center;">€ / Std.</div>
+                    <div style="width: 38px;"></div>
+                </div>
+            }
+
+            <!-- Liste der Positionen -->
+            @foreach (var item in _eventPlan.PersonnelCostItems)
+            {
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; background: rgba(0,0,0,0.02); padding: 0.5rem; border-radius: 6px;">
+                    <input type="text" class="form-control" placeholder="z. B. Barkeeper" @bind="item.RoleName" style="flex: 2;" />
+                    <input type="number" class="form-control" title="Anzahl Personen" @bind="item.Count" min="1" style="width: 70px; text-align: center;" />
+                    <input type="number" class="form-control" title="Arbeitsstunden" @bind="item.Hours" min="0.5" step="0.5" style="width: 80px; text-align: center;" />
+                    <input type="number" class="form-control" title="Stundensatz in Euro" @bind="item.HourlyRate" min="0" step="0.5" style="width: 80px; text-align: right;" />
+                    <button class="btn-secondary" style="color: #dc3545; padding: 0.4rem 0.6rem;" title="Zeile löschen" @onclick="() => _eventPlan.PersonnelCostItems.Remove(item)">🗑️</button>
+                </div>
+            }
+
+            <button class="btn-secondary" style="width: 100%; margin-bottom: 1.25rem;" @onclick="AddPersonnelItem">➕ Neue Position hinzufügen</button>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 0.75rem;">
+                <strong style="font-size: 1rem;">Gesamtsumme Personal: @_eventPlan.PersonnelCostItems.Sum(x => x.TotalCost).ToString("C2")</strong>
+                <button class="btn-primary" @onclick="SaveAndClosePersonnelModal">Übernehmen</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showFixedModal)
+{
+    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="card-panel" style="background: white; width: 90%; max-width: 600px; padding: 1.5rem; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Fixkosten im Detail</h3>
+                <button class="btn-secondary" style="padding: 0.2rem 0.5rem;" @onclick="CloseFixedModal">✕</button>
+            </div>
+
+            <!-- Spalten-Überschriften -->
+            @if (_eventPlan.FixedCostItems.Any())
+            {
+                <div style="display: flex; gap: 0.5rem; padding: 0 0.5rem; margin-bottom: 0.3rem; font-size: 0.75rem; font-weight: 600; color: #6c757d;">
+                    <div style="flex: 2;">Beschreibung / Posten</div>
+                    <div style="width: 120px; text-align: right;">Betrag (€)</div>
+                    <div style="width: 38px;"></div>
+                </div>
+            }
+
+            <!-- Liste der Positionen -->
+            @foreach (var item in _eventPlan.FixedCostItems)
+            {
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; background: rgba(0,0,0,0.02); padding: 0.5rem; border-radius: 6px;">
+                    <input type="text" class="form-control" placeholder="z. B. Standmiete" @bind="item.Description" style="flex: 2;" />
+                    <input type="number" class="form-control" placeholder="Betrag (€)" @bind="item.Amount" min="0" step="10" style="width: 120px; text-align: right;" />
+                    <button class="btn-secondary" style="color: #dc3545; padding: 0.4rem 0.6rem;" title="Zeile löschen" @onclick="() => _eventPlan.FixedCostItems.Remove(item)">🗑️</button>
+                </div>
+            }
+
+            <button class="btn-secondary" style="width: 100%; margin-bottom: 1.25rem;" @onclick="AddFixedItem">➕ Neue Position hinzufügen</button>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 0.75rem;">
+                <strong style="font-size: 1rem;">Gesamtsumme Fixkosten: @_eventPlan.FixedCostItems.Sum(x => x.Amount).ToString("C2")</strong>
+                <button class="btn-primary" @onclick="SaveAndCloseFixedModal">Übernehmen</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+    private bool _showPersonnelModal = false;
+    private bool _showFixedModal = false;
     private EventPlan _eventPlan = CreateEmptyEventPlan();
     private List<EventPlan> _savedEventPlans = new();
     private List<Recipe> _availableRecipes = new();
@@ -429,4 +522,26 @@
         IngredientUnit.Milliliter => "ml",
         _ => "ml"
     };
+
+    // -- Personal Methoden --
+    private void OpenPersonnelModal() => _showPersonnelModal = true;
+    private void ClosePersonnelModal() => _showPersonnelModal = false;
+    private void AddPersonnelItem() {
+        _eventPlan.PersonnelCostItems.Add(new PersonnelCostItem { EventPlanId = _eventPlan.Id, RoleName = "Servicekraft", Count = 1, Hours = 5m, HourlyRate = 14m });
+    }
+    private void SaveAndClosePersonnelModal() {
+        _eventPlan.PersonnelCosts = _eventPlan.PersonnelCostItems.Sum(x => x.TotalCost);
+        _showPersonnelModal = false;
+    }
+
+    // -- Fixkosten Methoden --
+    private void OpenFixedModal() => _showFixedModal = true;
+    private void CloseFixedModal() => _showFixedModal = false;
+    private void AddFixedItem() {
+        _eventPlan.FixedCostItems.Add(new FixedCostItem { EventPlanId = _eventPlan.Id, Description = "Standmiete", Amount = 100m });
+    }
+    private void SaveAndCloseFixedModal() {
+        _eventPlan.FixedCosts = _eventPlan.FixedCostItems.Sum(x => x.Amount);
+        _showFixedModal = false;
+    }
 }

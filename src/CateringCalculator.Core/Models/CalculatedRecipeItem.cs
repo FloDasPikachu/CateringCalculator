@@ -4,7 +4,11 @@ public class CalculatedRecipeItem {
     public Guid RecipeId { get; set; }
     public string RecipeName { get; set; } = string.Empty;
     public decimal Percentage { get; set; }
-    public int TargetDrinkCount { get; set; }
+
+    public int PayingDrinkCount { get; set; }
+    public int FreeDrinkCount { get; set; }
+
+    public int TargetDrinkCount => PayingDrinkCount + FreeDrinkCount;
 
     public decimal TheoreticalCostTotal { get; set; }
     public decimal TheoreticalCostPerDrink => TargetDrinkCount > 0 ? TheoreticalCostTotal / TargetDrinkCount : 0m;
