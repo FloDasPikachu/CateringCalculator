@@ -19,6 +19,9 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
                 .ThenInclude(er => er.Recipe)
                     .ThenInclude(r => r.Items)
                         .ThenInclude(i => i.Ingredient)
+            // NEU: Detail-Listen beim Laden mit einbeziehen
+            .Include(e => e.FixedCostItems)
+            .Include(e => e.PersonnelCostItems)
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == id);
     }
@@ -26,6 +29,8 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
     public async Task SaveEventPlanAsync(EventPlan eventPlan) {
         var existingPlan = await context.EventPlans
             .Include(e => e.SelectedRecipes)
+            .Include(e => e.FixedCostItems)
+            .Include(e => e.PersonnelCostItems)
             .FirstOrDefaultAsync(e => e.Id == eventPlan.Id);
 
         if (existingPlan == null) {
@@ -34,15 +39,28 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
                 selected.Recipe = null!; // Referenz entkoppeln für FK-Insert
             }
 
+            // Foreign Keys für die neuen Kosten-Items sicherstellen
+            foreach (var item in eventPlan.FixedCostItems) {
+                item.EventPlanId = eventPlan.Id;
+            }
+
+            foreach (var item in eventPlan.PersonnelCostItems) {
+                item.EventPlanId = eventPlan.Id;
+            }
+
             await context.EventPlans.AddAsync(eventPlan);
         } else {
-            // Bestehendes Event aktualisieren
+            // Bestehendes Event aktualisieren - Scalar-Werte übertragen
             existingPlan.Title = eventPlan.Title;
             existingPlan.GuestCount = eventPlan.GuestCount;
             existingPlan.AverageDrinksPerGuest = eventPlan.AverageDrinksPerGuest;
             existingPlan.WasteBufferPercent = eventPlan.WasteBufferPercent;
+            existingPlan.FixedCosts = eventPlan.FixedCosts;
+            existingPlan.PersonnelCosts = eventPlan.PersonnelCosts;
+            existingPlan.TargetProfit = eventPlan.TargetProfit;
+            existingPlan.FreeDrinksCount = eventPlan.FreeDrinksCount;
 
-            // Abgleich der Zuordnungstabelle
+            // 1. Abgleich der Rezept-Zuordnungstabelle
             var selectedRecipeIds = eventPlan.SelectedRecipes.Select(r => r.RecipeId).ToList();
             existingPlan.SelectedRecipes.RemoveAll(r => !selectedRecipeIds.Contains(r.RecipeId));
 
@@ -59,6 +77,30 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
                         Percentage = updatedRecipe.Percentage
                     });
                 }
+            }
+
+            // 2. Abgleich der Fixkosten-Details (Modal-Werte)
+            context.FixedCostItems.RemoveRange(existingPlan.FixedCostItems);
+            foreach (var item in eventPlan.FixedCostItems) {
+                existingPlan.FixedCostItems.Add(new FixedCostItem {
+                    Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
+                    EventPlanId = existingPlan.Id,
+                    Description = item.Description,
+                    Amount = item.Amount
+                });
+            }
+
+            // 3. Abgleich der Personalkosten-Details (Modal-Werte)
+            context.PersonnelCostItems.RemoveRange(existingPlan.PersonnelCostItems);
+            foreach (var item in eventPlan.PersonnelCostItems) {
+                existingPlan.PersonnelCostItems.Add(new PersonnelCostItem {
+                    Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
+                    EventPlanId = existingPlan.Id,
+                    RoleName = item.RoleName,
+                    Count = item.Count,
+                    Hours = item.Hours,
+                    HourlyRate = item.HourlyRate
+                });
             }
         }
 

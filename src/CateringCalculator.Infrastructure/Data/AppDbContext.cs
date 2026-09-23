@@ -8,6 +8,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<RecipeItem> RecipeItems => Set<RecipeItem>();
     public DbSet<EventPlan> EventPlans => Set<EventPlan>();
+    public DbSet<FixedCostItem> FixedCostItems => Set<FixedCostItem>();
+    public DbSet<PersonnelCostItem> PersonnelCostItems => Set<PersonnelCostItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
@@ -48,5 +50,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany()
             .HasForeignKey(er => er.RecipeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<EventPlan>()
+            .HasMany(e => e.FixedCostItems)
+            .WithOne()
+            .HasForeignKey(f => f.EventPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<EventPlan>()
+            .HasMany(e => e.PersonnelCostItems)
+            .WithOne()
+            .HasForeignKey(p => p.EventPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
