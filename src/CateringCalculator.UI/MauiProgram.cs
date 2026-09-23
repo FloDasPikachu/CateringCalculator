@@ -46,6 +46,8 @@ public static class MauiProgram {
 
             // Führt alle ausstehenden Migrationen (wie FixEventRecipeNavigation) auf catering_calculator.db aus
             dbContext.Database.Migrate();
+
+            DbInitializer.InitializeAsync(dbContext).GetAwaiter().GetResult();
         }
 
         return app;
