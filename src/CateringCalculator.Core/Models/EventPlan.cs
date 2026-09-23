@@ -6,6 +6,6 @@ public class EventPlan {
     public int GuestCount { get; set; }
     public int AverageDrinksPerGuest { get; set; } = 3;
     public decimal WasteBufferPercent { get; set; } = 10m;
-    public List<Recipe> SelectedRecipes { get; set; } = [];
+    public List<EventRecipe> SelectedRecipes { get; set; } = [];
     public int TotalDrinksToServe => GuestCount * AverageDrinksPerGuest;
 }

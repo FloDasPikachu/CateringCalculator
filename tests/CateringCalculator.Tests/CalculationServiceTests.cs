@@ -53,7 +53,15 @@ public class CalculationServiceTests {
             GuestCount = 10,
             AverageDrinksPerGuest = 2, // 20 Drinks gesamt
             WasteBufferPercent = 10,  // 10 % Verschnitt
-            SelectedRecipes = [recipe]
+            SelectedRecipes =
+            [
+                new EventRecipe
+                {
+                    RecipeId = recipe.Id,
+                    Recipe = recipe,
+                    Percentage = 100m // 100 % der Drinks entfallen auf den Mojito
+                }
+            ]
         };
 
         // Act
@@ -103,5 +111,72 @@ public class CalculationServiceTests {
         // Assert
         Assert.Empty(result.ShoppingList);
         Assert.Equal(0, result.TotalIceInKg);
+    }
+
+    [Fact]
+    public void Calculate_WithMultipleRecipesAndPercentages_CalculatesWeightedShoppingList() {
+        // Arrange
+        var rum = new Ingredient {
+            Id = Guid.NewGuid(),
+            Name = "Weißer Rum",
+            Unit = IngredientUnit.Milliliter,
+            PackageSize = 700m,
+            PackagePrice = 14.00m
+        };
+
+        var cachaça = new Ingredient {
+            Id = Guid.NewGuid(),
+            Name = "Cachaça",
+            Unit = IngredientUnit.Milliliter,
+            PackageSize = 700m,
+            PackagePrice = 15.00m
+        };
+
+        var mojito = new Recipe {
+            Id = Guid.NewGuid(),
+            Name = "Mojito",
+            IceInGrams = 150,
+            Items = [new() { IngredientId = rum.Id, Ingredient = rum, Amount = 60m }]
+        };
+
+        var caipirinha = new Recipe {
+            Id = Guid.NewGuid(),
+            Name = "Caipirinha",
+            IceInGrams = 200,
+            Items = [new() { IngredientId = cachaça.Id, Ingredient = cachaça, Amount = 5m }] // 50ml Korrekturwert für Test
+        };
+
+        var plan = new EventPlan {
+            Id = Guid.NewGuid(),
+            Title = "Cocktailabend",
+            GuestCount = 10,
+            AverageDrinksPerGuest = 2, // 20 Drinks gesamt
+            WasteBufferPercent = 0,    // 0% Puffer zur einfacheren Nachvollziehbarkeit im Test
+            SelectedRecipes =
+            [
+                new EventRecipe { RecipeId = mojito.Id, Recipe = mojito, Percentage = 60m },       // 12 Drinks
+                new EventRecipe { RecipeId = caipirinha.Id, Recipe = caipirinha, Percentage = 40m } // 8 Drinks
+            ]
+        };
+
+        // Act
+        var result = _sut.Calculate(plan);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(20, result.TotalDrinksCount);
+
+        // Rum: 12 Drinks (60% von 20) * 60 ml = 720 ml -> 2 Flaschen (a 700ml, da 1 nicht reicht)
+        var rumItem = result.ShoppingList.First(i => i.IngredientId == rum.Id);
+        Assert.Equal(720m, rumItem.TotalAmountNeeded);
+        Assert.Equal(2, rumItem.PackagesToBuy);
+
+        // Cachaça: 8 Drinks (40% von 20) * 50 ml = 400 ml -> 1 Flasche (a 700ml)
+        var cachaçaItem = result.ShoppingList.First(i => i.IngredientId == cachaça.Id);
+        Assert.Equal(400m, cachaçaItem.TotalAmountNeeded);
+        Assert.Equal(1, cachaçaItem.PackagesToBuy);
+
+        // Eisbedarf: (12 * 150g) + (8 * 200g) = 1800g + 1600g = 3400g = 3.4 kg
+        Assert.Equal(3.4m, result.TotalIceInKg);
     }
 }
