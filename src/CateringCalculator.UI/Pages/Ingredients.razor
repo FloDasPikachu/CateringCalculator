@@ -18,7 +18,7 @@
 
     @if (_ingredients == null) {
         <div class="card-panel text-center" style="padding: 3rem;">
-            <p class="text-muted" style="margin: 0;"><em>Zutaten werden geladen...</em></p>
+            <p class="text-muted" style="margin: 0;"><em>@AppResources.Ingredients_Loading</em></p>
         </div>
     } else if (!_ingredients.Any()) {
         <div class="card-panel text-center" style="padding: 3rem;">
@@ -45,13 +45,13 @@
                             <td><strong>@ingredient.Name</strong></td>
                             <td><span class="badge badge-primary">@ingredient.Unit</span></td>
                             <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
-                            <td>@ingredient.PackagePrice.ToString("C2")</td>
-                            <td><strong>@ingredient.PricePerUnit.ToString("C4")</strong> / @ingredient.Unit</td>
+                            <td>@ingredient.PackagePrice.ToString("N2") €</td>
+                            <td><strong>@ingredient.PricePerUnit.ToString("N4") €</strong> / @ingredient.Unit</td>
                             <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
                                 <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
                                     @AppResources.Button_Edit
                                 </button>
-                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => DeleteIngredientAsync(ingredient)" title="@AppResources.Button_Delete">
+                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => ConfirmDeleteIngredient(ingredient)" title="@AppResources.Button_Delete">
                                     🗑️
                                 </button>
                             </td>
@@ -67,3 +67,14 @@
                  Ingredient="_editingIngredient"
                  OnSave="HandleSaveIngredientAsync"
                  OnClose="CloseModal" />
+
+<DeleteConfirmationModal IsVisible="_showDeleteConfirmation"
+                         Title="@AppResources.DeleteModal_IngredientTitle"
+                         Message="@string.Format(AppResources.DeleteModal_IngredientMessage, _ingredientToDelete?.Name)"
+                         OnConfirm="ExecuteDeleteIngredientAsync"
+                         OnCancel="CancelDelete" />
+
+<InfoModal IsVisible="_showInfoModal"
+           Title="@AppResources.InfoModal_Title"
+           Message="_infoMessage"
+           OnClose="CloseInfoModal" />

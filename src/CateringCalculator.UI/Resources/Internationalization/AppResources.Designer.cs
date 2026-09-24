@@ -106,11 +106,56 @@ namespace CateringCalculator.UI.Resources.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ok.
+        /// </summary>
+        internal static string Button_Ok {
+            get {
+                return ResourceManager.GetString("Button_Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Speichern.
         /// </summary>
         internal static string Button_Save {
             get {
                 return ResourceManager.GetString("Button_Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bist du sicher, dass du die Zutat &quot;{0}&quot; unwiderruflich löschen möchtest?.
+        /// </summary>
+        internal static string DeleteModal_IngredientMessage {
+            get {
+                return ResourceManager.GetString("DeleteModal_IngredientMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zutat löschen?.
+        /// </summary>
+        internal static string DeleteModal_IngredientTitle {
+            get {
+                return ResourceManager.GetString("DeleteModal_IngredientTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bist du sicher, dass du das Rezept &quot;{0}&quot; unwiderruflich löschen möchtest?.
+        /// </summary>
+        internal static string DeleteModal_RecipeMessage {
+            get {
+                return ResourceManager.GetString("DeleteModal_RecipeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rezept löschen?.
+        /// </summary>
+        internal static string DeleteModal_RecipeTitle {
+            get {
+                return ResourceManager.GetString("DeleteModal_RecipeTitle", resourceCulture);
             }
         }
         
@@ -592,6 +637,24 @@ namespace CateringCalculator.UI.Resources.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hinweis.
+        /// </summary>
+        internal static string InfoModal_DefaultTitle {
+            get {
+                return ResourceManager.GetString("InfoModal_DefaultTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Aktion nicht möglich.
+        /// </summary>
+        internal static string InfoModal_Title {
+            get {
+                return ResourceManager.GetString("InfoModal_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name der Zutat.
         /// </summary>
         internal static string IngredientModal_NameLabel {
@@ -678,6 +741,15 @@ namespace CateringCalculator.UI.Resources.Internationalization {
         internal static string Ingredients_EmptyTitle {
             get {
                 return ResourceManager.GetString("Ingredients_EmptyTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zutaten werden geladen....
+        /// </summary>
+        internal static string Ingredients_Loading {
+            get {
+                return ResourceManager.GetString("Ingredients_Loading", resourceCulture);
             }
         }
         

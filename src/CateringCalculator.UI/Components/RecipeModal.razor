@@ -110,7 +110,7 @@
                             <select class="form-control" value="@_selectedIngredientId" @onchange="OnIngredientSelectionChanged">
                                 <option value="@Guid.Empty">@AppResources.RecipeModal_SelectOrNewOption</option>
                                 @foreach (var ing in AvailableIngredients) {
-                                    <option value="@ing.Id">@ing.Name (@ing.PackageSize @GetUnitSuffix(ing.Unit) - @ing.PackagePrice.ToString("C2"))</option>
+                                    <option value="@ing.Id">@ing.Name (@ing.PackageSize @GetUnitSuffix(ing.Unit) - @ing.PackagePrice.ToString("N2") €)</option>
                                 }
                             </select>
                         </div>

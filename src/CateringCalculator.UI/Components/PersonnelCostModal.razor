@@ -31,7 +31,7 @@
             <button class="btn-secondary" style="width: 100%; margin-bottom: 1.25rem;" @onclick="AddPersonnelItem">➕ @AppResources.PersonnelModal_AddPosition</button>
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 0.75rem;">
-                <strong style="font-size: 1rem;">@AppResources.PersonnelModal_Total @_items.Sum(x => x.TotalCost).ToString("C2")</strong>
+                <strong style="font-size: 1rem;">@AppResources.PersonnelModal_Total @_items.Sum(x => x.TotalCost).ToString("N2") €</strong>
                 <button class="btn-primary" @onclick="() => OnSave.InvokeAsync(_items)">@AppResources.Button_Save</button>
             </div>
         </div>

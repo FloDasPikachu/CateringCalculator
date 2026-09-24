@@ -1,19 +1,22 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
-using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
 public partial class Ingredients : IDisposable {
-    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
-    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
+    [Inject]
+    private LocalizationService LocalizationService { get; set; } = default!;
 
     private List<Ingredient>? _ingredients;
     private Ingredient _editingIngredient = new();
     private bool _showModal = false;
+    private bool _showInfoModal = false;
+    private string _infoMessage = string.Empty;
+
+    private bool _showDeleteConfirmation = false;
+    private Ingredient? _ingredientToDelete;
 
     protected override async Task OnInitializedAsync() {
         LocalizationService.OnChange += StateHasChanged;
@@ -63,20 +66,41 @@ public partial class Ingredients : IDisposable {
         await LoadIngredientsAsync();
     }
 
-    private async Task DeleteIngredientAsync(Ingredient ingredient) {
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", AppResources.Msg_DeleteConfirm);
-        if (!confirmed)
+
+    private void ConfirmDeleteIngredient(Ingredient ingredient) {
+        _ingredientToDelete = ingredient;
+        _showDeleteConfirmation = true;
+    }
+
+    private void CancelDelete() {
+        _ingredientToDelete = null;
+        _showDeleteConfirmation = false;
+    }
+
+    private async Task ExecuteDeleteIngredientAsync() {
+        if (_ingredientToDelete == null)
             return;
 
         try {
-            await RecipeRepository.DeleteIngredientAsync(ingredient.Id);
+            await RecipeRepository.DeleteIngredientAsync(_ingredientToDelete.Id);
+            _ingredientToDelete = null;
+            _showDeleteConfirmation = false;
             await LoadIngredientsAsync();
         } catch (InvalidOperationException ex) {
-            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+            _showDeleteConfirmation = false;
+            _ingredientToDelete = null;
+
+            _infoMessage = ex.Message;
+            _showInfoModal = true;
         }
     }
 
     public void Dispose() {
         LocalizationService.OnChange -= StateHasChanged;
+    }
+
+    private void CloseInfoModal() {
+        _showInfoModal = false;
+        _infoMessage = string.Empty;
     }
 }

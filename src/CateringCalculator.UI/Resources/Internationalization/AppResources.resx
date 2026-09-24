@@ -510,4 +510,28 @@
   <data name="Recipe_GroupsLabel" xml:space="preserve">
     <value>Gruppen / Tags:</value>
   </data>
+  <data name="Button_Ok" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="InfoModal_Title" xml:space="preserve">
+    <value>Aktion nicht möglich</value>
+  </data>
+  <data name="InfoModal_DefaultTitle" xml:space="preserve">
+    <value>Hinweis</value>
+  </data>
+  <data name="DeleteModal_IngredientTitle" xml:space="preserve">
+    <value>Zutat löschen?</value>
+  </data>
+  <data name="DeleteModal_IngredientMessage" xml:space="preserve">
+    <value>Bist du sicher, dass du die Zutat "{0}" unwiderruflich löschen möchtest?</value>
+  </data>
+  <data name="DeleteModal_RecipeTitle" xml:space="preserve">
+    <value>Rezept löschen?</value>
+  </data>
+  <data name="DeleteModal_RecipeMessage" xml:space="preserve">
+    <value>Bist du sicher, dass du das Rezept "{0}" unwiderruflich löschen möchtest?</value>
+  </data>
+  <data name="Ingredients_Loading" xml:space="preserve">
+    <value>Zutaten werden geladen...</value>
+  </data>
 </root>

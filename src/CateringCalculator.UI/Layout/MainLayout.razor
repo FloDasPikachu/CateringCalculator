@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@inject CateringCalculator.UI.Services.LocalizationService LocalizationService
 
 <div class="app-shell">
     @* Safe Area Handling für iOS Statusleiste *@
@@ -14,14 +13,14 @@
         <div style="display: flex; align-items: center; gap: 1rem;">
             <!-- Sprachschalter -->
             <div class="language-switcher" style="display: flex; gap: 0.25rem;">
-                <button class="btn @(LocalizationService.CurrentCulture.TwoLetterISOLanguageName == "de" ? "btn-primary" : "btn-outline-secondary") btn-sm"
+                <button class="btn @(IsGermanActive ? "btn-primary" : "btn-outline-secondary") btn-sm"
                         style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                        @onclick='() => LocalizationService.SetCulture("de")'>
+                        @onclick='() => ChangeLanguage("de")'>
                     DE
                 </button>
-                <button class="btn @(LocalizationService.CurrentCulture.TwoLetterISOLanguageName == "en" ? "btn-primary" : "btn-outline-secondary") btn-sm"
+                <button class="btn @(IsEnglishActive ? "btn-primary" : "btn-outline-secondary") btn-sm"
                         style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                        @onclick='() => LocalizationService.SetCulture("en")'>
+                        @onclick='() => ChangeLanguage("en")'>
                     EN
                 </button>
             </div>

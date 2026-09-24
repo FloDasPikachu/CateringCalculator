@@ -152,7 +152,7 @@
                                         @recipe.Name
                                     </label>
                                     <span class="badge badge-primary">
-                                        @recipe.TotalCostPerDrink.ToString("C2") / Drink
+                                        @recipe.TotalCostPerDrink.ToString("N2") € / Drink
                                     </span>
                                 </div>
 
@@ -214,19 +214,19 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;">
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
                             <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_MaterialCostTotal</span>
-                            <strong style="color: #28a745; font-size: 1.1rem;">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
+                            <strong style="color: #28a745; font-size: 1.1rem;">@_calculationResult.TotalMaterialCost.ToString("N2") €</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
                             <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TotalEventCosts</span>
-                            <strong style="color: #d9534f; font-size: 1.1rem;">@_calculationResult.TotalEventCosts.ToString("C2")</strong>
+                            <strong style="color: #d9534f; font-size: 1.1rem;">@_calculationResult.TotalEventCosts.ToString("N2") €</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
                             <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TargetRevenue</span>
-                            <strong style="color: var(--primary); font-size: 1.1rem;">@_calculationResult.TotalTargetRevenue.ToString("C2")</strong>
+                            <strong style="color: var(--primary); font-size: 1.1rem;">@_calculationResult.TotalTargetRevenue.ToString("N2") €</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
                             <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_AvgSalesPrice</span>
-                            <strong style="color: #6f42c1; font-size: 1.1rem;">@_calculationResult.TargetSalesPricePerDrink.ToString("C2")</strong>
+                            <strong style="color: #6f42c1; font-size: 1.1rem;">@_calculationResult.TargetSalesPricePerDrink.ToString("N2") €</strong>
                         </div>
                     </div>
 
@@ -249,8 +249,8 @@
                                         <td><strong>@calc.RecipeName</strong></td>
                                         <td style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
                                         <td style="text-align: center;">@calc.PayingDrinkCount (@calc.FreeDrinkCount) Stk.</td>
-                                        <td style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("C2")</td>
-                                        <td style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("C2")</td>
+                                        <td style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("N2") €</td>
+                                        <td style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("N2") €</td>
                                     </tr>
                                 }
                             </tbody>
@@ -282,7 +282,7 @@
                                                 @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
                                             </span>
                                         </td>
-                                        <td style="text-align: right;"><strong>@item.TotalCost.ToString("C2")</strong></td>
+                                        <td style="text-align: right;"><strong>@item.TotalCost.ToString("N2") €</strong></td>
                                     </tr>
                                 }
                             </tbody>

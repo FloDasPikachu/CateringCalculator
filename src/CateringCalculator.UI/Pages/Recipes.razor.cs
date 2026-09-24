@@ -1,5 +1,4 @@
-﻿using CateringCalculator.Core.Enums;
-using CateringCalculator.Core.Interfaces;
+﻿using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
@@ -7,7 +6,8 @@ using Microsoft.AspNetCore.Components;
 namespace CateringCalculator.UI.Pages;
 
 public partial class Recipes : IDisposable {
-    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
+    [Inject]
+    private LocalizationService LocalizationService { get; set; } = default!;
 
     private List<Recipe> _recipes = new();
     private List<Ingredient> _availableIngredients = new();
@@ -16,6 +16,9 @@ public partial class Recipes : IDisposable {
     private bool _showForm = false;
     private bool _isEditing = false;
     private string? _selectedGroupFilter;
+    private bool _showDeleteConfirmation = false;
+    private Recipe? _recipeToDelete;
+
     private List<string> AllExistingGroups => _recipes?
         .SelectMany(r => r.Groups ?? new())
         .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -89,107 +92,79 @@ public partial class Recipes : IDisposable {
         }
     }
 
-    private async Task DeleteRecipeAsync(Guid recipeId) {
-        await RecipeRepository.DeleteRecipeAsync(recipeId);
-        await LoadDataAsync();
-    }
-
-    // Live-Suche & Gruppenfilter-Evaluierung (unterstützt kommagetrennte Suche)
     private IEnumerable<(Recipe Recipe, int Score)> EvaluatedRecipes {
         get {
             if (_recipes == null)
                 yield break;
 
-            bool hasSearch = !string.IsNullOrWhiteSpace(_searchTerm);
-            bool hasGroup = !string.IsNullOrWhiteSpace(_selectedGroupFilter);
-            bool anyFilterActive = hasSearch || hasGroup;
-
-            // Mehrere Begriffe anhand von Kommas trennen (und Leerzeichen außenrum entfernen)
-            var searchTerms = hasSearch
-                ? _searchTerm.ToLowerInvariant()
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(t => t.Trim())
-                    .Where(t => !string.IsNullOrEmpty(t))
-                    .ToArray()
-                : Array.Empty<string>();
-
-            bool effectiveHasSearch = searchTerms.Length > 0;
-            bool effectiveAnyFilterActive = effectiveHasSearch || hasGroup;
+            var searchTerms = ParseSearchTerms(_searchTerm);
+            bool hasGroupFilter = !string.IsNullOrWhiteSpace(_selectedGroupFilter);
+            bool hasAnyFilter = searchTerms.Length > 0 || hasGroupFilter;
 
             foreach (var recipe in _recipes) {
-                int score = 0;
-
-                // 1. Prüfen, ob die Gruppe übereinstimmt (falls Gruppenfilter aktiv)
-                bool matchesGroup = !hasGroup || (recipe.Groups != null && recipe.Groups.Contains(_selectedGroupFilter, StringComparer.OrdinalIgnoreCase));
-
-                // 2. Prüfen, ob mind. einer der kommagetrennten Suchbegriffe matcht
-                bool matchesSearch = true;
-                int searchScore = 0;
-
-                if (effectiveHasSearch) {
-                    string name = recipe.Name.ToLowerInvariant();
-                    string desc = recipe.Description.ToLowerInvariant();
-                    string groups = recipe.Groups != null ? string.Join(" ", recipe.Groups).ToLowerInvariant() : string.Empty;
-                    string ingredients = string.Join(" ", recipe.Items.Select(i => i.Ingredient?.Name ?? string.Empty)).ToLowerInvariant();
-
-                    int totalTermScore = 0;
-                    bool anyTermMatched = false;
-
-                    foreach (var term in searchTerms) {
-                        int termScore = 0;
-                        if (name.Contains(term))
-                            termScore += 10;
-                        if (groups.Contains(term))
-                            termScore += 8;
-                        if (ingredients.Contains(term))
-                            termScore += 5;
-                        if (desc.Contains(term))
-                            termScore += 2;
-
-                        if (termScore > 0) {
-                            anyTermMatched = true;
-                            totalTermScore += termScore;
-                        }
-                    }
-
-                    matchesSearch = anyTermMatched;
-                    searchScore = totalTermScore;
-                }
-
-                // Ein Cocktail ist ein Top-Treffer, wenn alle aktiven Filter matchen
-                if (effectiveAnyFilterActive) {
-                    bool groupConditionMet = !hasGroup || matchesGroup;
-                    bool searchConditionMet = !effectiveHasSearch || matchesSearch;
-
-                    // Wenn beide (bzw. die jeweils aktiven) Bedingungen erfüllt sind -> Top-Treffer
-                    if (groupConditionMet && searchConditionMet) {
-                        score = 10 + searchScore;
-                    } else {
-                        score = 0; // Andernfalls in den Rest ("Weitere Cocktails")
-                    }
-                } else {
-                    score = 0;
-                }
-
-                yield return (recipe, score);
+                int score = CalculateRecipeScore(recipe, searchTerms, hasGroupFilter);
+                yield return (recipe, hasAnyFilter ? score : 0);
             }
         }
     }
 
-    private static string GetUnitSuffix(IngredientUnit unit) => unit switch {
-        IngredientUnit.Piece => "Stk.",
-        IngredientUnit.Gram => "g",
-        IngredientUnit.Milliliter => "ml",
-        _ => "ml"
-    };
+    private static string[] ParseSearchTerms(string searchTerm) {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return Array.Empty<string>();
 
-    private static string FormatAmount(decimal amount, IngredientUnit? unit) {
-        var suffix = unit.HasValue ? GetUnitSuffix(unit.Value) : "ml";
-        return $"{amount:0.##} {suffix}";
+        return searchTerm.ToLowerInvariant()
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(t => t.Trim())
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToArray();
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
+    private int CalculateRecipeScore(Recipe recipe, string[] searchTerms, bool hasGroupFilter) {
+        // 1. Gruppen-Prüfung
+        if (hasGroupFilter && !MatchesGroupFilter(recipe))
+            return 0;
+
+        // 2. Wenn kein Suchbegriff aktiv ist, aber die Gruppe passt -> Basis-Score (Top-Treffer)
+        if (searchTerms.Length == 0)
+            return hasGroupFilter ? 10 : 0;
+
+        // 3. Suchbegriffe auswerten
+        int searchScore = CalculateSearchScore(recipe, searchTerms);
+        return searchScore > 0 ? 10 + searchScore : 0;
+    }
+
+    private bool MatchesGroupFilter(Recipe recipe) {
+        return recipe.Groups != null &&
+               recipe.Groups.Contains(_selectedGroupFilter, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static int CalculateSearchScore(Recipe recipe, string[] searchTerms) {
+        string name = recipe.Name.ToLowerInvariant();
+        string desc = recipe.Description?.ToLowerInvariant() ?? string.Empty;
+        string groups = recipe.Groups != null ? string.Join(" ", recipe.Groups).ToLowerInvariant() : string.Empty;
+        string ingredients = string.Join(" ", recipe.Items.Select(i => i.Ingredient?.Name ?? string.Empty)).ToLowerInvariant();
+
+        int totalTermScore = 0;
+        bool anyTermMatched = false;
+
+        foreach (var term in searchTerms) {
+            int termScore = 0;
+            if (name.Contains(term))
+                termScore += 10;
+            if (groups.Contains(term))
+                termScore += 8;
+            if (ingredients.Contains(term))
+                termScore += 5;
+            if (desc.Contains(term))
+                termScore += 2;
+
+            if (termScore > 0) {
+                anyTermMatched = true;
+                totalTermScore += termScore;
+            }
+        }
+
+        return anyTermMatched ? totalTermScore : 0;
     }
 
     private void FilterByGroup(string group) {
@@ -205,5 +180,29 @@ public partial class Recipes : IDisposable {
     private void ClearSearch() {
         _searchTerm = string.Empty;
         StateHasChanged();
+    }
+
+    public void Dispose() {
+        LocalizationService.OnChange -= StateHasChanged;
+    }
+
+    private void ConfirmDeleteRecipe(Recipe recipe) {
+        _recipeToDelete = recipe;
+        _showDeleteConfirmation = true;
+    }
+
+    private void CancelDelete() {
+        _recipeToDelete = null;
+        _showDeleteConfirmation = false;
+    }
+
+    // Führt das eigentliche Löschen nach Bestätigung aus
+    private async Task ExecuteDeleteRecipeAsync() {
+        if (_recipeToDelete != null) {
+            await RecipeRepository.DeleteRecipeAsync(_recipeToDelete.Id);
+            _recipeToDelete = null;
+            _showDeleteConfirmation = false;
+            await LoadDataAsync();
+        }
     }
 }
