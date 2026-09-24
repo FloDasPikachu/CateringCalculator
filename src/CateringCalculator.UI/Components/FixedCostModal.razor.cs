@@ -1,4 +1,5 @@
 ﻿using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Resources.Internationalization;
 using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Components;
@@ -13,7 +14,6 @@ public partial class FixedCostModal {
     private List<FixedCostItem> _items = new();
 
     protected override void OnParametersSet() {
-        // Lokale Kopie erzeugen, damit Änderungen beim Abbrechen verworfen werden
         _items = FixedItems.Select(x => new FixedCostItem {
             Id = x.Id,
             EventPlanId = x.EventPlanId,
@@ -25,7 +25,7 @@ public partial class FixedCostModal {
     private void AddFixedItem() {
         _items.Add(new FixedCostItem {
             EventPlanId = EventPlanId,
-            Description = "Standmiete",
+            Description = AppResources.FixedModal_DefaultDescription,
             Amount = 100m
         });
     }

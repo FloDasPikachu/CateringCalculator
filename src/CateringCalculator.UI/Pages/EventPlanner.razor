@@ -1,31 +1,31 @@
 ﻿@page "/event-planner"
 @using CateringCalculator.Core.Interfaces
-@using CateringCalculator.Core.Models
 @using CateringCalculator.Core.Services
+@using CateringCalculator.UI.Resources.Internationalization
 @inject IRecipeRepository RecipeRepository
 @inject IEventPlanRepository EventPlanRepository
 @inject CalculationService CalculationService
 @inject CateringCalculator.UI.Services.FileSaveService FileSaveService
 
-<PageTitle>Event-Planung - Catering Calculator</PageTitle>
+<PageTitle>@AppResources.Event_Title - Catering Calculator</PageTitle>
 
 <div class="page-container">
     <!-- Header-Bereich -->
     <div class="page-header">
         <div>
-            <h1 class="page-title">Event-Planung & Kalkulation</h1>
-            <p class="text-muted" style="margin-bottom: 0;">Berechne die benötigten Zutaten, Gebinde, Fixkosten und Ziel-Verkaufspreise.</p>
+            <h1 class="page-title">@AppResources.Event_Title</h1>
+            <p class="text-muted" style="margin-bottom: 0;">@AppResources.Event_Subtitle</p>
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button class="btn-primary" @onclick="CreateNewEvent">
-                <span>➕</span> Neues Event
+                <span>➕</span> @AppResources.Event_New
             </button>
             <button class="btn-primary" @onclick="SaveCurrentEvent" disabled="@(string.IsNullOrWhiteSpace(_eventPlan.Title))" style="background-color: #28a745;">
-                <span>💾</span> Speichern
+                <span>💾</span> @AppResources.Button_Save
             </button>
             @if (_savedEventPlans.Any(p => p.Id == _eventPlan.Id)) {
                 <button class="btn-secondary" @onclick="DeleteCurrentEvent" style="color: #dc3545;">
-                    <span>🗑️</span> Löschen
+                    <span>🗑️</span> @AppResources.Button_Delete
                 </button>
             }
         </div>
@@ -34,9 +34,9 @@
     <!-- Event-Auswahl-Panel -->
     <div class="card-panel" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
         <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <label style="font-weight: 600; white-space: nowrap; font-size: 0.95rem;">Gespeichertes Event:</label>
+            <label style="font-weight: 600; white-space: nowrap; font-size: 0.95rem;">@AppResources.Event_SavedLabel</label>
             <select class="form-control" style="flex: 1; min-width: 240px;" @onchange="OnEventSelected" value="@(_eventPlan.Id.ToString())">
-                <option value="@Guid.Empty.ToString()">-- Neues Event (nicht gespeichert) --</option>
+                <option value="@Guid.Empty.ToString()">@AppResources.Event_NewUnsavedOption</option>
                 @foreach (var plan in _savedEventPlans) {
                     <option value="@plan.Id.ToString()">@plan.Title (@plan.GuestCount Gäste)</option>
                 }
@@ -53,33 +53,33 @@
             <!-- 1. Event-Parameters Panel -->
             <div class="card-panel">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-                    1. Event-Parameter & Mengen
+                    @AppResources.Event_Section1Title
                 </h3>
 
                 <div class="form-group">
-                    <label class="form-label">Veranstaltungsname *</label>
+                    <label class="form-label">@AppResources.Event_NameLabel</label>
                     <input type="text" class="form-control" @bind="_eventPlan.Title" placeholder="z. B. Sommerfest 2026" />
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Anzahl Gäste</label>
+                        <label class="form-label">@AppResources.Event_GuestCount</label>
                         <input type="number" class="form-control" @bind="_eventPlan.GuestCount" min="1" />
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Drinks / Gast</label>
+                        <label class="form-label">@AppResources.Event_DrinksPerGuest</label>
                         <input type="number" class="form-control" @bind="_eventPlan.AverageDrinksPerGuest" min="1" />
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Freigetränke (Stk.)</label>
+                        <label class="form-label">@AppResources.Event_FreeDrinks</label>
                         <input type="number" class="form-control" @bind="_eventPlan.FreeDrinksCount" min="0" />
-                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Fließen als Kostentreiber in den Wareneinsatz.</span>
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_FreeDrinksHint</span>
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Schwund-Puffer (%)</label>
+                        <label class="form-label">@AppResources.Event_WasteBuffer</label>
                         <input type="number" class="form-control" @bind="_eventPlan.WasteBufferPercent" min="0" max="50" />
                     </div>
                 </div>
@@ -88,36 +88,36 @@
             <!-- 2. Finanzielle Parameter (Fixkosten & Personal) -->
             <div class="card-panel">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-                    2. Kosten & Wunschgewinn
+                    @AppResources.Event_Section2Title
                 </h3>
 
                 <div class="form-row">
                     <!-- Fixkosten mit Modal-Button -->
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Fixkosten (€)</label>
+                        <label class="form-label">@AppResources.Event_FixedCosts</label>
                         <div style="display: flex; gap: 0.5rem;">
                             <input type="number" class="form-control" @bind="_eventPlan.FixedCosts" min="0" step="10" style="flex: 1;" />
-                            <button type="button" class="btn-secondary" @onclick="OpenFixedModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Fixkosten im Detail berechnen">⚙️ Details</button>
+                            <button type="button" class="btn-secondary" @onclick="OpenFixedModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Fixkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
                         </div>
-                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Miete, Müll, Pauschalen etc.</span>
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_FixedCostsHint</span>
                     </div>
 
                     <!-- Personalkosten mit Modal-Button -->
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Personalkosten (€)</label>
+                        <label class="form-label">@AppResources.Event_PersonnelCosts</label>
                         <div style="display: flex; gap: 0.5rem;">
                             <input type="number" class="form-control" @bind="_eventPlan.PersonnelCosts" min="0" step="10" style="flex: 1;" />
-                            <button type="button" class="btn-secondary" @onclick="OpenPersonnelModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Personalkosten im Detail berechnen">⚙️ Details</button>
+                            <button type="button" class="btn-secondary" @onclick="OpenPersonnelModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Personalkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
                         </div>
-                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">Gesamtlohn Service/Bar.</span>
+                        <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_PersonnelCostsHint</span>
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label">Wunschgewinn (€)</label>
+                    <label class="form-label">@AppResources.Event_TargetProfit</label>
                     <input type="number" class="form-control" @bind="_eventPlan.TargetProfit" min="0" step="50" />
                     <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.25rem;">
-                        Netto-Gewinnziel, das auf die zahlenden Drinks umgelegt wird.
+                        @AppResources.Event_TargetProfitHint
                     </span>
                 </div>
             </div>
@@ -125,17 +125,17 @@
             <!-- 3. Cocktails auswählen Panel -->
             <div class="card-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">3. Cocktails auswählen</h3>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">@AppResources.Event_Section3Title</h3>
                     @if (_eventPlan.SelectedRecipes.Count > 0) {
                         <button type="button" class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" @onclick="DistributeEvenly">
-                            ⚖️ Gleichmäßig verteilen
+                            ⚖️ @AppResources.Event_DistributeEvenly
                         </button>
                     }
                 </div>
 
                 @if (_availableRecipes.Count == 0) {
                     <div style="background-color: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 0.75rem; font-size: 0.875rem; color: #856404;">
-                        Keine Rezepte vorhanden. Bitte erst unter "Rezepte" Cocktails anlegen!
+                        @AppResources.Event_NoRecipesWarning
                     </div>
                 } else {
                     <div style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px;">
@@ -158,7 +158,7 @@
 
                                 @if (isSelected && selection != null) {
                                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.1);">
-                                        <span class="text-muted" style="font-size: 0.8rem;">Anteil:</span>
+                                        <span class="text-muted" style="font-size: 0.8rem;">@AppResources.Event_ShareLabel</span>
                                         <input type="range" style="flex: 1;" min="0" max="100" step="5"
                                                @bind="selection.Percentage" @bind:event="oninput" />
                                         <div style="display: flex; align-items: center; gap: 0.2rem; width: 75px;">
@@ -176,8 +176,8 @@
                         var totalPercent = TotalPercentage;
                         var is100 = totalPercent == 100m;
                         <div style="background-color: @(is100 ? "rgba(40, 167, 69, 0.1)" : "rgba(220, 53, 69, 0.1)"); border: 1px solid @(is100 ? "rgba(40, 167, 69, 0.3)" : "rgba(220, 53, 69, 0.3)"); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.85rem; color: @(is100 ? "#155724" : "#721c24"); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <span>Verteilung gesamt:</span>
-                            <strong>@totalPercent % @(is100 ? "✓" : "(Muss 100% ergeben)")</strong>
+                            <span>@AppResources.Event_TotalDistribution</span>
+                            <strong>@totalPercent % @(is100 ? "✓" : AppResources.Event_MustBe100)</strong>
                         </div>
                     }
                 }
@@ -185,7 +185,7 @@
                 <button type="button" class="btn-primary" style="width: 100%; padding: 0.75rem;"
                         @onclick="CalculateEvent"
                         disabled="@(_eventPlan.SelectedRecipes.Count == 0 || _eventPlan.GuestCount <= 0 || TotalPercentage != 100m)">
-                    🧮 Event jetzt kalkulieren
+                    🧮 @AppResources.Event_CalculateBtn
                 </button>
             </div>
         </div>
@@ -194,18 +194,18 @@
         <div>
             @if (_calculationResult == null) {
                 <div class="card-panel text-center" style="padding: 4rem 2rem;">
-                    <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Kalkulation vorhanden</p>
-                    <p class="text-muted" style="margin-bottom: 0;">Fülle links die Parameter aus und klicke auf "Event jetzt kalkulieren".</p>
+                    <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">@AppResources.Event_NoCalculationYet</p>
+                    <p class="text-muted" style="margin-bottom: 0;">@AppResources.Event_NoCalculationHint</p>
                 </div>
             } else {
                 <div class="card-panel">
                     <!-- Ergebnis-Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Ergebnis: @_calculationResult.EventTitle</h3>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@AppResources.Event_ResultPrefix @_calculationResult.EventTitle</h3>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="badge badge-primary">@_calculationResult.TotalDrinksCount zahlende Drinks</span>
+                            <span class="badge badge-primary">@_calculationResult.TotalDrinksCount @AppResources.Event_PayingDrinksCount</span>
                             <button type="button" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="ExportPdf">
-                                📄 PDF Exportieren
+                                📄 @AppResources.Event_ExportPdf
                             </button>
                         </div>
                     </div>
@@ -213,34 +213,34 @@
                     <!-- Kennzahlen-Grid (4 Boxen) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;">
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Wareneinsatz (Gesamt)</span>
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_MaterialCostTotal</span>
                             <strong style="color: #28a745; font-size: 1.1rem;">@_calculationResult.TotalMaterialCost.ToString("C2")</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Gesamtkosten (inkl. Fix/Pers)</span>
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TotalEventCosts</span>
                             <strong style="color: #d9534f; font-size: 1.1rem;">@_calculationResult.TotalEventCosts.ToString("C2")</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Ziel-Umsatz (inkl. Gewinn)</span>
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TargetRevenue</span>
                             <strong style="color: var(--primary); font-size: 1.1rem;">@_calculationResult.TotalTargetRevenue.ToString("C2")</strong>
                         </div>
                         <div class="price-preview-box text-center" style="padding: 0.6rem;">
-                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">Ø Verkaufspreis / Drink</span>
+                            <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_AvgSalesPrice</span>
                             <strong style="color: #6f42c1; font-size: 1.1rem;">@_calculationResult.TargetSalesPricePerDrink.ToString("C2")</strong>
                         </div>
                     </div>
 
                     <!-- 1. Tabelle: Kalkulation pro Cocktail & Ziel-Verkaufspreis -->
-                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 Cocktail-Kalkulation & Verkaufspreise</h4>
+                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 @AppResources.Event_CocktailCalcTitle</h4>
                     <div style="overflow-x: auto; margin-bottom: 1.5rem;">
                         <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th>Cocktail</th>
-                                    <th style="text-align: center;">Anteil</th>
-                                    <th style="text-align: center;">Anzahl</th>
-                                    <th style="text-align: right;">Real / Drink*</th>
-                                    <th style="text-align: right; color: #6f42c1;">Empf. Verkaufspreis</th>
+                                    <th>@AppResources.Event_TableCocktail</th>
+                                    <th style="text-align: center;">@AppResources.Event_TableShare</th>
+                                    <th style="text-align: center;">@AppResources.Event_TableCount</th>
+                                    <th style="text-align: right;">@AppResources.Event_TableRealPerDrink</th>
+                                    <th style="text-align: right; color: #6f42c1;">@AppResources.Event_TableRecommendedPrice</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -256,20 +256,20 @@
                             </tbody>
                         </table>
                         <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.35rem;">
-                            * Inkl. vollem Gebinde und anteiliger Berücksichtigung von Freigetränken. Empfohlener Verkaufspreis beinhaltet Wareneinsatz plus gewerblichen Fixkosten- und Gewinnaufschlag.
+                            @AppResources.Event_CalcDisclaimer
                         </span>
                     </div>
 
                     <!-- 2. Tabelle: Einkaufsliste -->
-                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🛒 Automatische Einkaufsliste</h4>
+                    <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🛒 @AppResources.Event_ShoppingListTitle</h4>
                     <div style="overflow-x: auto;">
                         <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th>Zutat</th>
-                                    <th>Bedarf (inkl. Puffer/Freidrinks)</th>
-                                    <th style="text-align: center;">Kaufm. Gebinde</th>
-                                    <th style="text-align: right;">Gesamtkosten</th>
+                                    <th>@AppResources.Event_TableIngredient</th>
+                                    <th>@AppResources.Event_TableDemand</th>
+                                    <th style="text-align: center;">@AppResources.Event_TablePackage</th>
+                                    <th style="text-align: right;">@AppResources.Event_TableTotalCost</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -1,4 +1,5 @@
 ﻿using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Resources.Internationalization;
 using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Components;
@@ -27,7 +28,7 @@ public partial class PersonnelCostModal {
     private void AddPersonnelItem() {
         _items.Add(new PersonnelCostItem {
             EventPlanId = EventPlanId,
-            RoleName = "Servicekraft",
+            RoleName = AppResources.PersonnelModal_DefaultRole,
             Count = 1,
             Hours = 5m,
             HourlyRate = 14m

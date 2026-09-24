@@ -1,0 +1,501 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Button_Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Button_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Button_Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Button_Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Button_Add" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="Button_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Msg_DeleteConfirm" xml:space="preserve">
+    <value>Möchtest du diesen Eintrag wirklich unwiderruflich löschen?</value>
+  </data>
+  <data name="Nav_Overview" xml:space="preserve">
+    <value>Übersicht</value>
+  </data>
+  <data name="Nav_EventPlanner" xml:space="preserve">
+    <value>Eventplanung</value>
+  </data>
+  <data name="Nav_Recipes" xml:space="preserve">
+    <value>Rezepte</value>
+  </data>
+  <data name="Nav_Ingredients" xml:space="preserve">
+    <value>Zutaten</value>
+  </data>
+  <data name="Ingredients_Title" xml:space="preserve">
+    <value>Zutatenverwaltung</value>
+  </data>
+  <data name="Ingredients_Subtitle" xml:space="preserve">
+    <value>Verwalte Gebindegrößen und Preise für deine Kalkulationen.</value>
+  </data>
+  <data name="Ingredients_New" xml:space="preserve">
+    <value>Neue Zutat anlegen</value>
+  </data>
+  <data name="Ingredients_EmptyTitle" xml:space="preserve">
+    <value>Noch keine Zutaten vorhanden</value>
+  </data>
+  <data name="Ingredients_EmptyDesc" xml:space="preserve">
+    <value>Lege deine erste Zutat mit Gebindegröße und Preis an, um Rezepte berechnen zu können.</value>
+  </data>
+  <data name="Ingredients_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Ingredients_Unit" xml:space="preserve">
+    <value>Einheit</value>
+  </data>
+  <data name="Ingredients_PackageSize" xml:space="preserve">
+    <value>Gebindegröße</value>
+  </data>
+  <data name="Ingredients_PackagePrice" xml:space="preserve">
+    <value>Gebindepreis</value>
+  </data>
+  <data name="Ingredients_PricePerUnit" xml:space="preserve">
+    <value>Preis / Einheit</value>
+  </data>
+  <data name="Ingredients_Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="IngredientModal_TitleNew" xml:space="preserve">
+    <value>Neue Zutat anlegen</value>
+  </data>
+  <data name="IngredientModal_TitleEdit" xml:space="preserve">
+    <value>Zutat bearbeiten</value>
+  </data>
+  <data name="IngredientModal_NameLabel" xml:space="preserve">
+    <value>Name der Zutat</value>
+  </data>
+  <data name="IngredientModal_UnitLabel" xml:space="preserve">
+    <value>Einheit</value>
+  </data>
+  <data name="IngredientModal_PackageSizeLabel" xml:space="preserve">
+    <value>Gebindegröße ({0})</value>
+  </data>
+  <data name="IngredientModal_PackagePriceLabel" xml:space="preserve">
+    <value>Gebindepreis (€)</value>
+  </data>
+  <data name="IngredientModal_PricePerUnitLabel" xml:space="preserve">
+    <value>Errechneter Preis pro Einheit:</value>
+  </data>
+  <data name="Recipes_Title" xml:space="preserve">
+    <value>Cocktails &amp; Rezepte</value>
+  </data>
+  <data name="Recipes_Subtitle" xml:space="preserve">
+    <value>Verwalte hier deine Rezepturen und Zutatenmengen.</value>
+  </data>
+  <data name="Recipes_New" xml:space="preserve">
+    <value>Neues Rezept anlegen</value>
+  </data>
+  <data name="Recipes_FirstNew" xml:space="preserve">
+    <value>Erstes Rezept anlegen</value>
+  </data>
+  <data name="Recipes_Loading" xml:space="preserve">
+    <value>Rezepte werden geladen...</value>
+  </data>
+  <data name="Recipes_EmptyTitle" xml:space="preserve">
+    <value>Noch keine Rezepte vorhanden</value>
+  </data>
+  <data name="Recipes_EmptyDesc" xml:space="preserve">
+    <value>Klicke oben auf "Neues Rezept anlegen", um dein erstes Rezept zu erstellen.</value>
+  </data>
+  <data name="Recipes_IngredientsHeader" xml:space="preserve">
+    <value>Zutaten:</value>
+  </data>
+  <data name="Recipes_CostPerDrink" xml:space="preserve">
+    <value>Kosten / Drink:</value>
+  </data>
+  <data name="Recipes_UnknownIngredient" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
+  <data name="RecipeModal_TitleNew" xml:space="preserve">
+    <value>Neues Rezept anlegen</value>
+  </data>
+  <data name="RecipeModal_TitleEdit" xml:space="preserve">
+    <value>Rezept bearbeiten</value>
+  </data>
+  <data name="RecipeModal_NameLabel" xml:space="preserve">
+    <value>Name des Cocktails *</value>
+  </data>
+  <data name="RecipeModal_NamePlaceholder" xml:space="preserve">
+    <value>z. B. Mojito, Caipirinha...</value>
+  </data>
+  <data name="RecipeModal_DescLabel" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="RecipeModal_DescPlaceholder" xml:space="preserve">
+    <value>Kurze Beschreibung</value>
+  </data>
+  <data name="RecipeModal_IngredientsHeader" xml:space="preserve">
+    <value>Zutaten des Rezeptes</value>
+  </data>
+  <data name="RecipeModal_EmptyWarning" xml:space="preserve">
+    <value>Füge unten mindestens eine Zutat hinzu.</value>
+  </data>
+  <data name="RecipeModal_TableIngredient" xml:space="preserve">
+    <value>Zutat</value>
+  </data>
+  <data name="RecipeModal_TableAmount" xml:space="preserve">
+    <value>Menge</value>
+  </data>
+  <data name="RecipeModal_TableAction" xml:space="preserve">
+    <value>Aktion</value>
+  </data>
+  <data name="RecipeModal_AddSectionTitle" xml:space="preserve">
+    <value>Zutat hinzufügen</value>
+  </data>
+  <data name="RecipeModal_ExistingIngredientLabel" xml:space="preserve">
+    <value>Existierende Zutat</value>
+  </data>
+  <data name="RecipeModal_SelectOrNewOption" xml:space="preserve">
+    <value>-- Wählen oder neu anlegen --</value>
+  </data>
+  <data name="RecipeModal_AmountLabel" xml:space="preserve">
+    <value>Menge ({0})</value>
+  </data>
+  <data name="RecipeModal_AddBtn" xml:space="preserve">
+    <value>+ Hinzufügen</value>
+  </data>
+  <data name="RecipeModal_CancelBtn" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="RecipeModal_NewIngredientBtn" xml:space="preserve">
+    <value>Neue Zutat</value>
+  </data>
+  <data name="RecipeModal_NewCatalogTitle" xml:space="preserve">
+    <value>Neue Zutat im Katalog anlegen</value>
+  </data>
+  <data name="RecipeModal_NewIngNameLabel" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="RecipeModal_NewIngNamePlaceholder" xml:space="preserve">
+    <value>z. B. Rohrzucker</value>
+  </data>
+  <data name="RecipeModal_NewIngUnitLabel" xml:space="preserve">
+    <value>Einheit</value>
+  </data>
+  <data name="RecipeModal_NewIngSizeLabel" xml:space="preserve">
+    <value>Gebindegröße</value>
+  </data>
+  <data name="RecipeModal_NewIngPriceLabel" xml:space="preserve">
+    <value>Preis (€)</value>
+  </data>
+  <data name="RecipeModal_CreateAndAssignBtn" xml:space="preserve">
+    <value>Zutat anlegen &amp; übernehmen</value>
+  </data>
+  <data name="RecipeModal_Saving" xml:space="preserve">
+    <value>Speichere...</value>
+  </data>
+  <data name="Event_Title" xml:space="preserve">
+    <value>Event-Planung &amp; Kalkulation</value>
+  </data>
+  <data name="Event_Subtitle" xml:space="preserve">
+    <value>Berechne die benötigten Zutaten, Gebinde, Fixkosten und Ziel-Verkaufspreise.</value>
+  </data>
+  <data name="Event_New" xml:space="preserve">
+    <value>Neues Event</value>
+  </data>
+  <data name="Event_SavedLabel" xml:space="preserve">
+    <value>Gespeichertes Event:</value>
+  </data>
+  <data name="Event_NewUnsavedOption" xml:space="preserve">
+    <value>-- Neues Event (nicht gespeichert) --</value>
+  </data>
+  <data name="Event_Section1Title" xml:space="preserve">
+    <value>1. Event-Parameter &amp; Mengen</value>
+  </data>
+  <data name="Event_NameLabel" xml:space="preserve">
+    <value>Veranstaltungsname *</value>
+  </data>
+  <data name="Event_GuestCount" xml:space="preserve">
+    <value>Anzahl Gäste</value>
+  </data>
+  <data name="Event_DrinksPerGuest" xml:space="preserve">
+    <value>Drinks / Gast</value>
+  </data>
+  <data name="Event_FreeDrinks" xml:space="preserve">
+    <value>Freigetränke (Stk.)</value>
+  </data>
+  <data name="Event_FreeDrinksHint" xml:space="preserve">
+    <value>Fließen als Kostentreiber in den Wareneinsatz.</value>
+  </data>
+  <data name="Event_WasteBuffer" xml:space="preserve">
+    <value>Schwund-Puffer (%)</value>
+  </data>
+  <data name="Event_Section2Title" xml:space="preserve">
+    <value>2. Kosten &amp; Wunschgewinn</value>
+  </data>
+  <data name="Event_FixedCosts" xml:space="preserve">
+    <value>Fixkosten (€)</value>
+  </data>
+  <data name="Event_FixedCostsHint" xml:space="preserve">
+    <value>Miete, Müll, Pauschalen etc.</value>
+  </data>
+  <data name="Event_PersonnelCosts" xml:space="preserve">
+    <value>Personalkosten (€)</value>
+  </data>
+  <data name="Event_PersonnelCostsHint" xml:space="preserve">
+    <value>Gesamtlohn Service/Bar.</value>
+  </data>
+  <data name="Event_TargetProfit" xml:space="preserve">
+    <value>Wunschgewinn (€)</value>
+  </data>
+  <data name="Event_TargetProfitHint" xml:space="preserve">
+    <value>Netto-Gewinnziel, das auf die zahlenden Drinks umgelegt wird.</value>
+  </data>
+  <data name="Event_Section3Title" xml:space="preserve">
+    <value>3. Cocktails auswählen</value>
+  </data>
+  <data name="Event_DistributeEvenly" xml:space="preserve">
+    <value>Gleichmäßig verteilen</value>
+  </data>
+  <data name="Event_NoRecipesWarning" xml:space="preserve">
+    <value>Keine Rezepte vorhanden. Bitte erst unter "Rezepte" Cocktails anlegen!</value>
+  </data>
+  <data name="Event_ShareLabel" xml:space="preserve">
+    <value>Anteil:</value>
+  </data>
+  <data name="Event_TotalDistribution" xml:space="preserve">
+    <value>Verteilung gesamt:</value>
+  </data>
+  <data name="Event_MustBe100" xml:space="preserve">
+    <value>(Muss 100% ergeben)</value>
+  </data>
+  <data name="Event_CalculateBtn" xml:space="preserve">
+    <value>Event jetzt kalkulieren</value>
+  </data>
+  <data name="Event_NoCalculationYet" xml:space="preserve">
+    <value>Noch keine Kalkulation vorhanden</value>
+  </data>
+  <data name="Event_NoCalculationHint" xml:space="preserve">
+    <value>Fülle links die Parameter aus und klicke auf "Event jetzt kalkulieren".</value>
+  </data>
+  <data name="Event_ResultPrefix" xml:space="preserve">
+    <value>Ergebnis:</value>
+  </data>
+  <data name="Event_PayingDrinksCount" xml:space="preserve">
+    <value>zahlende Drinks</value>
+  </data>
+  <data name="Event_ExportPdf" xml:space="preserve">
+    <value>PDF Exportieren</value>
+  </data>
+  <data name="Event_MaterialCostTotal" xml:space="preserve">
+    <value>Wareneinsatz (Gesamt)</value>
+  </data>
+  <data name="Event_TotalEventCosts" xml:space="preserve">
+    <value>Gesamtkosten (inkl. Fix/Pers)</value>
+  </data>
+  <data name="Event_TargetRevenue" xml:space="preserve">
+    <value>Ziel-Umsatz (inkl. Gewinn)</value>
+  </data>
+  <data name="Event_AvgSalesPrice" xml:space="preserve">
+    <value>Ø Verkaufspreis / Drink</value>
+  </data>
+  <data name="Event_CocktailCalcTitle" xml:space="preserve">
+    <value>Cocktail-Kalkulation &amp; Verkaufspreise</value>
+  </data>
+  <data name="Event_TableCocktail" xml:space="preserve">
+    <value>Cocktail</value>
+  </data>
+  <data name="Event_TableShare" xml:space="preserve">
+    <value>Anteil</value>
+  </data>
+  <data name="Event_TableCount" xml:space="preserve">
+    <value>Anzahl</value>
+  </data>
+  <data name="Event_TableRealPerDrink" xml:space="preserve">
+    <value>Real / Drink*</value>
+  </data>
+  <data name="Event_TableRecommendedPrice" xml:space="preserve">
+    <value>Empf. Verkaufspreis</value>
+  </data>
+  <data name="Event_CalcDisclaimer" xml:space="preserve">
+    <value>* Inkl. vollem Gebinde und anteiliger Berücksichtigung von Freigetränken. Empfohlener Verkaufspreis beinhaltet Wareneinsatz plus gewerblichen Fixkosten- und Gewinnaufschlag.</value>
+  </data>
+  <data name="Event_ShoppingListTitle" xml:space="preserve">
+    <value>Automatische Einkaufsliste</value>
+  </data>
+  <data name="Event_TableIngredient" xml:space="preserve">
+    <value>Zutat</value>
+  </data>
+  <data name="Event_TableDemand" xml:space="preserve">
+    <value>Bedarf (inkl. Puffer/Freidrinks)</value>
+  </data>
+  <data name="Event_TablePackage" xml:space="preserve">
+    <value>Kaufm. Gebinde</value>
+  </data>
+  <data name="Event_TableTotalCost" xml:space="preserve">
+    <value>Gesamtkosten</value>
+  </data>
+  <data name="FixedModal_Title" xml:space="preserve">
+    <value>Fixkosten im Detail</value>
+  </data>
+  <data name="FixedModal_DescPlaceholder" xml:space="preserve">
+    <value>Beschreibung / Posten</value>
+  </data>
+  <data name="FixedModal_AmountHeader" xml:space="preserve">
+    <value>Betrag (€)</value>
+  </data>
+  <data name="FixedModal_AddPosition" xml:space="preserve">
+    <value>Neue Position hinzufügen</value>
+  </data>
+  <data name="FixedModal_Total" xml:space="preserve">
+    <value>Gesamtsumme Fixkosten:</value>
+  </data>
+  <data name="FixedModal_DefaultDescription" xml:space="preserve">
+    <value>Standmiete</value>
+  </data>
+  <data name="PersonnelModal_Title" xml:space="preserve">
+    <value>Personalkosten im Detail</value>
+  </data>
+  <data name="PersonnelModal_RolePlaceholder" xml:space="preserve">
+    <value>Rolle / Position</value>
+  </data>
+  <data name="PersonnelModal_CountHeader" xml:space="preserve">
+    <value>Anzahl</value>
+  </data>
+  <data name="PersonnelModal_HoursHeader" xml:space="preserve">
+    <value>Stunden</value>
+  </data>
+  <data name="PersonnelModal_RateHeader" xml:space="preserve">
+    <value>€ / Std.</value>
+  </data>
+  <data name="PersonnelModal_AddPosition" xml:space="preserve">
+    <value>Neue Position hinzufügen</value>
+  </data>
+  <data name="PersonnelModal_Total" xml:space="preserve">
+    <value>Gesamtsumme Personal:</value>
+  </data>
+  <data name="PersonnelModal_DefaultRole" xml:space="preserve">
+    <value>Servicekraft</value>
+  </data>
+  <data name="RecipeModal_UnknownIngredient" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
+</root>

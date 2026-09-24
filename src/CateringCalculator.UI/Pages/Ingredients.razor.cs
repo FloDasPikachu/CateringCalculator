@@ -1,19 +1,22 @@
 ﻿using CateringCalculator.Core.Enums;
-using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Resources.Internationalization;
+using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Ingredients {
+public partial class Ingredients : IDisposable {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
 
     private List<Ingredient>? _ingredients;
     private Ingredient _editingIngredient = new();
     private bool _showModal = false;
 
     protected override async Task OnInitializedAsync() {
+        LocalizationService.OnChange += StateHasChanged;
         await LoadIngredientsAsync();
     }
 
@@ -23,7 +26,7 @@ public partial class Ingredients {
 
     private void OpenAddModal() {
         _editingIngredient = new Ingredient {
-            Id = Guid.NewGuid(), // Direkt eine neue ID vergeben
+            Id = Guid.NewGuid(),
             Name = "",
             Unit = IngredientUnit.Milliliter,
             PackageSize = 1000m,
@@ -61,7 +64,7 @@ public partial class Ingredients {
     }
 
     private async Task DeleteIngredientAsync(Ingredient ingredient) {
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Möchtest du die Zutat '{ingredient.Name}' wirklich unwiderruflich löschen?");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", AppResources.Msg_DeleteConfirm);
         if (!confirmed)
             return;
 
@@ -71,5 +74,9 @@ public partial class Ingredients {
         } catch (InvalidOperationException ex) {
             await JSRuntime.InvokeVoidAsync("alert", ex.Message);
         }
+    }
+
+    public void Dispose() {
+        LocalizationService.OnChange -= StateHasChanged;
     }
 }

@@ -1,27 +1,25 @@
-﻿<nav class="nav-container">
+﻿@using CateringCalculator.UI.Resources.Internationalization
+
+<nav class="nav-container">
     <div class="nav-links">
         <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
             <span class="nav-icon">📊</span>
-            <span class="nav-text">Übersicht</span>
+            <span class="nav-text">@AppResources.Nav_Overview</span>
         </NavLink>
 
         <NavLink class="nav-item" href="event-planner">
             <span class="nav-icon">📅</span>
-            <span class="nav-text">Eventplanung</span>
+            <span class="nav-text">@AppResources.Nav_EventPlanner</span>
         </NavLink>
 
         <NavLink class="nav-item" href="recipes">
             <span class="nav-icon">🍸</span>
-            <span class="nav-text">Rezepte</span>
+            <span class="nav-text">@AppResources.Nav_Recipes</span>
         </NavLink>
 
         <NavLink class="nav-item" href="ingredients">
             <span class="nav-icon">🍋</span>
-            <span class="nav-text">Zutaten</span>
+            <span class="nav-text">@AppResources.Nav_Ingredients</span>
         </NavLink>
     </div>
 </nav>
-
-@code {
-    // Falls Logik für responsive Menu-Toggles benötigt wird
-}

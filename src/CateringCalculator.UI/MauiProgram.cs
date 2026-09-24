@@ -36,6 +36,7 @@ public static class MauiProgram {
         builder.Services.AddScoped<CalculationService>();
 
         builder.Services.AddSingleton<FileSaveService>();
+        builder.Services.AddSingleton<LocalizationService>();
 
         var app = builder.Build();
 

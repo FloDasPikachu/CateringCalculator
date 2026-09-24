@@ -2,11 +2,14 @@
 using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
 using CateringCalculator.Core.Services;
+using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class EventPlanner {
+public partial class EventPlanner : IDisposable {
+    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
+
     private bool _showPersonnelModal = false;
     private bool _showFixedModal = false;
     private EventPlan _eventPlan = CreateEmptyEventPlan();
@@ -17,6 +20,7 @@ public partial class EventPlanner {
     private decimal TotalPercentage => _eventPlan.SelectedRecipes.Sum(r => r.Percentage);
 
     protected override async Task OnInitializedAsync() {
+        LocalizationService.OnChange += StateHasChanged;
         _availableRecipes = await RecipeRepository.GetAllRecipesAsync();
         await LoadSavedEventPlansAsync();
     }
@@ -133,5 +137,9 @@ public partial class EventPlanner {
         _eventPlan.FixedCostItems = items;
         _eventPlan.FixedCosts = items.Sum(x => x.Amount);
         _showFixedModal = false;
+    }
+
+    public void Dispose() {
+        LocalizationService.OnChange -= StateHasChanged;
     }
 }

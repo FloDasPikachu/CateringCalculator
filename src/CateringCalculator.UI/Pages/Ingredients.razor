@@ -1,18 +1,18 @@
 ﻿@page "/ingredients"
 @using CateringCalculator.Core.Interfaces
-@using CateringCalculator.Core.Models
+@using CateringCalculator.UI.Resources.Internationalization
 @inject IRecipeRepository RecipeRepository
 
-<PageTitle>Zutatenübersicht - Catering Calculator</PageTitle>
+<PageTitle>@AppResources.Ingredients_Title</PageTitle>
 
 <div class="page-container">
     <div class="page-header">
         <div>
-            <h1 class="page-title">Zutatenverwaltung</h1>
-            <p class="text-muted" style="margin-bottom: 0;">Verwalte Gebindegrößen und Preise für deine Kalkulationen.</p>
+            <h1 class="page-title">@AppResources.Ingredients_Title</h1>
+            <p class="text-muted" style="margin-bottom: 0;">@AppResources.Ingredients_Subtitle</p>
         </div>
         <button class="btn-primary" @onclick="OpenAddModal">
-            <span>➕</span> Neue Zutat anlegen
+            <span>➕</span> @AppResources.Ingredients_New
         </button>
     </div>
 
@@ -22,21 +22,21 @@
         </div>
     } else if (!_ingredients.Any()) {
         <div class="card-panel text-center" style="padding: 3rem;">
-            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Zutaten vorhanden</p>
-            <p class="text-muted" style="margin-bottom: 1.5rem;">Lege deine erste Zutat mit Gebindegröße und Preis an, um Rezepte berechnen zu können.</p>
-            <button class="btn-primary" @onclick="OpenAddModal">Erste Zutat anlegen</button>
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">@AppResources.Ingredients_EmptyTitle</p>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">@AppResources.Ingredients_EmptyDesc</p>
+            <button class="btn-primary" @onclick="OpenAddModal">@AppResources.Ingredients_New</button>
         </div>
     } else {
         <div class="card-panel" style="padding: 0; overflow-x: auto;">
             <table class="table-custom">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Einheit</th>
-                        <th>Gebindegröße</th>
-                        <th>Gebindepreis</th>
-                        <th>Preis / Einheit</th>
-                        <th style="width: 180px; text-align: right;">Aktionen</th>
+                        <th>@AppResources.Ingredients_Name</th>
+                        <th>@AppResources.Ingredients_Unit</th>
+                        <th>@AppResources.Ingredients_PackageSize</th>
+                        <th>@AppResources.Ingredients_PackagePrice</th>
+                        <th>@AppResources.Ingredients_PricePerUnit</th>
+                        <th style="width: 180px; text-align: right;">@AppResources.Ingredients_Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,9 +49,9 @@
                             <td><strong>@ingredient.PricePerUnit.ToString("C4")</strong> / @ingredient.Unit</td>
                             <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
                                 <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
-                                    Bearbeiten
+                                    @AppResources.Button_Edit
                                 </button>
-                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => DeleteIngredientAsync(ingredient)" title="Löschen">
+                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => DeleteIngredientAsync(ingredient)" title="@AppResources.Button_Delete">
                                     🗑️
                                 </button>
                             </td>
@@ -63,7 +63,6 @@
     }
 </div>
 
-@* Eingebundene Modal-Komponente *@
 <IngredientModal IsVisible="_showModal"
                  Ingredient="_editingIngredient"
                  OnSave="HandleSaveIngredientAsync"

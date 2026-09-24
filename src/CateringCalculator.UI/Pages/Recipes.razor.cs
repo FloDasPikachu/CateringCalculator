@@ -1,10 +1,14 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Services;
+using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Recipes {
+public partial class Recipes : IDisposable {
+    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
+
     private List<Recipe> _recipes = new();
     private List<Ingredient> _availableIngredients = new();
     private bool _isLoading = true;
@@ -15,6 +19,7 @@ public partial class Recipes {
     private Recipe _editingRecipe = new();
 
     protected override async Task OnInitializedAsync() {
+        LocalizationService.OnChange += StateHasChanged;
         await LoadDataAsync();
     }
 
@@ -32,7 +37,6 @@ public partial class Recipes {
     }
 
     private void EditRecipe(Recipe recipe) {
-        // Deep Copy für den Editor, damit Änderungen nicht direkt das Original überschreiben vor dem Speichern
         _editingRecipe = new Recipe {
             Id = recipe.Id,
             Name = recipe.Name,
@@ -54,7 +58,6 @@ public partial class Recipes {
     }
 
     private async Task HandleIngredientAddedAsync(Ingredient newIngredient) {
-        // Wenn im Modal eine komplett neue Zutat angelegt wurde, direkt in der DB speichern und Liste aktualisieren
         await RecipeRepository.AddIngredientAsync(newIngredient);
         _availableIngredients = await RecipeRepository.GetAllIngredientsAsync();
     }
@@ -93,5 +96,9 @@ public partial class Recipes {
     private static string FormatAmount(decimal amount, IngredientUnit? unit) {
         var suffix = unit.HasValue ? GetUnitSuffix(unit.Value) : "ml";
         return $"{amount:0.##} {suffix}";
+    }
+
+    public void Dispose() {
+        LocalizationService.OnChange -= StateHasChanged;
     }
 }

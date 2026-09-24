@@ -1,12 +1,13 @@
 ﻿@using CateringCalculator.Core.Enums
 @using CateringCalculator.Core.Models
+@using CateringCalculator.UI.Resources.Internationalization
 
 @if (IsVisible) {
     <div class="modal-backdrop">
         <div class="modal-card">
             <div class="modal-header">
                 <h3 style="margin: 0;">
-                    @(Ingredient.Id == Guid.Empty ? "Neue Zutat anlegen" : "Zutat bearbeiten")
+                    @(Ingredient.Id == Guid.Empty ? AppResources.IngredientModal_TitleNew : AppResources.IngredientModal_TitleEdit)
                 </h3>
                 <button type="button" class="btn-close-custom" @onclick="OnClose">✕</button>
             </div>
@@ -16,12 +17,12 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="form-label">Name der Zutat</label>
+                        <label class="form-label">@AppResources.IngredientModal_NameLabel</label>
                         <InputText class="form-control" @bind-Value="Ingredient.Name" placeholder="z. B. Havanna Club 3 Jahre" required />
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Einheit</label>
+                        <label class="form-label">@AppResources.IngredientModal_UnitLabel</label>
                         <InputSelect class="form-control" @bind-Value="Ingredient.Unit">
                             @foreach (var unit in Enum.GetValues<IngredientUnit>()) {
                                 <option value="@unit">@unit</option>
@@ -31,18 +32,18 @@
 
                     <div class="form-row">
                         <div class="form-group" style="flex: 1;">
-                            <label class="form-label">Gebindegröße (@Ingredient.Unit)</label>
+                            <label class="form-label">@string.Format(AppResources.IngredientModal_PackageSizeLabel, Ingredient.Unit)</label>
                             <InputNumber class="form-control" @bind-Value="Ingredient.PackageSize" step="0.01" min="0.01" required />
                         </div>
 
                         <div class="form-group" style="flex: 1;">
-                            <label class="form-label">Gebindepreis (€)</label>
+                            <label class="form-label">@AppResources.IngredientModal_PackagePriceLabel</label>
                             <InputNumber class="form-control" @bind-Value="Ingredient.PackagePrice" step="0.01" min="0" required />
                         </div>
                     </div>
 
                     <div class="price-preview-box">
-                        <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Errechneter Preis pro Einheit:</span>
+                        <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">@AppResources.IngredientModal_PricePerUnitLabel</span>
                         <strong style="color: var(--primary); font-size: 1.1rem;">
                             @Ingredient.PricePerUnit.ToString("C4") / @Ingredient.Unit
                         </strong>
@@ -50,8 +51,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" @onclick="OnClose">Abbrechen</button>
-                    <button type="submit" class="btn-primary">Speichern</button>
+                    <button type="button" class="btn-secondary" @onclick="OnClose">@AppResources.Button_Cancel</button>
+                    <button type="submit" class="btn-primary">@AppResources.Button_Save</button>
                 </div>
             </EditForm>
         </div>
