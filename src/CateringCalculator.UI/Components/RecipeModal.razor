@@ -23,6 +23,44 @@
                     <input type="text" class="form-control" @bind="Recipe.Description" placeholder="@AppResources.RecipeModal_DescPlaceholder" />
                 </div>
 
+                <!-- Gruppen / Tags Sektion -->
+                <div class="form-group">
+                    <label class="form-label">Gruppen / Tags</label>
+
+                    <!-- Eingetragene Gruppen als Chips direkt über/neben dem Feld oder im Input -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; align-items: center;">
+                        @foreach (var tag in _currentTags) {
+                            <span style="background-color: rgba(var(--primary-rgb, 99, 102, 241), 0.15); color: var(--primary); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 500;">
+                                @tag
+                                <button type="button" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.9rem; padding: 0; line-height: 1;" @onclick="() => RemoveTag(tag)">×</button>
+                            </span>
+                        }
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-control" @bind="_tagInput" @bind:event="oninput" placeholder="Neue Gruppe eingeben (mit Komma trennen)..." />
+                        <button type="button" class="btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.85rem;" @onclick="AddTagFromInput">Hinzufügen</button>
+                    </div>
+
+                    <!-- Live Vorschlag-Chips -->
+                    @if (AvailableGroups != null && AvailableGroups.Any()) {
+                        var unusedSuggestions = AvailableGroups.Where(g => !_currentTags.Contains(g, StringComparer.OrdinalIgnoreCase)).ToList();
+
+                        if (unusedSuggestions.Any()) {
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; align-items: center;">
+                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 0.25rem;">Vorschläge:</span>
+                                @foreach (var suggestion in unusedSuggestions) {
+                                    <button type="button"
+                                            style="background-color: rgba(var(--primary-rgb, 99, 102, 241), 0.08); border: 1px dashed var(--primary); color: var(--primary); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 12px; cursor: pointer; transition: all 0.2s;"
+                                            @onclick="() => AddGroupTag(suggestion)">
+                                        + @suggestion
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
                 <h4 style="font-size: 1rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem;">
                     @AppResources.RecipeModal_IngredientsHeader
                 </h4>
@@ -132,7 +170,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" @onclick="OnClose">@AppResources.RecipeModal_CancelBtn</button>
-                <button type="button" class="btn-primary" @onclick="() => OnSave.InvokeAsync(Recipe)" disabled="@(string.IsNullOrWhiteSpace(Recipe.Name) || Recipe.Items.Count == 0 || IsSaving)">
+                <button type="button" class="btn-primary" @onclick="async () => { PrepareRecipeBeforeSave(); await OnSave.InvokeAsync(Recipe); }" disabled="@(string.IsNullOrWhiteSpace(Recipe.Name) || Recipe.Items.Count == 0 || IsSaving)">
                     @if (IsSaving) {
                         <span>@AppResources.RecipeModal_Saving</span>
                     } else {

@@ -871,6 +871,15 @@ namespace CateringCalculator.UI.Resources.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Gruppen / Tags:.
+        /// </summary>
+        internal static string Recipe_GroupsLabel {
+            get {
+                return ResourceManager.GetString("Recipe_GroupsLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to + Hinzufügen.
         /// </summary>
         internal static string RecipeModal_AddBtn {
@@ -1200,6 +1209,33 @@ namespace CateringCalculator.UI.Resources.Internationalization {
         internal static string Recipes_UnknownIngredient {
             get {
                 return ResourceManager.GetString("Recipes_UnknownIngredient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weitere Cocktails.
+        /// </summary>
+        internal static string Search_OtherResults {
+            get {
+                return ResourceManager.GetString("Search_OtherResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suche nach Name, Beschreibung, Zutaten oder Gruppen....
+        /// </summary>
+        internal static string Search_Placeholder {
+            get {
+                return ResourceManager.GetString("Search_Placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passende Treffer.
+        /// </summary>
+        internal static string Search_TopResults {
+            get {
+                return ResourceManager.GetString("Search_TopResults", resourceCulture);
             }
         }
     }

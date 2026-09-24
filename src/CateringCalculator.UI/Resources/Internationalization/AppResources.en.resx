@@ -498,4 +498,16 @@
   <data name="RecipeModal_UnknownIngredient" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="Search_Placeholder" xml:space="preserve">
+    <value>Search by name, description, ingredients or groups...</value>
+  </data>
+  <data name="Search_TopResults" xml:space="preserve">
+    <value>Matching Results</value>
+  </data>
+  <data name="Search_OtherResults" xml:space="preserve">
+    <value>Other Cocktails</value>
+  </data>
+  <data name="Recipe_GroupsLabel" xml:space="preserve">
+    <value>Groups / Tags:</value>
+  </data>
 </root>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 namespace CateringCalculator.UI.Components;
 
 public partial class RecipeModal {
+    [Parameter] public List<string> AvailableGroups { get; set; } = new();
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public Recipe Recipe { get; set; } = new();
     [Parameter] public List<Ingredient> AvailableIngredients { get; set; } = new();
@@ -17,12 +18,47 @@ public partial class RecipeModal {
     private Guid _selectedIngredientId = Guid.Empty;
     private decimal _amount = 50m;
     private string _amountStep = "5";
+
+    // Saubere Tag-Verwaltung
+    private List<string> _currentTags = new();
+    private string _tagInput = string.Empty;
+
     private bool _showNewIngredientInput = false;
 
     private string _newIngName = "";
     private IngredientUnit _newIngUnit = IngredientUnit.Milliliter;
     private decimal _newIngSize = 700m;
     private decimal _newIngPrice = 12.99m;
+
+    protected override void OnParametersSet() {
+        _currentTags = Recipe.Groups != null ? new List<string>(Recipe.Groups) : new();
+        _tagInput = string.Empty;
+    }
+
+    private void AddTagFromInput() {
+        if (string.IsNullOrWhiteSpace(_tagInput))
+            return;
+
+        // Erlaubt auch Komma-getrennte Eingaben auf einmal
+        var parts = _tagInput.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var part in parts) {
+            var trimmed = part.Trim();
+            if (!string.IsNullOrEmpty(trimmed) && !_currentTags.Contains(trimmed, StringComparer.OrdinalIgnoreCase)) {
+                _currentTags.Add(trimmed);
+            }
+        }
+        _tagInput = string.Empty;
+    }
+
+    private void AddGroupTag(string groupName) {
+        if (!_currentTags.Contains(groupName, StringComparer.OrdinalIgnoreCase)) {
+            _currentTags.Add(groupName);
+        }
+    }
+
+    private void RemoveTag(string tag) {
+        _currentTags.Remove(tag);
+    }
 
     private void OnIngredientSelectionChanged(ChangeEventArgs e) {
         if (Guid.TryParse(e.Value?.ToString(), out var parsedId)) {
@@ -121,5 +157,14 @@ public partial class RecipeModal {
     private static string FormatAmount(decimal amount, IngredientUnit? unit) {
         var suffix = unit.HasValue ? GetUnitSuffix(unit.Value) : "ml";
         return $"{amount:0.##} {suffix}";
+    }
+
+    private void PrepareRecipeBeforeSave() {
+        // Falls noch was im Textfeld steht beim Speichern, kurz mit übernehmen
+        if (!string.IsNullOrWhiteSpace(_tagInput)) {
+            AddTagFromInput();
+        }
+
+        Recipe.Groups = new List<string>(_currentTags);
     }
 }
