@@ -1,0 +1,70 @@
+﻿@page "/ingredients"
+@using CateringCalculator.Core.Interfaces
+@using CateringCalculator.Core.Models
+@inject IRecipeRepository RecipeRepository
+
+<PageTitle>Zutatenübersicht - Catering Calculator</PageTitle>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Zutatenverwaltung</h1>
+            <p class="text-muted" style="margin-bottom: 0;">Verwalte Gebindegrößen und Preise für deine Kalkulationen.</p>
+        </div>
+        <button class="btn-primary" @onclick="OpenAddModal">
+            <span>➕</span> Neue Zutat anlegen
+        </button>
+    </div>
+
+    @if (_ingredients == null) {
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p class="text-muted" style="margin: 0;"><em>Zutaten werden geladen...</em></p>
+        </div>
+    } else if (!_ingredients.Any()) {
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Zutaten vorhanden</p>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Lege deine erste Zutat mit Gebindegröße und Preis an, um Rezepte berechnen zu können.</p>
+            <button class="btn-primary" @onclick="OpenAddModal">Erste Zutat anlegen</button>
+        </div>
+    } else {
+        <div class="card-panel" style="padding: 0; overflow-x: auto;">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Einheit</th>
+                        <th>Gebindegröße</th>
+                        <th>Gebindepreis</th>
+                        <th>Preis / Einheit</th>
+                        <th style="width: 180px; text-align: right;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ingredient in _ingredients) {
+                        <tr>
+                            <td><strong>@ingredient.Name</strong></td>
+                            <td><span class="badge badge-primary">@ingredient.Unit</span></td>
+                            <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
+                            <td>@ingredient.PackagePrice.ToString("C2")</td>
+                            <td><strong>@ingredient.PricePerUnit.ToString("C4")</strong> / @ingredient.Unit</td>
+                            <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
+                                    Bearbeiten
+                                </button>
+                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => DeleteIngredientAsync(ingredient)" title="Löschen">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@* Eingebundene Modal-Komponente *@
+<IngredientModal IsVisible="_showModal"
+                 Ingredient="_editingIngredient"
+                 OnSave="HandleSaveIngredientAsync"
+                 OnClose="CloseModal" />

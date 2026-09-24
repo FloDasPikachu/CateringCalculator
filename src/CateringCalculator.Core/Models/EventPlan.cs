@@ -17,4 +17,17 @@ public class EventPlan {
 
     public List<FixedCostItem> FixedCostItems { get; set; } = new();
     public List<PersonnelCostItem> PersonnelCostItems { get; set; } = new();
+
+    public void UpdateDetails(string title, int guestCount, int averageDrinksPerGuest,
+      decimal wasteBufferPercent, decimal fixedCosts, decimal personnelCosts,
+      decimal targetProfit, int freeDrinksCount) {
+        Title = title ?? throw new ArgumentNullException(nameof(title));
+        GuestCount = guestCount;
+        AverageDrinksPerGuest = averageDrinksPerGuest;
+        WasteBufferPercent = wasteBufferPercent;
+        FixedCosts = fixedCosts;
+        PersonnelCosts = personnelCosts;
+        TargetProfit = targetProfit;
+        FreeDrinksCount = freeDrinksCount;
+    }
 }

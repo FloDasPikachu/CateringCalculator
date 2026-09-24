@@ -136,7 +136,7 @@ public class CalculationServiceTests {
         var caipirinha = new Recipe {
             Id = Guid.NewGuid(),
             Name = "Caipirinha",
-            Items = [new() { IngredientId = cachaça.Id, Ingredient = cachaça, Amount = 5m }] // 50ml Korrekturwert für Test
+            Items = [new() { IngredientId = cachaça.Id, Ingredient = cachaça, Amount = 50m }] // 50ml Korrekturwert für Test
         };
 
         var plan = new EventPlan {

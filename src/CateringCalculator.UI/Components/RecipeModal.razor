@@ -1,0 +1,144 @@
+﻿@using CateringCalculator.Core.Enums
+@using CateringCalculator.Core.Models
+
+@if (IsVisible) {
+    <div class="modal-backdrop">
+        <div class="modal-card" style="max-width: 700px; width: 90%;">
+            <div class="modal-header">
+                <h3 style="margin: 0;">
+                    @(IsEditing ? "Rezept bearbeiten" : "Neues Rezept anlegen")
+                </h3>
+                <button type="button" class="btn-close-custom" @onclick="OnClose">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Name des Cocktails *</label>
+                    <input type="text" class="form-control" @bind="Recipe.Name" placeholder="z. B. Mojito, Caipirinha..." />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Beschreibung</label>
+                    <input type="text" class="form-control" @bind="Recipe.Description" placeholder="Kurze Beschreibung" />
+                </div>
+
+                <h4 style="font-size: 1rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem;">
+                    Zutaten des Rezeptes
+                </h4>
+
+                <!-- Tabelle der hinzugefügten Zutaten -->
+                @if (Recipe.Items.Count == 0) {
+                    <div style="background-color: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.875rem; color: #856404;">
+                        Füge unten mindestens eine Zutat hinzu.
+                    </div>
+                } else {
+                    <div style="overflow-x: auto; margin-bottom: 1rem;">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Zutat</th>
+                                    <th style="width: 140px;">Menge</th>
+                                    <th style="width: 60px; text-align: right;">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Recipe.Items) {
+                                    var ing = AvailableIngredients.FirstOrDefault(i => i.Id == item.IngredientId);
+                                    <tr>
+                                        <td><strong>@(ing?.Name ?? item.Ingredient?.Name ?? "Unbekannt")</strong></td>
+                                        <td>@FormatAmount(item.Amount, ing?.Unit ?? item.Ingredient?.Unit)</td>
+                                        <td style="text-align: right;">
+                                            <button type="button" class="btn-secondary" style="padding: 0.2rem 0.5rem; color: #dc3545;" @onclick="() => RemoveItemFromRecipe(item)" title="Entfernen">
+                                                ✕
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <!-- Card zum Auswählen/Hinzufügen einer Zutat -->
+                <div class="price-preview-box" style="margin-bottom: 1rem;">
+                    <span style="font-weight: 600; display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                        Zutat hinzufügen
+                    </span>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-end;">
+                        <div style="flex: 2; min-width: 180px;">
+                            <label class="form-label" style="font-size: 0.8rem;">Existierende Zutat</label>
+                            <select class="form-control" value="@_selectedIngredientId" @onchange="OnIngredientSelectionChanged">
+                                <option value="@Guid.Empty">-- Wählen oder neu anlegen --</option>
+                                @foreach (var ing in AvailableIngredients) {
+                                    <option value="@ing.Id">@ing.Name (@ing.PackageSize @GetUnitSuffix(ing.Unit) - @ing.PackagePrice.ToString("C2"))</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label" style="font-size: 0.8rem;">Menge (@GetSelectedIngredientUnitLabel())</label>
+                            <input type="number" class="form-control" @bind="_amount" min="0.1" step="@_amountStep" />
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button type="button" class="btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" @onclick="AddSelectedIngredientToRecipe" disabled="@(_selectedIngredientId == Guid.Empty || _amount <= 0)">
+                                + Hinzufügen
+                            </button>
+                            <button type="button" class="btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" @onclick="ToggleNewIngredientFields">
+                                @(_showNewIngredientInput ? "Abbrechen" : "Neue Zutat")
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unter-Formular für völlig neue Zutat -->
+                    @if (_showNewIngredientInput) {
+                        <div style="border-top: 1px solid rgba(0,0,0,0.1); margin-top: 0.75rem; padding-top: 0.75rem;">
+                            <span style="font-weight: 600; color: var(--primary); display: block; margin-bottom: 0.5rem; font-size: 0.85rem;">
+                                Neue Zutat im Katalog anlegen
+                            </span>
+                            <div class="form-row" style="margin-bottom: 0.5rem;">
+                                <div class="form-group" style="flex: 2;">
+                                    <label class="form-label" style="font-size: 0.8rem;">Name</label>
+                                    <input type="text" class="form-control" @bind="_newIngName" placeholder="z. B. Rohrzucker" />
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label" style="font-size: 0.8rem;">Einheit</label>
+                                    <select class="form-control" @bind="_newIngUnit">
+                                        <option value="@IngredientUnit.Milliliter">Milliliter (ml)</option>
+                                        <option value="@IngredientUnit.Piece">Stück (Stk.)</option>
+                                        <option value="@IngredientUnit.Gram">Gramm (g)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row" style="margin-bottom: 0.75rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label" style="font-size: 0.8rem;">Gebindegröße</label>
+                                    <input type="number" class="form-control" @bind="_newIngSize" step="1" />
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label" style="font-size: 0.8rem;">Preis (€)</label>
+                                    <input type="number" class="form-control" @bind="_newIngPrice" step="0.01" />
+                                </div>
+                            </div>
+                            <button type="button" class="btn-primary" style="width: 100%; font-size: 0.85rem;" @onclick="CreateAndAddIngredientAsync">
+                                Zutat anlegen & übernehmen
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" @onclick="OnClose">Abbrechen</button>
+                <button type="button" class="btn-primary" @onclick="() => OnSave.InvokeAsync(Recipe)" disabled="@(string.IsNullOrWhiteSpace(Recipe.Name) || Recipe.Items.Count == 0 || IsSaving)">
+                    @if (IsSaving) {
+                        <span>Speichere...</span>
+                    } else {
+                        <span>💾 Speichern</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}

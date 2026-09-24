@@ -6,39 +6,28 @@ public class CalculationService {
     public CalculationResult Calculate(EventPlan eventPlan) {
         ArgumentNullException.ThrowIfNull(eventPlan);
 
-        int payingDrinksCount = eventPlan.TotalDrinksToServe;
-        int freeDrinksCount = eventPlan.FreeDrinksCount;
-        int totalProductionDrinks = payingDrinksCount + freeDrinksCount;
+        var context = new CalculationContext(eventPlan);
 
-        var result = new CalculationResult {
-            EventPlanId = eventPlan.Id,
-            EventTitle = eventPlan.Title,
-            TotalDrinksCount = payingDrinksCount,
-            FreeDrinksCount = freeDrinksCount,
-            FixedCosts = eventPlan.FixedCosts,
-            PersonnelCosts = eventPlan.PersonnelCosts,
-            TargetProfit = eventPlan.TargetProfit
-        };
-
-        if (eventPlan.SelectedRecipes.Count == 0 || totalProductionDrinks == 0) {
-            return result;
+        if (!context.IsValid) {
+            return context.Result;
         }
 
-        var ingredientAmounts = new Dictionary<Guid, (Ingredient Ingredient, decimal TotalAmount)>();
-        decimal wasteMultiplier = 1m + (eventPlan.WasteBufferPercent / 100m);
+        CalculateRecipeRequirements(eventPlan, context);
+        GenerateShoppingList(context);
+        DistributeRealCosts(context);
+        CalculatePricing(eventPlan, context);
 
-        // Map zur Speicherung des verbrauchten Bedarfs pro Rezept & Zutat
-        // Key: RecipeId -> Value: (IngredientId -> Verbrauchte Menge inkl. Puffer)
-        var recipeIngredientUsage = new Dictionary<Guid, Dictionary<Guid, decimal>>();
+        return context.Result;
+    }
 
-        // 1. Zutatenmengen & Soll-Kosten berechnen (basierend auf der GESAMTPRODUKTION inkl. Freigetränke)
+    private static void CalculateRecipeRequirements(EventPlan eventPlan, CalculationContext context) {
         foreach (var eventRecipe in eventPlan.SelectedRecipes) {
             var recipe = eventRecipe.Recipe;
             if (recipe == null)
                 continue;
 
-            int payingForThisRecipe = (int)Math.Round(payingDrinksCount * (eventRecipe.Percentage / 100m));
-            int freeForThisRecipe = (int)Math.Round(freeDrinksCount * (eventRecipe.Percentage / 100m));
+            int payingForThisRecipe = (int)Math.Round(context.PayingDrinksCount * (eventRecipe.Percentage / 100m));
+            int freeForThisRecipe = (int)Math.Round(context.FreeDrinksCount * (eventRecipe.Percentage / 100m));
             int countForThisRecipe = payingForThisRecipe + freeForThisRecipe;
 
             decimal recipeTheoreticalCost = 0m;
@@ -48,27 +37,24 @@ public class CalculationService {
                 if (item.Ingredient == null)
                     continue;
 
-                // Verbrauchsmenge inkl. Schwundpuffer für dieses spezifische Rezept
-                decimal amountNeededWithWaste = item.Amount * countForThisRecipe * wasteMultiplier;
-                usageDict[item.Ingredient.Id] = amountNeededWithWaste;
-
-                // Gesamtsummen für die Einkaufsliste aufsummieren
-                if (ingredientAmounts.TryGetValue(item.Ingredient.Id, out (Ingredient Ingredient, decimal TotalAmount) current)) {
-                    ingredientAmounts[item.Ingredient.Id] = (current.Ingredient, current.TotalAmount + item.Amount * countForThisRecipe);
+                decimal amountNeededWithWaste = item.Amount * countForThisRecipe * context.WasteMultiplier;
+                if (usageDict.TryGetValue(item.Ingredient.Id, out decimal existingAmount)) {
+                    usageDict[item.Ingredient.Id] = existingAmount + amountNeededWithWaste;
                 } else {
-                    ingredientAmounts[item.Ingredient.Id] = (item.Ingredient, item.Amount * countForThisRecipe);
+                    usageDict[item.Ingredient.Id] = amountNeededWithWaste;
                 }
 
-                // Soll-Kosten (exakter Verbrauchswert)
+                AccumulateIngredientAmounts(context, item.Ingredient, item.Amount * countForThisRecipe);
+
                 if (item.Ingredient.PackageSize > 0) {
                     decimal costPerUnit = item.Ingredient.PackagePrice / item.Ingredient.PackageSize;
                     recipeTheoreticalCost += amountNeededWithWaste * costPerUnit;
                 }
             }
 
-            recipeIngredientUsage[recipe.Id] = usageDict;
+            context.RecipeIngredientUsage[recipe.Id] = usageDict;
 
-            result.RecipeCalculations.Add(new CalculatedRecipeItem {
+            context.Result.RecipeCalculations.Add(new CalculatedRecipeItem {
                 RecipeId = recipe.Id,
                 RecipeName = recipe.Name,
                 Percentage = eventRecipe.Percentage,
@@ -77,14 +63,20 @@ public class CalculationService {
                 TheoreticalCostTotal = Math.Round(recipeTheoreticalCost, 2)
             });
         }
+    }
 
-        // 2. Einkaufsliste erstellen & Gesamteinkaufskosten je Zutat ermitteln
-        var ingredientTotalShoppingCost = new Dictionary<Guid, decimal>();
-        var ingredientTotalAmountNeeded = new Dictionary<Guid, decimal>();
+    private static void AccumulateIngredientAmounts(CalculationContext context, Ingredient ingredient, decimal amount) {
+        if (context.IngredientAmounts.TryGetValue(ingredient.Id, out var current)) {
+            context.IngredientAmounts[ingredient.Id] = (current.Ingredient, current.TotalAmount + amount);
+        } else {
+            context.IngredientAmounts[ingredient.Id] = (ingredient, amount);
+        }
+    }
 
-        foreach (var entry in ingredientAmounts.Values) {
+    private static void GenerateShoppingList(CalculationContext context) {
+        foreach (var entry in context.IngredientAmounts.Values) {
             var ingredient = entry.Ingredient;
-            decimal totalWithWaste = entry.TotalAmount * wasteMultiplier;
+            decimal totalWithWaste = entry.TotalAmount * context.WasteMultiplier;
 
             int packagesToBuy = 0;
             decimal totalCost = 0m;
@@ -94,10 +86,10 @@ public class CalculationService {
                 totalCost = packagesToBuy * ingredient.PackagePrice;
             }
 
-            ingredientTotalShoppingCost[ingredient.Id] = totalCost;
-            ingredientTotalAmountNeeded[ingredient.Id] = totalWithWaste;
+            context.IngredientTotalShoppingCost[ingredient.Id] = totalCost;
+            context.IngredientTotalAmountNeeded[ingredient.Id] = totalWithWaste;
 
-            result.ShoppingList.Add(new IngredientShoppingItem {
+            context.Result.ShoppingList.Add(new IngredientShoppingItem {
                 IngredientId = ingredient.Id,
                 IngredientName = ingredient.Name,
                 Unit = ingredient.Unit,
@@ -107,15 +99,16 @@ public class CalculationService {
                 PackagesToBuy = packagesToBuy
             });
         }
+    }
 
-        // 3. Realkosten verursachungsgerecht je Zutat verteilen
-        foreach (var calc in result.RecipeCalculations) {
+    private static void DistributeRealCosts(CalculationContext context) {
+        foreach (var calc in context.Result.RecipeCalculations) {
             decimal recipeRealCost = 0m;
 
-            if (recipeIngredientUsage.TryGetValue(calc.RecipeId, out var usageDict)) {
+            if (context.RecipeIngredientUsage.TryGetValue(calc.RecipeId, out var usageDict)) {
                 foreach (var (ingredientId, recipeAmount) in usageDict) {
-                    decimal totalShoppingCost = ingredientTotalShoppingCost[ingredientId];
-                    decimal totalAmountNeeded = ingredientTotalAmountNeeded[ingredientId];
+                    decimal totalShoppingCost = context.IngredientTotalShoppingCost[ingredientId];
+                    decimal totalAmountNeeded = context.IngredientTotalAmountNeeded[ingredientId];
 
                     if (totalAmountNeeded > 0) {
                         decimal ingredientShare = recipeAmount / totalAmountNeeded;
@@ -126,27 +119,59 @@ public class CalculationService {
 
             calc.RealCostTotal = Math.Round(recipeRealCost, 2);
         }
+    }
 
-        // Gesamte Materialkosten für die gesamte Produktion (Zahlend + Frei)
-        decimal totalProductionMaterialCost = result.RecipeCalculations.Sum(c => c.RealCostTotal);
+    private static void CalculatePricing(EventPlan eventPlan, CalculationContext context) {
+        decimal totalProductionMaterialCost = context.Result.RecipeCalculations.Sum(c => c.RealCostTotal);
 
-        // Berechne den allgemeinen Aufschlag pro zahlendem Drink:
-        // Dieser deckt Fixkosten + Personal + Wunschgewinn + den Materialwert der Freigetränke ab.
         decimal generalMarkupPerPayingDrink = 0m;
-        if (payingDrinksCount > 0) {
-            decimal materialCostOfFreeDrinks = totalProductionDrinks > 0
-                ? totalProductionMaterialCost * ((decimal)freeDrinksCount / totalProductionDrinks)
+        if (context.PayingDrinksCount > 0) {
+            decimal materialCostOfFreeDrinks = context.TotalProductionDrinks > 0
+                ? totalProductionMaterialCost * ((decimal)context.FreeDrinksCount / context.TotalProductionDrinks)
                 : 0m;
 
-            generalMarkupPerPayingDrink = (eventPlan.FixedCosts + eventPlan.PersonnelCosts + eventPlan.TargetProfit + materialCostOfFreeDrinks) / payingDrinksCount;
+            generalMarkupPerPayingDrink = (eventPlan.FixedCosts + eventPlan.PersonnelCosts + eventPlan.TargetProfit + materialCostOfFreeDrinks) / context.PayingDrinksCount;
         }
 
-        // 4. Empfohlenen Verkaufspreis je Cocktail berechnen
-        foreach (var calc in result.RecipeCalculations) {
+        foreach (var calc in context.Result.RecipeCalculations) {
             decimal realCostPerProducedDrink = calc.TargetDrinkCount > 0 ? calc.RealCostTotal / calc.TargetDrinkCount : 0m;
             calc.TargetSalesPrice = Math.Round(realCostPerProducedDrink + generalMarkupPerPayingDrink, 2);
         }
+    }
 
-        return result;
+    // Hilfsklasse zum Kapseln des Berechnungskontexts (verhindert Parameter-Chaos)
+    private sealed class CalculationContext {
+        public CalculationResult Result { get; }
+        public int PayingDrinksCount { get; }
+        public int FreeDrinksCount { get; }
+        public int TotalProductionDrinks { get; }
+        public decimal WasteMultiplier { get; }
+
+        public bool IsValid => PayingDrinksCount > 0 && _hasRecipes;
+
+        private readonly bool _hasRecipes;
+
+        public Dictionary<Guid, (Ingredient Ingredient, decimal TotalAmount)> IngredientAmounts { get; } = new();
+        public Dictionary<Guid, Dictionary<Guid, decimal>> RecipeIngredientUsage { get; } = new();
+        public Dictionary<Guid, decimal> IngredientTotalShoppingCost { get; } = new();
+        public Dictionary<Guid, decimal> IngredientTotalAmountNeeded { get; } = new();
+
+        public CalculationContext(EventPlan eventPlan) {
+            PayingDrinksCount = eventPlan.TotalDrinksToServe;
+            FreeDrinksCount = eventPlan.FreeDrinksCount;
+            TotalProductionDrinks = PayingDrinksCount + FreeDrinksCount;
+            WasteMultiplier = 1m + (eventPlan.WasteBufferPercent / 100m);
+            _hasRecipes = eventPlan.SelectedRecipes.Count > 0;
+
+            Result = new CalculationResult {
+                EventPlanId = eventPlan.Id,
+                EventTitle = eventPlan.Title,
+                TotalDrinksCount = PayingDrinksCount,
+                FreeDrinksCount = FreeDrinksCount,
+                FixedCosts = eventPlan.FixedCosts,
+                PersonnelCosts = eventPlan.PersonnelCosts,
+                TargetProfit = eventPlan.TargetProfit
+            };
+        }
     }
 }

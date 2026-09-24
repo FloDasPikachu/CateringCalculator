@@ -1,0 +1,59 @@
+﻿@using CateringCalculator.Core.Enums
+@using CateringCalculator.Core.Models
+
+@if (IsVisible) {
+    <div class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="margin: 0;">
+                    @(Ingredient.Id == Guid.Empty ? "Neue Zutat anlegen" : "Zutat bearbeiten")
+                </h3>
+                <button type="button" class="btn-close-custom" @onclick="OnClose">✕</button>
+            </div>
+
+            <EditForm Model="Ingredient" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Name der Zutat</label>
+                        <InputText class="form-control" @bind-Value="Ingredient.Name" placeholder="z. B. Havanna Club 3 Jahre" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Einheit</label>
+                        <InputSelect class="form-control" @bind-Value="Ingredient.Unit">
+                            @foreach (var unit in Enum.GetValues<IngredientUnit>()) {
+                                <option value="@unit">@unit</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Gebindegröße (@Ingredient.Unit)</label>
+                            <InputNumber class="form-control" @bind-Value="Ingredient.PackageSize" step="0.01" min="0.01" required />
+                        </div>
+
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Gebindepreis (€)</label>
+                            <InputNumber class="form-control" @bind-Value="Ingredient.PackagePrice" step="0.01" min="0" required />
+                        </div>
+                    </div>
+
+                    <div class="price-preview-box">
+                        <span class="text-muted" style="display: block; font-size: 0.8rem; margin-bottom: 0.2rem;">Errechneter Preis pro Einheit:</span>
+                        <strong style="color: var(--primary); font-size: 1.1rem;">
+                            @Ingredient.PricePerUnit.ToString("C4") / @Ingredient.Unit
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" @onclick="OnClose">Abbrechen</button>
+                    <button type="submit" class="btn-primary">Speichern</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}

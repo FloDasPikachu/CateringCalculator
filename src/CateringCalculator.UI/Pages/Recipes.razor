@@ -1,0 +1,81 @@
+﻿@page "/recipes"
+@using CateringCalculator.Core.Interfaces
+@using CateringCalculator.Core.Models
+@inject IRecipeRepository RecipeRepository
+
+<PageTitle>Rezepte - Catering Calculator</PageTitle>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Cocktails & Rezepte</h1>
+            <p class="text-muted" style="margin-bottom: 0;">Verwalte hier deine Rezepturen und Zutatenmengen.</p>
+        </div>
+        <button class="btn-primary" @onclick="OpenCreateDialog">
+            <span>➕</span> Neues Rezept anlegen
+        </button>
+    </div>
+
+    @if (_isLoading) {
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p class="text-muted" style="margin: 0;"><em>Rezepte werden geladen...</em></p>
+        </div>
+    } else if (_recipes.Count == 0) {
+        <div class="card-panel text-center" style="padding: 3rem;">
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Noch keine Rezepte vorhanden</p>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Klicke oben auf "Neues Rezept anlegen", um dein erstes Rezept zu erstellen.</p>
+            <button class="btn-primary" @onclick="OpenCreateDialog">Erstes Rezept anlegen</button>
+        </div>
+    } else {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            @foreach (var recipe in _recipes) {
+                <div class="card-panel" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@recipe.Name</h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" @onclick="() => EditRecipe(recipe)" title="Bearbeiten">
+                                    Bearbeiten
+                                </button>
+                                <button class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: #dc3545;" @onclick="() => DeleteRecipeAsync(recipe.Id)" title="Löschen">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(recipe.Description)) {
+                            <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">@recipe.Description</p>
+                        }
+
+                        <h4 style="font-size: 0.9rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem;">Zutaten:</h4>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0;">
+                            @foreach (var item in recipe.Items) {
+                                <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.9rem;">
+                                    <span>@(item.Ingredient?.Name ?? "Unbekannt")</span>
+                                    <span class="badge badge-primary">
+                                        @FormatAmount(item.Amount, item.Ingredient?.Unit)
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div style="padding-top: 0.75rem; border-top: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <span class="text-muted">Kosten / Drink:</span>
+                        <strong style="color: var(--primary); font-size: 1.1rem;">@recipe.TotalCostPerDrink.ToString("C2")</strong>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* Ausgelagerte Modal-Komponente *@
+<RecipeModal IsVisible="_showForm"
+             Recipe="_editingRecipe"
+             AvailableIngredients="_availableIngredients"
+             IsEditing="_isEditing"
+             IsSaving="_isSaving"
+             OnSave="SaveRecipeAsync"
+             OnClose="CloseForm"
+             OnIngredientAdded="HandleIngredientAddedAsync" />
