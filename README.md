@@ -13,7 +13,9 @@ Ein plattformübergreifendes B2B-Kalkulationswerkzeug für Event-Caterer, Barten
 📍 **In Entwicklung (MVP Phase 1)**
 
 ## 📋 Features (Geplant)
-- [ ] Rezept- & Zutatenverwaltung
-- [ ] Event-Kalkulation (Gästezahl, Aufschläge für Schwund & Eis)
-- [ ] Automatische Einkaufslisten-Generierung
-- [ ] PDF-Export für Angebote & Großhandel-Einkauf
+- [x] Rezept- & Zutatenverwaltung
+- [x] Event-Kalkulation (Gästezahl, Aufschläge für Schwund & Eis)
+- [x] Automatische Einkaufslisten-Generierung
+- [x] PDF-Export für Angebote & Großhandel-Einkauf
+- [ ] Lizenzierung
+- [ ] Übersetzungen
