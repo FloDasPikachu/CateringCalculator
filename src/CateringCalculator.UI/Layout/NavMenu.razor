@@ -1,23 +1,23 @@
 ﻿@using CateringCalculator.UI.Resources.Internationalization
 
-<nav class="nav-container">
+<nav class="nav-container @(IsMobile ? "mobile-menu" : "desktop-menu")">
     <div class="nav-links">
-        <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+        <NavLink class="nav-item" href="" Match="NavLinkMatch.All" @onclick="HandleClick">
             <span class="nav-icon">📊</span>
             <span class="nav-text">@AppResources.Nav_Overview</span>
         </NavLink>
 
-        <NavLink class="nav-item" href="event-planner">
+        <NavLink class="nav-item" href="event-planner" @onclick="HandleClick">
             <span class="nav-icon">📅</span>
             <span class="nav-text">@AppResources.Nav_EventPlanner</span>
         </NavLink>
 
-        <NavLink class="nav-item" href="recipes">
+        <NavLink class="nav-item" href="recipes" @onclick="HandleClick">
             <span class="nav-icon">🍸</span>
             <span class="nav-text">@AppResources.Nav_Recipes</span>
         </NavLink>
 
-        <NavLink class="nav-item" href="ingredients">
+        <NavLink class="nav-item" href="ingredients" @onclick="HandleClick">
             <span class="nav-icon">🍋</span>
             <span class="nav-text">@AppResources.Nav_Ingredients</span>
         </NavLink>

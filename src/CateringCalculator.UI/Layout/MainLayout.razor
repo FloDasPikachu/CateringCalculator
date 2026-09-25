@@ -1,7 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.Maui.Devices
 
 <div class="app-shell">
-    @* Safe Area Handling für iOS Statusleiste *@
+    @* Safe Area Handling für iOS/Android Notches *@
     <div class="status-bar-safe-area"></div>
 
     <header class="top-navbar">
@@ -10,22 +11,31 @@
             <span class="brand-title">Catering Calculator</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <!-- Sprachschalter -->
-            <div class="language-switcher" style="display: flex; gap: 0.25rem;">
-                <button class="btn @(IsGermanActive ? "btn-primary" : "btn-outline-secondary") btn-sm"
-                        style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                        @onclick='() => ChangeLanguage("de")'>
-                    DE
-                </button>
-                <button class="btn @(IsEnglishActive ? "btn-primary" : "btn-outline-secondary") btn-sm"
-                        style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                        @onclick='() => ChangeLanguage("en")'>
-                    EN
-                </button>
-            </div>
+        <!-- Header Rechts (Desktop-Navigation & Sprachschalter) -->
+        <div class="header-right">
+            @if (IsMobileDevice) {
+                @* Auf echtem Smartphone: Nur Sprachschalter oben, Menü ist unten *@
+            } else {
+                @* 1. Permanente Desktop-Leiste (wird bei breitem Fenster direkt angezeigt, bei schmalem ausgeblendet) *@
+                <div class="desktop-menu">
+                    <NavMenu IsMobile="false" />
+                </div>
 
-            <NavMenu />
+                @* 2. Hamburger-Button (erscheint nur bei schmalem Desktop-Fenster via CSS) *@
+                <button class="hamburger-btn" @onclick="ToggleDesktopMenu" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+
+                @* 3. Dropdown-Menü für den Hamburger *@
+                <div class="desktop-nav @(_isDesktopMenuOpen ? "open" : "")">
+                    <NavMenu IsMobile="false" OnItemSelected="CloseDesktopMenu" />
+                </div>
+            }
+
+            <div class="language-switcher">
+                <button class="btn-lang @(IsGermanActive ? "active" : "")" @onclick='() => ChangeLanguage("de")'>DE</button>
+                <button class="btn-lang @(IsEnglishActive ? "active" : "")" @onclick='() => ChangeLanguage("en")'>EN</button>
+            </div>
         </div>
     </header>
 
@@ -34,6 +44,13 @@
             @Body
         </div>
     </main>
+
+    @* Mobile Bottom Navigation: EXKLUSIV nur auf echten Smartphones *@
+    @if (IsMobileDevice) {
+        <div class="mobile-nav">
+            <NavMenu IsMobile="true" />
+        </div>
+    }
 </div>
 
 <div id="blazor-error-ui">

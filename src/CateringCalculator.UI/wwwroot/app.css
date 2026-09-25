@@ -37,6 +37,7 @@
    ========================================================================== */
 *, *::before, *::after {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -69,8 +70,6 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================================================
    3. REUSABLE UI COMPONENTS (Cards, Buttons, Tables, Forms)
    ========================================================================== */
-
-/* Page Layout Wrappers */
 .page-container {
     padding: 1.5rem;
     max-width: 1200px;
@@ -90,7 +89,6 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
 
-/* Cards & Panels */
 .card-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -100,7 +98,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1.25rem;
 }
 
-/* Buttons */
 .btn-primary {
     background-color: var(--primary);
     color: #ffffff;
@@ -154,7 +151,6 @@ h1, h2, h3, h4, h5, h6 {
         background-color: #dc2626;
     }
 
-/* Form Controls */
 .form-group {
     margin-bottom: 1rem;
 }
@@ -185,7 +181,6 @@ h1, h2, h3, h4, h5, h6 {
         box-shadow: 0 0 0 3px var(--primary-light);
     }
 
-/* Tables */
 .table-custom {
     width: 100%;
     border-collapse: separate;
@@ -216,7 +211,6 @@ h1, h2, h3, h4, h5, h6 {
         border-bottom: none;
     }
 
-/* Badges & Chips */
 .badge {
     display: inline-block;
     padding: 0.25rem 0.6rem;
@@ -236,7 +230,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   4. BLAZOR & MAUI NATIVE SYSTEM OVERLAYS
+   4. BLAZOR & SYSTEM OVERLAYS
    ========================================================================== */
 .valid.modified:not([type=checkbox]) {
     border-color: var(--success);
@@ -294,14 +288,10 @@ h1, h2, h3, h4, h5, h6 {
         width: 100%;
         z-index: 1;
     }
-
-    .flex-column, .navbar-brand {
-        padding-left: env(safe-area-inset-left);
-    }
 }
 
 /* ==========================================================================
-   5. APP LAYOUT & NAVIGATION
+   5. APP LAYOUT & HEADER / DESKTOP NAVIGATION
    ========================================================================== */
 .app-shell {
     display: flex;
@@ -335,37 +325,159 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.4rem;
 }
 
-.nav-container {
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+}
+
+/* Permanente Desktop-Leiste standardmäßig anzeigen */
+.desktop-menu {
     display: flex;
     align-items: center;
 }
 
-.nav-links {
-    display: flex;
-    gap: 0.5rem;
+    .desktop-menu .nav-links {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .desktop-menu .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.85rem;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+        .desktop-menu .nav-item:hover {
+            color: var(--primary);
+            background-color: var(--surface-hover);
+        }
+
+        .desktop-menu .nav-item.active {
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+/* Hamburger Button (standardmäßig auf großem Desktop versteckt) */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 20px;
+    padding: 0;
 }
 
-.nav-item {
+    .hamburger-btn span {
+        display: block;
+        width: 100%;
+        height: 3px;
+        background-color: var(--text-main);
+        border-radius: 2px;
+        transition: all 0.2s ease;
+    }
+
+/* Desktop Dropdown-Menü (bei Klick auf Hamburger) */
+.desktop-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 0.75rem;
+    min-width: 220px;
+    z-index: 1000;
+}
+
+    .desktop-nav.open {
+        display: block;
+    }
+
+    /* Spezifische Korrektur für das NavMenu im Desktop-Dropdown-Container */
+    .desktop-nav .desktop-menu {
+        display: block !important;
+        width: 100% !important;
+    }
+
+        .desktop-nav .desktop-menu .nav-links {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.25rem !important;
+        }
+
+        .desktop-nav .desktop-menu .nav-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            padding: 0.6rem 0.85rem !important;
+            width: 100% !important;
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+            .desktop-nav .desktop-menu .nav-item:hover {
+                background-color: var(--surface-hover);
+                color: var(--primary);
+            }
+
+            .desktop-nav .desktop-menu .nav-item.active {
+                background-color: var(--primary-light);
+                color: var(--primary);
+                font-weight: 600;
+            }
+
+/* MEDIA QUERY: Ab Fensterbreite unter 950px schaltet die Desktop-Ansicht komplett auf Hamburger um */
+@media (max-width: 950px) {
+    .desktop-menu {
+        display: none !important;
+    }
+
+    .hamburger-btn {
+        display: flex !important;
+    }
+}
+
+/* Sprachschalter */
+.language-switcher {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.85rem;
+    background: var(--background);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
+    padding: 2px;
+}
+
+.btn-lang {
+    background: transparent;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
     color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
+    cursor: pointer;
     transition: all 0.15s ease;
 }
 
-    .nav-item:hover {
-        color: var(--primary);
-        background-color: var(--surface-hover);
-    }
-
-    .nav-item.active {
-        color: var(--primary);
-        background-color: var(--primary-light);
+    .btn-lang.active {
+        background: var(--primary);
+        color: #ffffff;
     }
 
 .content-body {
@@ -377,30 +489,55 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .top-navbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem;
-    }
-
-    .nav-links {
-        width: 100%;
-        overflow-x: auto;
-        padding-bottom: 0.25rem;
-    }
-
-    .nav-item {
-        white-space: nowrap;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.65rem;
-    }
+/* ==========================================================================
+   6. ECHTE MOBILGERÄTE (Nur wenn DeviceIdiom.Phone)
+   ========================================================================== */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
+.content-body.mobile-padding {
+    padding-bottom: 75px;
+}
+
+.mobile-menu .nav-links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.mobile-menu .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.7rem;
+    padding: 0.4rem;
+    color: var(--text-muted);
+    text-align: center;
+    text-decoration: none;
+}
+
+    .mobile-menu .nav-item .nav-icon {
+        font-size: 1.25rem;
+    }
+
+    .mobile-menu .nav-item.active {
+        color: var(--primary);
+        background-color: transparent;
+    }
+
 /* ==========================================================================
-   6. MODALS & DIALOGS
+   7. MODALS & DIALOGS
    ========================================================================== */
 .modal-backdrop {
     position: fixed;
@@ -497,48 +634,26 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
-/* ==========================================================================
-   NAVBAR & NAV-MENU STYLING
-   ========================================================================== */
-.nav-links {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--radius-sm);
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
-
-    .nav-item:hover {
-        color: var(--primary);
-        background-color: var(--surface-hover);
+/* Responsive Modal Anpassung für kleine Screens */
+@media (max-width: 576px) {
+    .modal-backdrop {
+        padding: 0.5rem;
+        align-items: flex-end;
     }
 
-    .nav-item.active {
-        color: var(--primary);
-        background-color: var(--primary-light);
+    .modal-card {
+        max-width: 100%;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
-@media (max-width: 768px) {
-    .nav-links {
-        width: 100%;
-        overflow-x: auto;
-        padding-bottom: 0.25rem;
+    .modal-footer {
+        flex-direction: column-reverse;
     }
 
-    .nav-item {
-        white-space: nowrap;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.65rem;
-    }
+        .modal-footer button {
+            width: 100%;
+        }
 }
