@@ -1,20 +1,17 @@
 ﻿@inherits LayoutComponentBase
 @using Microsoft.Maui.Devices
 
-<div class="app-shell">
-    @* Safe Area Handling für iOS/Android Notches *@
-    <div class="status-bar-safe-area"></div>
-
+<div class="app-shell @(_isDarkMode ? "dark-theme" : "")">
     <header class="top-navbar">
         <div class="brand">
             <span class="brand-icon">🍹</span>
-            <span class="brand-title">Catering Calculator</span>
+            <span class="brand-title">@TitleService.CurrentTitle</span>
         </div>
 
-        <!-- Header Rechts (Desktop-Navigation & Sprachschalter) -->
+        <!-- Header Rechts (Desktop-Navigation, Darkmode & Sprachschalter) -->
         <div class="header-right">
             @if (IsMobileDevice) {
-                @* Auf echtem Smartphone: Nur Sprachschalter oben, Menü ist unten *@
+                @* Auf echtem Smartphone: Nur Schalter oben, Menü ist unten *@
             } else {
                 @* 1. Permanente Desktop-Leiste (wird bei breitem Fenster direkt angezeigt, bei schmalem ausgeblendet) *@
                 <div class="desktop-menu">
@@ -31,6 +28,11 @@
                     <NavMenu IsMobile="false" OnItemSelected="CloseDesktopMenu" />
                 </div>
             }
+
+            @* Dark Mode Umschalter *@
+            <button class="btn-lang theme-toggle-btn" @onclick="ToggleTheme" aria-label="Toggle Theme">
+                @(_isDarkMode ? "☀️" : "🌙")
+            </button>
 
             <div class="language-switcher">
                 <button class="btn-lang @(IsGermanActive ? "active" : "")" @onclick='() => ChangeLanguage("de")'>DE</button>

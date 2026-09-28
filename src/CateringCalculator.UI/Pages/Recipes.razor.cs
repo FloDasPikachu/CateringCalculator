@@ -1,13 +1,19 @@
 ﻿using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Recipes : IDisposable {
+public partial class Recipes : IDisposable, IAsyncDisposable {
     [Inject]
     private LocalizationService LocalizationService { get; set; } = default!;
+    [Inject]
+    private PageTitleService TitleService { get; set; } = default!;
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
 
     private List<Recipe> _recipes = new();
     private List<Ingredient> _availableIngredients = new();
@@ -18,6 +24,11 @@ public partial class Recipes : IDisposable {
     private string? _selectedGroupFilter;
     private bool _showDeleteConfirmation = false;
     private Recipe? _recipeToDelete;
+
+    // Variablen für den Scroll-Observer
+    private ElementReference pageHeaderRef;
+    private IJSObjectReference? _jsModule;
+    private DotNetObjectReference<Recipes>? _dotNetRef;
 
     private List<string> AllExistingGroups => _recipes?
         .SelectMany(r => r.Groups ?? new())
@@ -30,7 +41,31 @@ public partial class Recipes : IDisposable {
 
     protected override async Task OnInitializedAsync() {
         LocalizationService.OnChange += StateHasChanged;
+
+        // Startet ganz oben erst einmal mit dem Standard-Titel in der Navbar
+        TitleService.SetTitle("Catering Calculator");
+
         await LoadDataAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            // Lädt das JS-Skript aus wwwroot/js/scrollObserver.js
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/scrollObserver.js");
+            await _jsModule.InvokeVoidAsync("observeHeader", pageHeaderRef, _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void TargetVisibilityChanged(bool isIntersecting) {
+        if (isIntersecting) {
+            // Header ist im Sichtbereich -> Zeige Standard-App-Namen
+            TitleService.SetTitle("Catering Calculator");
+        } else {
+            // Header wurde nach oben weggescrollt -> Zeige den Seitentitel
+            TitleService.SetTitle(AppResources.Recipes_Title);
+        }
     }
 
     private async Task LoadDataAsync() {
@@ -182,10 +217,6 @@ public partial class Recipes : IDisposable {
         StateHasChanged();
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
-    }
-
     private void ConfirmDeleteRecipe(Recipe recipe) {
         _recipeToDelete = recipe;
         _showDeleteConfirmation = true;
@@ -196,7 +227,6 @@ public partial class Recipes : IDisposable {
         _showDeleteConfirmation = false;
     }
 
-    // Führt das eigentliche Löschen nach Bestätigung aus
     private async Task ExecuteDeleteRecipeAsync() {
         if (_recipeToDelete != null) {
             await RecipeRepository.DeleteRecipeAsync(_recipeToDelete.Id);
@@ -204,5 +234,17 @@ public partial class Recipes : IDisposable {
             _showDeleteConfirmation = false;
             await LoadDataAsync();
         }
+    }
+
+    public void Dispose() {
+        LocalizationService.OnChange -= StateHasChanged;
+    }
+
+    public async ValueTask DisposeAsync() {
+        if (_jsModule != null) {
+            await _jsModule.InvokeVoidAsync("unobserveHeader");
+            await _jsModule.DisposeAsync();
+        }
+        _dotNetRef?.Dispose();
     }
 }

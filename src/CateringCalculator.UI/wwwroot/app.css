@@ -8,7 +8,7 @@
     --primary-light: #e0e7ff;
     --secondary: #0ea5e9; /* Ozeanblau für Highlights */
     --accent: #f59e0b; /* Warmes Bernstein/Orange (Cocktail-Flair) */
-    /* Neutral Colors */
+    /* Neutral Colors (Light Mode Default) */
     --background: #f8fafc; /* Weicher, hellgrauer Hintergrund */
     --surface: #ffffff; /* Karten- & Modalhintergrund */
     --surface-hover: #f1f5f9;
@@ -33,6 +33,27 @@
 }
 
 /* ==========================================================================
+   DARK MODE THEME OVERRIDES
+   ========================================================================== */
+.app-shell.dark-theme {
+    --primary: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-light: rgba(99, 102, 241, 0.15);
+    --secondary: #38bdf8;
+    --accent: #fbbf24;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --surface-hover: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --success: #34d399;
+    --success-light: rgba(52, 211, 153, 0.15);
+    --danger: #f87171;
+    --danger-light: rgba(248, 113, 113, 0.15);
+}
+
+/* ==========================================================================
    2. BASE RESET & TYPOGRAPHY
    ========================================================================== */
 *, *::before, *::after {
@@ -46,7 +67,6 @@ html, body {
     color: var(--text-main);
     margin: 0;
     padding: 0;
-    padding-top: env(safe-area-inset-top);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -80,12 +100,12 @@ h1, h2, h3, h4, h5, h6 {
 .page-header {
     position: sticky;
     top: 0;
-    background-color: var(--background, #f8f9fa); /* Hintergrundfarbe damit der Text nicht durchscheint */
+    background-color: var(--background);
     z-index: 100;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border, rgba(0,0,0,0.08));
+    border-bottom: 1px solid var(--border);
 }
 
 .page-title {
@@ -210,6 +230,7 @@ h1, h2, h3, h4, h5, h6 {
         border-bottom: 1px solid var(--border);
         background-color: var(--surface);
         font-size: 0.95rem;
+        color: var(--text-main);
     }
 
     .table-custom tr:last-child td {
@@ -279,22 +300,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: var(--radius-md);
 }
 
-.status-bar-safe-area {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    .status-bar-safe-area {
-        display: block;
-        position: sticky;
-        top: 0;
-        height: max(40px, env(safe-area-inset-top));
-        background-color: var(--surface);
-        width: 100%;
-        z-index: 1000;
-    }
-}
-
 /* ==========================================================================
    5. APP LAYOUT & HEADER / DESKTOP NAVIGATION
    ========================================================================== */
@@ -302,19 +307,24 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: var(--background);
+    color: var(--text-main);
 }
 
 .top-navbar {
     background-color: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1.5rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .brand {
@@ -413,7 +423,6 @@ h1, h2, h3, h4, h5, h6 {
         display: block;
     }
 
-    /* Spezifische Korrektur für das NavMenu im Desktop-Dropdown-Container */
     .desktop-nav .desktop-menu {
         display: block !important;
         width: 100% !important;
@@ -488,6 +497,7 @@ h1, h2, h3, h4, h5, h6 {
 .content-body {
     flex: 1;
     background-color: var(--background);
+    overflow-y: auto;
 }
 
 .content-wrapper {
@@ -505,7 +515,7 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--surface);
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
+    z-index: 100;
     padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -625,7 +635,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .price-preview-box {
     background-color: var(--primary-light);
-    border: 1px solid #c7d2fe;
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 0.85rem;
     margin-top: 1rem;
@@ -639,7 +649,6 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
-/* Responsive Modal Anpassung für kleine Screens */
 @media (max-width: 576px) {
     .modal-backdrop {
         padding: 0.5rem;
@@ -663,16 +672,10 @@ h1, h2, h3, h4, h5, h6 {
         }
 }
 
-/* Fix für mobiles Menü: Unter Modals einordnen und Überlappung am Seitenende verhindern */
-.mobile-nav {
-    z-index: 100 !important; /* Unter Modals (z-index: 1000) halten */
-}
-
 .content-body.mobile-padding {
-    padding-bottom: 90px !important; /* Genug Abstand, damit man den letzten Inhalt einer Seite noch sieht */
+    padding-bottom: 90px !important;
 }
 
-/* Zusätzlicher Schutz für Tabellen und Container am Seitenende auf Mobile */
 @media (max-width: 950px) {
     .page-container,
     .content-wrapper,
@@ -680,14 +683,12 @@ h1, h2, h3, h4, h5, h6 {
         margin-bottom: env(safe-area-inset-bottom);
     }
 
-        /* Letztes Element in einem Container bekommt extra Luft nach unten */
         .page-container > *:last-child,
         .card-panel:last-child {
             margin-bottom: 5rem !important;
         }
 }
 
-/* Responsive Tabellen-Wrapper für horizontale Scrollbarkeit */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -698,15 +699,13 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface);
 }
 
-    /* Entferne den direkten Rahmen der Tabelle, da der Wrapper den Rahmen übernimmt */
     .table-responsive .table-custom {
         margin-top: 0;
         border: none;
         width: 100%;
-        white-space: nowrap; /* Verhindert hässlichen Textumbruch in Spalten */
+        white-space: nowrap;
     }
 
-        /* Tabellenzellen behalten etwas Luft */
         .table-responsive .table-custom th,
         .table-responsive .table-custom td {
             padding: 0.85rem 1rem;
@@ -720,12 +719,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
-    /* Tabelle auf Mobile ausblenden */
     .table-responsive.hide-on-mobile {
         display: none !important;
     }
 
-    /* Kartenliste auf Mobile anzeigen */
     .ingredients-card-list {
         display: flex;
         flex-direction: column;
@@ -793,7 +790,6 @@ h1, h2, h3, h4, h5, h6 {
    9. MOBILE STACKED TABLE (Für Event-Ergebnisse auf Smartphones)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* Wir schalten die klassische Tabellen-Struktur für diese spezielle Tabelle ab */
     .table-responsive.stack-on-mobile table,
     .table-responsive.stack-on-mobile thead,
     .table-responsive.stack-on-mobile tbody,
@@ -803,14 +799,12 @@ h1, h2, h3, h4, h5, h6 {
         display: block;
     }
 
-        /* Tabellenkopf unsichtbar machen */
         .table-responsive.stack-on-mobile thead tr {
             position: absolute;
             top: -9999px;
             left: -9999px;
         }
 
-    /* Jede Zeile wird wie eine kleine kompakte Karte behandelt */
     .table-responsive.stack-on-mobile tr {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -820,7 +814,6 @@ h1, h2, h3, h4, h5, h6 {
         box-shadow: var(--shadow-sm);
     }
 
-    /* Jede Zelle bekommt ein Flex-Layout (Links: Beschriftung, Rechts: Wert) */
     .table-responsive.stack-on-mobile td {
         display: flex;
         justify-content: space-between;
@@ -831,7 +824,6 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 0.9rem;
     }
 
-        /* Erste Zelle (Cocktail-Name) etwas hervorheben als Überschrift der "Mini-Karte" */
         .table-responsive.stack-on-mobile td:first-child {
             font-size: 1rem;
             font-weight: 700;
@@ -841,7 +833,6 @@ h1, h2, h3, h4, h5, h6 {
             justify-content: flex-start;
         }
 
-        /* Automatische Labels via data-label Attribut erzeugen */
         .table-responsive.stack-on-mobile td:not(:first-child)::before {
             content: attr(data-label);
             font-weight: 500;

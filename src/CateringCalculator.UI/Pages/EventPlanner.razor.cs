@@ -2,13 +2,20 @@
 using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
 using CateringCalculator.Core.Services;
+using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class EventPlanner : IDisposable {
-    [Inject] private LocalizationService LocalizationService { get; set; } = default!;
+public partial class EventPlanner : IDisposable, IAsyncDisposable {
+    [Inject]
+    private LocalizationService LocalizationService { get; set; } = default!;
+    [Inject]
+    private PageTitleService TitleService { get; set; } = default!;
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
 
     private bool _showPersonnelModal = false;
     private bool _showFixedModal = false;
@@ -17,12 +24,41 @@ public partial class EventPlanner : IDisposable {
     private List<Recipe> _availableRecipes = new();
     private CalculationResult? _calculationResult;
 
+    // Variablen für den Scroll-Observer
+    private ElementReference pageHeaderRef;
+    private IJSObjectReference? _jsModule;
+    private DotNetObjectReference<EventPlanner>? _dotNetRef;
+
     private decimal TotalPercentage => _eventPlan.SelectedRecipes.Sum(r => r.Percentage);
 
     protected override async Task OnInitializedAsync() {
         LocalizationService.OnChange += StateHasChanged;
+
+        // Startet ganz oben mit dem Standard-Titel
+        TitleService.SetTitle("Catering Calculator");
+
         _availableRecipes = await RecipeRepository.GetAllRecipesAsync();
         await LoadSavedEventPlansAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            // Lädt das JS-Skript aus wwwroot/js/scrollObserver.js
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/scrollObserver.js");
+            await _jsModule.InvokeVoidAsync("observeHeader", pageHeaderRef, _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void TargetVisibilityChanged(bool isIntersecting) {
+        if (isIntersecting) {
+            // Header im Sichtbereich -> Standard-App-Namen anzeigen
+            TitleService.SetTitle("Catering Calculator");
+        } else {
+            // Header nach oben weggescrollt -> Seitentitel anzeigen
+            TitleService.SetTitle(AppResources.Event_Title);
+        }
     }
 
     private async Task LoadSavedEventPlansAsync() {
@@ -141,5 +177,13 @@ public partial class EventPlanner : IDisposable {
 
     public void Dispose() {
         LocalizationService.OnChange -= StateHasChanged;
+    }
+
+    public async ValueTask DisposeAsync() {
+        if (_jsModule != null) {
+            await _jsModule.InvokeVoidAsync("unobserveHeader");
+            await _jsModule.DisposeAsync();
+        }
+        _dotNetRef?.Dispose();
     }
 }

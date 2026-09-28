@@ -37,6 +37,7 @@ public static class MauiProgram {
 
         builder.Services.AddSingleton<FileSaveService>();
         builder.Services.AddSingleton<LocalizationService>();
+        builder.Services.AddSingleton<PageTitleService>();
 
         var app = builder.Build();
 

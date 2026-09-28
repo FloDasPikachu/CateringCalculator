@@ -1,13 +1,19 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
+using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Ingredients : IDisposable {
+public partial class Ingredients : IDisposable, IAsyncDisposable {
     [Inject]
     private LocalizationService LocalizationService { get; set; } = default!;
+    [Inject]
+    private PageTitleService TitleService { get; set; } = default!;
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
 
     private List<Ingredient>? _ingredients;
     private Ingredient _editingIngredient = new();
@@ -18,9 +24,31 @@ public partial class Ingredients : IDisposable {
     private bool _showDeleteConfirmation = false;
     private Ingredient? _ingredientToDelete;
 
+    private ElementReference pageHeaderRef;
+    private IJSObjectReference? _jsModule;
+    private DotNetObjectReference<Ingredients>? _dotNetRef;
+
     protected override async Task OnInitializedAsync() {
         LocalizationService.OnChange += StateHasChanged;
+        TitleService.SetTitle("Catering Calculator");
         await LoadIngredientsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/scrollObserver.js");
+            await _jsModule.InvokeVoidAsync("observeHeader", pageHeaderRef, _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void TargetVisibilityChanged(bool isIntersecting) {
+        if (isIntersecting) {
+            TitleService.SetTitle("Catering Calculator");
+        } else {
+            TitleService.SetTitle(AppResources.Ingredients_Title);
+        }
     }
 
     private async Task LoadIngredientsAsync() {
@@ -66,7 +94,6 @@ public partial class Ingredients : IDisposable {
         await LoadIngredientsAsync();
     }
 
-
     private void ConfirmDeleteIngredient(Ingredient ingredient) {
         _ingredientToDelete = ingredient;
         _showDeleteConfirmation = true;
@@ -95,12 +122,20 @@ public partial class Ingredients : IDisposable {
         }
     }
 
+    private void CloseInfoModal() {
+        _showInfoModal = false;
+        _infoMessage = string.Empty;
+    }
+
     public void Dispose() {
         LocalizationService.OnChange -= StateHasChanged;
     }
 
-    private void CloseInfoModal() {
-        _showInfoModal = false;
-        _infoMessage = string.Empty;
+    public async ValueTask DisposeAsync() {
+        if (_jsModule != null) {
+            await _jsModule.InvokeVoidAsync("unobserveHeader");
+            await _jsModule.DisposeAsync();
+        }
+        _dotNetRef?.Dispose();
     }
 }
