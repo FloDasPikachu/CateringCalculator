@@ -27,38 +27,71 @@
             <button class="btn-primary" @onclick="OpenAddModal">@AppResources.Ingredients_New</button>
         </div>
     } else {
+        <!-- 1. Normale Tabelle für Desktop & Tablets -->
         <div class="card-panel" style="padding: 0; overflow-x: auto;">
-            <table class="table-custom">
-                <thead>
-                    <tr>
-                        <th>@AppResources.Ingredients_Name</th>
-                        <th>@AppResources.Ingredients_Unit</th>
-                        <th>@AppResources.Ingredients_PackageSize</th>
-                        <th>@AppResources.Ingredients_PackagePrice</th>
-                        <th>@AppResources.Ingredients_PricePerUnit</th>
-                        <th style="width: 180px; text-align: right;">@AppResources.Ingredients_Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ingredient in _ingredients) {
+            <div class="table-responsive hide-on-mobile">
+                <table class="table-custom">
+                    <thead>
                         <tr>
-                            <td><strong>@ingredient.Name</strong></td>
-                            <td><span class="badge badge-primary">@ingredient.Unit</span></td>
-                            <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
-                            <td>@ingredient.PackagePrice.ToString("N2") €</td>
-                            <td><strong>@ingredient.PricePerUnit.ToString("N4") €</strong> / @ingredient.Unit</td>
-                            <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
-                                    @AppResources.Button_Edit
-                                </button>
-                                <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => ConfirmDeleteIngredient(ingredient)" title="@AppResources.Button_Delete">
-                                    🗑️
-                                </button>
-                            </td>
+                            <th>@AppResources.Ingredients_Name</th>
+                            <th>@AppResources.Ingredients_Unit</th>
+                            <th>@AppResources.Ingredients_PackageSize</th>
+                            <th>@AppResources.Ingredients_PackagePrice</th>
+                            <th>@AppResources.Ingredients_PricePerUnit</th>
+                            <th style="width: 180px; text-align: right;">@AppResources.Ingredients_Actions</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var ingredient in _ingredients) {
+                            <tr>
+                                <td><strong>@ingredient.Name</strong></td>
+                                <td><span class="badge badge-primary">@ingredient.Unit</span></td>
+                                <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
+                                <td>@ingredient.PackagePrice.ToString("N2") €</td>
+                                <td><strong>@ingredient.PricePerUnit.ToString("N4") €</strong> / @ingredient.Unit</td>
+                                <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="() => OpenEditModal(ingredient)">
+                                        @AppResources.Button_Edit
+                                    </button>
+                                    <button class="btn-secondary" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; color: #dc3545;" @onclick="() => ConfirmDeleteIngredient(ingredient)" title="@AppResources.Button_Delete">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. Mobile Karten-Ansicht für Smartphones -->
+            <div class="ingredients-card-list" style="padding: 1rem;">
+                @foreach (var ingredient in _ingredients) {
+                    <div class="ingredient-card">
+                        <div class="ingredient-card-header">
+                            <span>@ingredient.Name</span>
+                            <span class="badge badge-primary">@ingredient.Unit</span>
+                        </div>
+                        <div class="ingredient-card-body">
+                            <span class="label">@AppResources.Ingredients_PackageSize:</span>
+                            <span class="value">@ingredient.PackageSize.ToString("N2") @ingredient.Unit</span>
+                            
+                            <span class="label">@AppResources.Ingredients_PackagePrice:</span>
+                            <span class="value">@ingredient.PackagePrice.ToString("N2") €</span>
+                            
+                            <span class="label">@AppResources.Ingredients_PricePerUnit:</span>
+                            <span class="value">@ingredient.PricePerUnit.ToString("N4") € / @ingredient.Unit</span>
+                        </div>
+                        <div class="ingredient-card-actions">
+                            <button class="btn-secondary" @onclick="() => OpenEditModal(ingredient)">
+                                ✏️ @AppResources.Button_Edit
+                            </button>
+                            <button class="btn-danger" @onclick="() => ConfirmDeleteIngredient(ingredient)">
+                                🗑️ @AppResources.Button_Delete
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     }
 </div>

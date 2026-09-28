@@ -74,13 +74,18 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
+    padding-top: max(1rem, env(safe-area-inset-top));
 }
 
 .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 0;
+    background-color: var(--background, #f8f9fa); /* Hintergrundfarbe damit der Text nicht durchscheint */
+    z-index: 100;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.08));
 }
 
 .page-title {
@@ -278,15 +283,15 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
 }
 
-@supports (-webkit-touch-callout: none) {
+@media (max-width: 768px) {
     .status-bar-safe-area {
-        display: flex;
+        display: block;
         position: sticky;
         top: 0;
-        height: env(safe-area-inset-top);
+        height: max(40px, env(safe-area-inset-top));
         background-color: var(--surface);
         width: 100%;
-        z-index: 1;
+        z-index: 1000;
     }
 }
 
@@ -655,5 +660,193 @@ h1, h2, h3, h4, h5, h6 {
 
         .modal-footer button {
             width: 100%;
+        }
+}
+
+/* Fix für mobiles Menü: Unter Modals einordnen und Überlappung am Seitenende verhindern */
+.mobile-nav {
+    z-index: 100 !important; /* Unter Modals (z-index: 1000) halten */
+}
+
+.content-body.mobile-padding {
+    padding-bottom: 90px !important; /* Genug Abstand, damit man den letzten Inhalt einer Seite noch sieht */
+}
+
+/* Zusätzlicher Schutz für Tabellen und Container am Seitenende auf Mobile */
+@media (max-width: 950px) {
+    .page-container,
+    .content-wrapper,
+    .table-custom {
+        margin-bottom: env(safe-area-inset-bottom);
+    }
+
+        /* Letztes Element in einem Container bekommt extra Luft nach unten */
+        .page-container > *:last-child,
+        .card-panel:last-child {
+            margin-bottom: 5rem !important;
+        }
+}
+
+/* Responsive Tabellen-Wrapper für horizontale Scrollbarkeit */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+    /* Entferne den direkten Rahmen der Tabelle, da der Wrapper den Rahmen übernimmt */
+    .table-responsive .table-custom {
+        margin-top: 0;
+        border: none;
+        width: 100%;
+        white-space: nowrap; /* Verhindert hässlichen Textumbruch in Spalten */
+    }
+
+        /* Tabellenzellen behalten etwas Luft */
+        .table-responsive .table-custom th,
+        .table-responsive .table-custom td {
+            padding: 0.85rem 1rem;
+        }
+
+/* ==========================================================================
+   8. MOBILE CARD LIST (Alternative zu Tabellen auf Smartphones)
+   ========================================================================== */
+.ingredients-card-list {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    /* Tabelle auf Mobile ausblenden */
+    .table-responsive.hide-on-mobile {
+        display: none !important;
+    }
+
+    /* Kartenliste auf Mobile anzeigen */
+    .ingredients-card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ingredient-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ingredient-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    .ingredient-card-body {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.4rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        padding: 0.25rem 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        margin-top: 0.25rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+        .ingredient-card-body .label {
+            font-weight: 500;
+        }
+
+        .ingredient-card-body .value {
+            text-align: right;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+    .ingredient-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+    }
+
+        .ingredient-card-actions button {
+            flex: 1;
+            justify-content: center;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+}
+
+/* ==========================================================================
+   9. MOBILE STACKED TABLE (Für Event-Ergebnisse auf Smartphones)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Wir schalten die klassische Tabellen-Struktur für diese spezielle Tabelle ab */
+    .table-responsive.stack-on-mobile table,
+    .table-responsive.stack-on-mobile thead,
+    .table-responsive.stack-on-mobile tbody,
+    .table-responsive.stack-on-mobile th,
+    .table-responsive.stack-on-mobile td,
+    .table-responsive.stack-on-mobile tr {
+        display: block;
+    }
+
+        /* Tabellenkopf unsichtbar machen */
+        .table-responsive.stack-on-mobile thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+    /* Jede Zeile wird wie eine kleine kompakte Karte behandelt */
+    .table-responsive.stack-on-mobile tr {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Jede Zelle bekommt ein Flex-Layout (Links: Beschriftung, Rechts: Wert) */
+    .table-responsive.stack-on-mobile td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right !important;
+        border: none !important;
+        padding: 0.35rem 0;
+        font-size: 0.9rem;
+    }
+
+        /* Erste Zelle (Cocktail-Name) etwas hervorheben als Überschrift der "Mini-Karte" */
+        .table-responsive.stack-on-mobile td:first-child {
+            font-size: 1rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border) !important;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
+            justify-content: flex-start;
+        }
+
+        /* Automatische Labels via data-label Attribut erzeugen */
+        .table-responsive.stack-on-mobile td:not(:first-child)::before {
+            content: attr(data-label);
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: left;
+            margin-right: 1rem;
         }
 }

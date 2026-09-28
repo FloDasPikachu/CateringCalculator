@@ -233,6 +233,7 @@
                     <!-- 1. Tabelle: Kalkulation pro Cocktail & Ziel-Verkaufspreis -->
                     <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 @AppResources.Event_CocktailCalcTitle</h4>
                     <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+                        <div class="table-responsive stack-on-mobile">
                         <table class="table-custom">
                             <thead>
                                 <tr>
@@ -247,14 +248,15 @@
                                 @foreach (var calc in _calculationResult.RecipeCalculations) {
                                     <tr>
                                         <td><strong>@calc.RecipeName</strong></td>
-                                        <td style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
-                                        <td style="text-align: center;">@calc.PayingDrinkCount (@calc.FreeDrinkCount) Stk.</td>
-                                        <td style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("N2") €</td>
-                                        <td style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("N2") €</td>
+                                        <td data-label="@AppResources.Event_TableShare" style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
+                                        <td data-label="@AppResources.Event_TableCount" style="text-align: center;">@calc.PayingDrinkCount (@calc.FreeDrinkCount) Stk.</td>
+                                        <td data-label="@AppResources.Event_TableRealPerDrink" style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("N2") €</td>
+                                        <td data-label="@AppResources.Event_TableRecommendedPrice" style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("N2") €</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
+                        </div>
                         <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.35rem;">
                             @AppResources.Event_CalcDisclaimer
                         </span>
@@ -263,6 +265,7 @@
                     <!-- 2. Tabelle: Einkaufsliste -->
                     <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🛒 @AppResources.Event_ShoppingListTitle</h4>
                     <div style="overflow-x: auto;">
+                        <div class="table-responsive">
                         <table class="table-custom">
                             <thead>
                                 <tr>
@@ -287,6 +290,7 @@
                                 }
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             }
