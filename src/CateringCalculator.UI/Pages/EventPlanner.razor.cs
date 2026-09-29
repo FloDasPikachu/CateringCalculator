@@ -144,10 +144,14 @@ public partial class EventPlanner : IDisposable, IAsyncDisposable {
         if (_calculationResult == null)
             return;
 
-        var pdfBytes = CateringCalculator.Infrastructure.Services.ShoppingListPdfGenerator.GeneratePdf(_calculationResult);
-        var fileName = $"Einkaufsliste_{_calculationResult.EventTitle.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
+        try {
+            var pdfBytes = CateringCalculator.Infrastructure.Services.ShoppingListPdfGenerator.GeneratePdf(_calculationResult);
+            var fileName = $"Einkaufsliste_{_calculationResult.EventTitle.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
 
-        await FileSaveService.SaveAndOpenFileAsync(fileName, pdfBytes);
+            await FileSaveService.SaveAndOpenFileAsync(fileName, pdfBytes);
+        } catch (Exception e) {
+            throw;
+        }
     }
 
     private static string GetUnitSuffix(IngredientUnit unit) => unit switch {

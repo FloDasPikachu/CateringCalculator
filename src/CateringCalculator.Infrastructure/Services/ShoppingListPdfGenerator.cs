@@ -1,159 +1,193 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Fonts;
+using PdfSharpCore.Pdf;
 
 namespace CateringCalculator.Infrastructure.Services;
 
 public class ShoppingListPdfGenerator {
+    private static bool _isInitialized = false;
+
+    // Statischer Konstruktor
     static ShoppingListPdfGenerator() {
-        QuestPDF.Settings.License = LicenseType.Community;
+        InitializeFontResolver();
+    }
+
+    private static void InitializeFontResolver() {
+        if (_isInitialized)
+            return;
+
+        try {
+            // Manchmal wirft schon das Abfragen von GlobalFontSettings.FontResolver den Fehler,
+            // wenn noch kein Resolver gesetzt ist. Wir setzen ihn daher direkt per Zuweisung.
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+            _isInitialized = true;
+        } catch (Exception) {
+            // Falls er bereits gesetzt wurde oder ein interner Konflikt auftritt, ignorieren
+            _isInitialized = true;
+        }
     }
 
     public static byte[] GeneratePdf(CalculationResult result) {
-        var document = Document.Create(container => {
-            container.Page(page => {
-                page.Size(PageSizes.A4);
-                page.Margin(1.5f, Unit.Centimetre);
-                page.PageColor(Colors.White);
-                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Lato"));
+        // Zur Sicherheit vor jedem PDF-Generieren nochmal aufrufen
+        InitializeFontResolver();
 
-                // Header
-                page.Header().Column(column => {
-                    column.Item().Text($"Ergebnis: {result.EventTitle}")
-                        .FontSize(18).Bold().FontColor(Colors.Blue.Darken3);
+        var document = new PdfDocument();
+        document.Info.Title = $"Einkaufsliste - {result.EventTitle}";
 
-                    var subtitle = $"{result.TotalDrinksCount} zahlende Drinks";
-                    if (result.FreeDrinksCount > 0) {
-                        subtitle += $" (+ {result.FreeDrinksCount} Freigetränke)";
-                    }
+        // Seite hinzufügen (A4 Hochformat)
+        var page = document.AddPage();
+        page.Size = PdfSharpCore.PageSize.A4;
 
-                    column.Item().PaddingTop(2).Text(subtitle)
-                        .FontSize(11).FontColor(Colors.Grey.Darken1);
+        var gfx = XGraphics.FromPdfPage(page);
 
-                    column.Item().PaddingVertical(8).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                });
+        // Farben definieren
+        var colPrimary = XColor.FromArgb(20, 50, 100); // Dunkelblau
+        var colGrayText = XColor.FromArgb(100, 100, 100);
+        var colLightGray = XColor.FromArgb(240, 240, 240);
+        var colGreen = XColor.FromArgb(0, 120, 50);
+        var colRed = XColor.FromArgb(180, 40, 40);
+        var colPurple = XColor.FromArgb(110, 40, 140);
 
-                page.Content().PaddingVertical(5).Column(column => {
-                    // 1. Kennzahlen-Kacheln (4er-Grid passend zur UI)
-                    column.Item().PaddingBottom(15).Column(kBox => {
-                        kBox.Item().PaddingBottom(8).Row(row => {
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
-                                c.Item().Text("Wareneinsatz (Einkauf)").FontSize(8).FontColor(Colors.Grey.Darken1);
-                                c.Item().Text($"{result.TotalMaterialCost:C2}").FontSize(12).Bold().FontColor(Colors.Green.Darken2);
-                            });
-                            row.Spacing(8);
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
-                                c.Item().Text("Gesamtkosten (inkl. Fix/Pers)").FontSize(8).FontColor(Colors.Grey.Darken1);
-                                c.Item().Text($"{result.TotalEventCosts:C2}").FontSize(12).Bold().FontColor(Colors.Red.Darken2);
-                            });
-                        });
+        // Fonts definieren
+        var fontTitle = new XFont("Arial", 16, XFontStyle.Bold);
+        var fontSubtitle = new XFont("Arial", 10, XFontStyle.Regular);
+        var fontSection = new XFont("Arial", 12, XFontStyle.Bold);
+        var fontHeader = new XFont("Arial", 9, XFontStyle.Bold);
+        var fontBody = new XFont("Arial", 9, XFontStyle.Regular);
+        var fontBodyBold = new XFont("Arial", 9, XFontStyle.Bold);
 
-                        kBox.Item().Row(row => {
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
-                                c.Item().Text("Ziel-Umsatz (inkl. Gewinn)").FontSize(8).FontColor(Colors.Grey.Darken1);
-                                c.Item().Text($"{result.TotalTargetRevenue:C2}").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
-                            });
-                            row.Spacing(8);
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(c => {
-                                c.Item().Text("Ø Verkaufspreis / Drink").FontSize(8).FontColor(Colors.Grey.Darken1);
-                                c.Item().Text($"{result.TargetSalesPricePerDrink:C2}").FontSize(12).Bold().FontColor(Colors.Purple.Darken2);
-                            });
-                        });
-                    });
+        // Standard-Format für Textboxen (verhindert den Baseline-Crash)
+        var formatLeft = new XStringFormat { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
 
-                    // 2. Kalkulation pro Cocktail & Verkaufspreis
-                    column.Item().PaddingBottom(5).Text("Cocktail-Kalkulation & Verkaufspreise").FontSize(12).Bold();
+        double margin = 40; // Seitenrand in Punkten
+        double yPos = margin;
+        double usableWidth = page.Width - (2 * margin);
 
-                    column.Item().PaddingBottom(15).Table(table => {
-                        table.ColumnsDefinition(columns => {
-                            columns.RelativeColumn(2.5f); // Cocktail
-                            columns.RelativeColumn(1f);   // Anteil
-                            columns.RelativeColumn(1f);   // Anzahl
-                            columns.RelativeColumn(1.8f); // Real / Drink
-                            columns.RelativeColumn(2.2f); // Empf. Verkaufspreis
-                        });
+        // --- 1. HEADER ---
+        gfx.DrawString($"Ergebnis: {result.EventTitle}", fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
+        yPos += 22;
 
-                        table.Header(header => {
-                            header.Cell().Element(HeaderStyle).Text("Cocktail");
-                            header.Cell().Element(HeaderStyle).AlignCenter().Text("Anteil");
-                            header.Cell().Element(HeaderStyle).AlignCenter().Text("Anzahl");
-                            header.Cell().Element(HeaderStyle).AlignRight().Text("Real / Drink*");
-                            header.Cell().Element(HeaderStyle).AlignRight().Text("Empf. Preis");
-                        });
+        var subtitle = $"{result.TotalDrinksCount} zahlende Drinks";
+        if (result.FreeDrinksCount > 0) {
+            subtitle += $" (+ {result.FreeDrinksCount} Freigetränke)";
+        }
+        gfx.DrawString(subtitle, fontSubtitle, new XSolidBrush(colGrayText), new XRect(margin, yPos, usableWidth, 18), formatLeft);
+        yPos += 20;
 
-                        foreach (var calc in result.RecipeCalculations) {
-                            table.Cell().Element(CellStyle).Text(calc.RecipeName).Bold();
-                            table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.Percentage:0.##} %");
-                            table.Cell().Element(CellStyle).AlignCenter().Text($"{calc.PayingDrinkCount} ({calc.FreeDrinkCount}) Stk.");
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.RealCostPerDrink:C2}").FontColor(Colors.Green.Darken2);
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{calc.TargetSalesPrice:C2}").Bold().FontColor(Colors.Purple.Darken2);
-                        }
-                    });
+        // Trennlinie
+        gfx.DrawLine(new XPen(XColors.LightGray, 1), margin, yPos, page.Width - margin, yPos);
+        yPos += 15;
 
-                    // 3. Automatische Einkaufsliste
-                    column.Item().PaddingBottom(5).Text("Automatische Einkaufsliste").FontSize(12).Bold();
+        // --- 2. KENNZAHLEN (Kacheln) ---
+        double boxWidth = (usableWidth - 10) / 2;
+        double boxHeight = 35;
 
-                    column.Item().Table(table => {
-                        table.ColumnsDefinition(columns => {
-                            columns.ConstantColumn(20);  // Checkbox [ ]
-                            columns.RelativeColumn(3);   // Zutat
-                            columns.RelativeColumn(2);   // Gesamtbedarf
-                            columns.RelativeColumn(3);   // Kaufm. Gebinde
-                            columns.RelativeColumn(2);   // Gesamtkosten
-                        });
+        // Funktion zum Zeichnen einer Kennzahlen-Box
+        void DrawKpiBox(double x, double y, string label, string value, XColor valueColor) {
+            gfx.DrawRectangle(new XSolidBrush(colLightGray), x, y, boxWidth, boxHeight);
+            gfx.DrawRectangle(new XPen(XColors.LightGray, 1), x, y, boxWidth, boxHeight);
 
-                        table.Header(header => {
-                            header.Cell().Element(HeaderStyle).Text("[x]");
-                            header.Cell().Element(HeaderStyle).Text("Zutat");
-                            header.Cell().Element(HeaderStyle).Text("Gesamtbedarf");
-                            header.Cell().Element(HeaderStyle).AlignCenter().Text("Kaufm. Gebinde");
-                            header.Cell().Element(HeaderStyle).AlignRight().Text("Gesamtkosten");
-                        });
+            gfx.DrawString(label, fontBody, new XSolidBrush(colGrayText), new XRect(x + 5, y + 4, boxWidth - 10, 12), formatLeft);
+            gfx.DrawString(value, fontBodyBold, new XSolidBrush(valueColor), new XRect(x + 5, y + 18, boxWidth - 10, 15), formatLeft);
+        }
 
-                        foreach (var item in result.ShoppingList) {
-                            table.Cell().Element(CellStyle).Text("[  ]");
-                            table.Cell().Element(CellStyle).Text(item.IngredientName).Bold();
-                            table.Cell().Element(CellStyle).Text(FormatAmount(item.TotalAmountNeeded, item.Unit));
-                            table.Cell().Element(CellStyle).AlignCenter().Text($"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})");
-                            table.Cell().Element(CellStyle).AlignRight().Text($"{item.TotalCost:C2}").Bold();
-                        }
-                    });
-                });
+        DrawKpiBox(margin, yPos, "Wareneinsatz (Einkauf)", $"{result.TotalMaterialCost:C2}", colGreen);
+        DrawKpiBox(margin + boxWidth + 10, yPos, "Gesamtkosten (inkl. Fix/Pers)", $"{result.TotalEventCosts:C2}", colRed);
+        yPos += boxHeight + 8;
 
-                // Footer
-                page.Footer().AlignRight().Text(x => {
-                    x.Span("Erstellt am ");
-                    x.Span(DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
-                    x.Span(" Uhr");
-                });
-            });
-        });
+        DrawKpiBox(margin, yPos, "Ziel-Umsatz (inkl. Gewinn)", $"{result.TotalTargetRevenue:C2}", colPrimary);
+        DrawKpiBox(margin + boxWidth + 10, yPos, "Ø Verkaufspreis / Drink", $"{result.TargetSalesPricePerDrink:C2}", colPurple);
+        yPos += boxHeight + 20;
 
-        return document.GeneratePdf();
+        // --- 3. COCKTAIL-KALKULATION ---
+        gfx.DrawString("Cocktail-Kalkulation & Verkaufspreise", fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        yPos += 22;
 
-        static IContainer HeaderStyle(IContainer container) =>
-            container.Background(Colors.Grey.Lighten3)
-                     .Padding(5)
-                     .DefaultTextStyle(x => x.Bold().FontSize(8.5f));
+        // Tabellenkopf
+        double[] colWidths1 = { 120, 50, 60, 95, 95 };
+        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, ["Cocktail", "Anteil", "Anzahl", "Real / Drink", "Empf. Preis"]);
 
-        static IContainer CellStyle(IContainer container) =>
-            container.BorderBottom(1)
-                     .BorderColor(Colors.Grey.Lighten3)
-                     .Padding(5)
-                     .DefaultTextStyle(x => x.FontSize(8.5f));
+        foreach (var calc in result.RecipeCalculations) {
+            DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths1, [
+                calc.RecipeName,
+                $"{calc.Percentage:0.##} %",
+                $"{calc.PayingDrinkCount} ({calc.FreeDrinkCount})",
+                $"{calc.RealCostPerDrink:C2}",
+                $"{calc.TargetSalesPrice:C2}"
+            ]);
+        }
+
+        yPos += 15;
+
+        // --- 4. EINKAUFSLISTE ---
+        gfx.DrawString("Automatische Einkaufsliste", fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        yPos += 22;
+
+        double[] colWidths2 = { 25, 130, 90, 115, 60 };
+        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths2, ["[ ]", "Zutat", "Gesamtbedarf", "Kaufm. Gebinde", "Kosten"]);
+
+        foreach (var item in result.ShoppingList) {
+            DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths2, [
+                "[  ]",
+                item.IngredientName,
+                FormatAmount(item.TotalAmountNeeded, item.Unit),
+                $"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})",
+                $"{item.TotalCost:C2}"
+            ]);
+        }
+
+        // Speicher-Stream generieren
+        using var memoryStream = new MemoryStream();
+        document.Save(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    private static void DrawTableHeader(XGraphics gfx, XFont font, XColor bgColor, double startX, ref double yPos, double totalWidth, double[] colWidths, string[] headers) {
+        double currentX = startX;
+        double height = 18;
+
+        gfx.DrawRectangle(new XSolidBrush(bgColor), startX, yPos, totalWidth, height);
+
+        for (int i = 0; i < headers.Length; i++) {
+            var rect = new XRect(currentX + 3, yPos + 3, colWidths[i] - 6, height - 3);
+            var format = new XStringFormat {
+                Alignment = i >= 3 ? XStringAlignment.Far : (i == 1 && headers[i] == "Anteil" ? XStringAlignment.Center : XStringAlignment.Near),
+                LineAlignment = XLineAlignment.Near
+            };
+
+            gfx.DrawString(headers[i], font, XBrushes.Black, rect, format);
+            currentX += colWidths[i];
+        }
+        yPos += height;
+    }
+
+    private static void DrawTableRow(XGraphics gfx, XFont font, double startX, ref double yPos, double totalWidth, double[] colWidths, string[] values) {
+        double currentX = startX;
+        double height = 18;
+
+        // Untere Trennlinie für Zeile
+        gfx.DrawLine(new XPen(XColors.LightGray, 0.5), startX, yPos + height, startX + totalWidth, yPos + height);
+
+        for (int i = 0; i < values.Length; i++) {
+            var rect = new XRect(currentX + 3, yPos + 3, colWidths[i] - 6, height - 3);
+            var format = new XStringFormat {
+                Alignment = i >= 3 ? XStringAlignment.Far : XStringAlignment.Near,
+                LineAlignment = XLineAlignment.Near
+            };
+
+            gfx.DrawString(values[i], font, XBrushes.DarkSlateGray, rect, format);
+            currentX += colWidths[i];
+        }
+        yPos += height;
     }
 
     private static string FormatAmount(decimal amount, IngredientUnit unit) {
         return unit switch {
             IngredientUnit.Piece => $"{amount:0.##} Stk.",
-            IngredientUnit.Gram => amount >= 1000m
-                ? $"{(amount / 1000m):0.##} kg"
-                : $"{amount:0.##} g",
-            IngredientUnit.Milliliter => amount >= 1000m
-                ? $"{(amount / 1000m):0.##} l"
-                : $"{amount:0.##} ml",
+            IngredientUnit.Gram => amount >= 1000m ? $"{(amount / 1000m):0.##} kg" : $"{amount:0.##} g",
+            IngredientUnit.Milliliter => amount >= 1000m ? $"{(amount / 1000m):0.##} l" : $"{amount:0.##} ml",
             _ => $"{amount:0.##}"
         };
     }
@@ -161,12 +195,8 @@ public class ShoppingListPdfGenerator {
     private static string FormatPackageSize(decimal packageSize, IngredientUnit unit) {
         return unit switch {
             IngredientUnit.Piece => $"{packageSize:0.##} Stk.",
-            IngredientUnit.Gram => packageSize >= 1000m
-                ? $"{(packageSize / 1000m):0.##} kg"
-                : $"{packageSize:0.##} g",
-            IngredientUnit.Milliliter => packageSize >= 1000m
-                ? $"{(packageSize / 1000m):0.##} l"
-                : $"{packageSize:0.##} ml",
+            IngredientUnit.Gram => packageSize >= 1000m ? $"{(packageSize / 1000m):0.##} kg" : $"{packageSize:0.##} g",
+            IngredientUnit.Milliliter => packageSize >= 1000m ? $"{(packageSize / 1000m):0.##} l" : $"{packageSize:0.##} ml",
             _ => $"{packageSize:0.##}"
         };
     }
