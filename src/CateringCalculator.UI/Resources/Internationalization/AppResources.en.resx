@@ -534,4 +534,28 @@
   <data name="Ingredients_Loading" xml:space="preserve">
     <value>Loading ingredients...</value>
   </data>
+  <data name="Home_Title" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="Home_Subtitle" xml:space="preserve">
+    <value>Plan, calculate and shop — everything for your cocktail events</value>
+  </data>
+  <data name="Home_Intro" xml:space="preserve">
+    <value>The Catering Calculator helps you plan events efficiently: manage recipes, calculate cost of goods, generate shopping lists and determine recommended sale prices.</value>
+  </data>
+  <data name="Home_UsageTitle" xml:space="preserve">
+    <value>How to use the app</value>
+  </data>
+  <data name="Home_Usage_Step1" xml:space="preserve">
+    <value>1) Maintain ingredients &amp; recipes: add package sizes and prices.</value>
+  </data>
+  <data name="Home_Usage_Step2" xml:space="preserve">
+    <value>2) Create a new event: set guest count, free drinks and buffer.</value>
+  </data>
+  <data name="Home_Usage_Step3" xml:space="preserve">
+    <value>3) View calculation: automatically generated costs, shopping list and recommended prices.</value>
+  </data>
+  <data name="Home_Note" xml:space="preserve">
+    <value>Tip: You can export results as PDF and reload saved events later.</value>
+  </data>
 </root>

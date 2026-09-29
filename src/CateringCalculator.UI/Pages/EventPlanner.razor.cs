@@ -6,12 +6,11 @@ using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using CateringCalculator.UI.Shared;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class EventPlanner : IDisposable, IAsyncDisposable {
-    [Inject]
-    private LocalizationService LocalizationService { get; set; } = default!;
+public partial class EventPlanner : LocalizedComponentBase, IAsyncDisposable {
     [Inject]
     private PageTitleService TitleService { get; set; } = default!;
     [Inject]
@@ -32,7 +31,7 @@ public partial class EventPlanner : IDisposable, IAsyncDisposable {
     private decimal TotalPercentage => _eventPlan.SelectedRecipes.Sum(r => r.Percentage);
 
     protected override async Task OnInitializedAsync() {
-        LocalizationService.OnChange += StateHasChanged;
+        // Localization handled by LocalizedComponentBase
 
         // Startet ganz oben mit dem Standard-Titel
         TitleService.SetTitle("Catering Calculator");
@@ -179,9 +178,7 @@ public partial class EventPlanner : IDisposable, IAsyncDisposable {
         _showFixedModal = false;
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
-    }
+    // Localization unsubscribe handled by LocalizedComponentBase.Dispose()
 
     public async ValueTask DisposeAsync() {
         if (_jsModule != null) {

@@ -534,4 +534,28 @@
   <data name="Ingredients_Loading" xml:space="preserve">
     <value>Zutaten werden geladen...</value>
   </data>
+  <data name="Home_Title" xml:space="preserve">
+    <value>Willkommen</value>
+  </data>
+  <data name="Home_Subtitle" xml:space="preserve">
+    <value>Planen, kalkulieren und einkaufen — alles für deine Cocktail-Events</value>
+  </data>
+  <data name="Home_Intro" xml:space="preserve">
+    <value>Der Catering Calculator hilft dir, Veranstaltungen effizient zu planen: Rezepte verwalten, den Wareneinsatz berechnen, automatische Einkaufsliste erstellen und empfohlene Verkaufspreise ermitteln.</value>
+  </data>
+  <data name="Home_UsageTitle" xml:space="preserve">
+    <value>So benutzt du die App</value>
+  </data>
+  <data name="Home_Usage_Step1" xml:space="preserve">
+    <value>1) Zutaten und Rezepte pflegen: Lege Gebindegrößen und Preise an.</value>
+  </data>
+  <data name="Home_Usage_Step2" xml:space="preserve">
+    <value>2) Neues Event anlegen: Gästezahl, Freigetränke und Puffer einstellen.</value>
+  </data>
+  <data name="Home_Usage_Step3" xml:space="preserve">
+    <value>3) Kalkulation ansehen: Automatisch berechnete Wareneinsätze, Einkaufsliste und empfohlene Verkaufspreise.</value>
+  </data>
+  <data name="Home_Note" xml:space="preserve">
+    <value>Tipp: Du kannst Ergebnisse als PDF exportieren und gespeicherte Events später wieder laden.</value>
+  </data>
 </root>

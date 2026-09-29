@@ -752,6 +752,78 @@ namespace CateringCalculator.UI.Resources.Internationalization {
                 return ResourceManager.GetString("Ingredients_Loading", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Willkommen.
+        /// </summary>
+        internal static string Home_Title {
+            get {
+                return ResourceManager.GetString("Home_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Planen, kalkulieren und einkaufen — alles für deine Cocktail-Events.
+        /// </summary>
+        internal static string Home_Subtitle {
+            get {
+                return ResourceManager.GetString("Home_Subtitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Der Catering Calculator hilft dir, Veranstaltungen effizient zu planen: Rezepte verwalten, den Wareneinsatz berechnen, automatische Einkaufsliste erstellen und empfohlene Verkaufspreise ermitteln.
+        /// </summary>
+        internal static string Home_Intro {
+            get {
+                return ResourceManager.GetString("Home_Intro", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to So benutzt du die App.
+        /// </summary>
+        internal static string Home_UsageTitle {
+            get {
+                return ResourceManager.GetString("Home_UsageTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 1) Zutaten und Rezepte pflegen: Lege Gebindegrößen und Preise an.
+        /// </summary>
+        internal static string Home_Usage_Step1 {
+            get {
+                return ResourceManager.GetString("Home_Usage_Step1", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 2) Neues Event anlegen: Gästezahl, Freigetränke und Puffer einstellen.
+        /// </summary>
+        internal static string Home_Usage_Step2 {
+            get {
+                return ResourceManager.GetString("Home_Usage_Step2", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 3) Kalkulation ansehen: Automatisch berechnete Wareneinsätze, Einkaufsliste und empfohlene Verkaufspreise.
+        /// </summary>
+        internal static string Home_Usage_Step3 {
+            get {
+                return ResourceManager.GetString("Home_Usage_Step3", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Tipp: Du kannst Ergebnisse als PDF exportieren und gespeicherte Events später wieder laden.
+        /// </summary>
+        internal static string Home_Note {
+            get {
+                return ResourceManager.GetString("Home_Note", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Name.

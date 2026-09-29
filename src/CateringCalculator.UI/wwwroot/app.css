@@ -45,12 +45,20 @@
     --surface: #1e293b;
     --surface-hover: #334155;
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    /* Improve contrast for muted text in dark mode to make subtitles and helper text more readable */
+    --text-muted: #cbd5e1;
     --border: #334155;
     --success: #34d399;
     --success-light: rgba(52, 211, 153, 0.15);
     --danger: #f87171;
     --danger-light: rgba(248, 113, 113, 0.15);
+}
+
+/* Bootstrap uses its own .text-muted which can reference Bootstrap CSS variables.
+   Ensure our dark-theme muted text is applied with higher specificity so subtitles
+   and helper text are readable. */
+.app-shell.dark-theme .text-muted {
+    color: var(--text-muted) !important;
 }
 
 /* ==========================================================================
@@ -619,6 +627,23 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.5rem;
 }
 
+/* Rows used inside modals for list items (fixed costs, personnel items). Adapts to dark mode. */
+.modal-item-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background-color: var(--surface-hover);
+}
+
+.modal-item-row .form-control {
+    background: var(--surface);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+}
+
 .modal-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border);
@@ -703,12 +728,19 @@ h1, h2, h3, h4, h5, h6 {
         margin-top: 0;
         border: none;
         width: 100%;
-        white-space: nowrap;
+        /* Allow table cells to wrap on larger screens so the table adapts
+           to the available container width and avoids unnecessary
+           horizontal scrolling. */
+        white-space: normal;
+        table-layout: auto;
     }
 
         .table-responsive .table-custom th,
         .table-responsive .table-custom td {
             padding: 0.85rem 1rem;
+            /* Allow long cell contents (names, numbers) to wrap and break
+               cleanly instead of forcing horizontal scroll. */
+            word-break: break-word;
         }
 
 /* ==========================================================================

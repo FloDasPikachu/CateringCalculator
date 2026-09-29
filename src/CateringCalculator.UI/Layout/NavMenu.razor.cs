@@ -1,12 +1,9 @@
-﻿using CateringCalculator.UI.Services;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
+using CateringCalculator.UI.Shared;
 
 namespace CateringCalculator.UI.Layout;
 
-public partial class NavMenu : ComponentBase, IDisposable {
-    [Inject]
-    private LocalizationService LocalizationService { get; set; } = default!;
-
+public partial class NavMenu : LocalizedComponentBase {
     [Parameter]
     public bool IsMobile { get; set; }
     [Parameter]
@@ -16,17 +13,5 @@ public partial class NavMenu : ComponentBase, IDisposable {
         if (OnItemSelected.HasDelegate) {
             await OnItemSelected.InvokeAsync();
         }
-    }
-
-    protected override void OnInitialized() {
-        LocalizationService.OnChange += OnLanguageChanged;
-    }
-
-    private void OnLanguageChanged() {
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose() {
-        LocalizationService.OnChange -= OnLanguageChanged;
     }
 }

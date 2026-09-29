@@ -2,14 +2,13 @@
 using CateringCalculator.Core.Models;
 using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
+using CateringCalculator.UI.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Recipes : IDisposable, IAsyncDisposable {
-    [Inject]
-    private LocalizationService LocalizationService { get; set; } = default!;
+public partial class Recipes : LocalizedComponentBase, IAsyncDisposable {
     [Inject]
     private PageTitleService TitleService { get; set; } = default!;
     [Inject]
@@ -40,8 +39,7 @@ public partial class Recipes : IDisposable, IAsyncDisposable {
     private string _searchTerm = string.Empty;
 
     protected override async Task OnInitializedAsync() {
-        LocalizationService.OnChange += StateHasChanged;
-
+        // Localization handled by LocalizedComponentBase
         // Startet ganz oben erst einmal mit dem Standard-Titel in der Navbar
         TitleService.SetTitle("Catering Calculator");
 
@@ -236,9 +234,7 @@ public partial class Recipes : IDisposable, IAsyncDisposable {
         }
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
-    }
+    // Localization unsubscribe handled by LocalizedComponentBase.Dispose()
 
     public async ValueTask DisposeAsync() {
         if (_jsModule != null) {

@@ -1,6 +1,7 @@
 ﻿@page "/ingredients"
 @using CateringCalculator.Core.Interfaces
 @using CateringCalculator.UI.Resources.Internationalization
+@inherits CateringCalculator.UI.Shared.LocalizedComponentBase
 @inject IRecipeRepository RecipeRepository
 
 <PageTitle>@AppResources.Ingredients_Title</PageTitle>

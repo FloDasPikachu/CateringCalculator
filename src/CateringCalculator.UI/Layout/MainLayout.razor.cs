@@ -1,12 +1,11 @@
-﻿using CateringCalculator.UI.Services;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Maui.Devices;
+using CateringCalculator.UI.Shared;
+using CateringCalculator.UI.Services;
 
 namespace CateringCalculator.UI.Layout;
 
-public partial class MainLayout : LayoutComponentBase, IDisposable {
-    [Inject]
-    private LocalizationService LocalizationService { get; set; } = default!;
+public partial class MainLayout : LocalizedLayoutBase {
     [Inject]
     private PageTitleService TitleService { get; set; } = default!;
 
@@ -19,7 +18,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable {
     private bool IsEnglishActive => LocalizationService.CurrentCulture.TwoLetterISOLanguageName == "en";
 
     protected override void OnInitialized() {
-        LocalizationService.OnChange += StateHasChanged;
+        base.OnInitialized();
         TitleService.OnChange += StateHasChanged;
     }
 
@@ -40,8 +39,8 @@ public partial class MainLayout : LayoutComponentBase, IDisposable {
         StateHasChanged();
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
+    public override void Dispose() {
+        base.Dispose();
         TitleService.OnChange -= StateHasChanged;
     }
 }

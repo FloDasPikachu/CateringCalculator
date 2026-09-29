@@ -2,14 +2,13 @@
 using CateringCalculator.Core.Models;
 using CateringCalculator.UI.Resources.Internationalization;
 using CateringCalculator.UI.Services;
+using CateringCalculator.UI.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace CateringCalculator.UI.Pages;
 
-public partial class Ingredients : IDisposable, IAsyncDisposable {
-    [Inject]
-    private LocalizationService LocalizationService { get; set; } = default!;
+public partial class Ingredients : LocalizedComponentBase, IAsyncDisposable {
     [Inject]
     private PageTitleService TitleService { get; set; } = default!;
     [Inject]
@@ -29,7 +28,7 @@ public partial class Ingredients : IDisposable, IAsyncDisposable {
     private DotNetObjectReference<Ingredients>? _dotNetRef;
 
     protected override async Task OnInitializedAsync() {
-        LocalizationService.OnChange += StateHasChanged;
+        // Localization handled by LocalizedComponentBase
         TitleService.SetTitle("Catering Calculator");
         await LoadIngredientsAsync();
     }
@@ -127,9 +126,7 @@ public partial class Ingredients : IDisposable, IAsyncDisposable {
         _infoMessage = string.Empty;
     }
 
-    public void Dispose() {
-        LocalizationService.OnChange -= StateHasChanged;
-    }
+    // Localization unsubscribe handled by LocalizedComponentBase.Dispose()
 
     public async ValueTask DisposeAsync() {
         if (_jsModule != null) {

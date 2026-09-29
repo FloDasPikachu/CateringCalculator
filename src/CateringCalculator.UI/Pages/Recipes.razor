@@ -2,6 +2,7 @@
 @implements IAsyncDisposable
 @using CateringCalculator.Core.Interfaces
 @using CateringCalculator.UI.Resources.Internationalization
+@inherits CateringCalculator.UI.Shared.LocalizedComponentBase
 @inject IRecipeRepository RecipeRepository
 
 <PageTitle>@AppResources.Recipes_Title - Catering Calculator</PageTitle>
