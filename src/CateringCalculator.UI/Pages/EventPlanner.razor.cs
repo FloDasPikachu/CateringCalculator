@@ -2,7 +2,7 @@
 using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
 using CateringCalculator.Core.Services;
-using CateringCalculator.UI.Resources.Internationalization;
+using CateringCalculator.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;

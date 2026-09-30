@@ -1,6 +1,6 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
-using CateringCalculator.UI.Resources.Internationalization;
+using CateringCalculator.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using CateringCalculator.UI.Shared;
 using Microsoft.AspNetCore.Components;

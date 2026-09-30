@@ -1,5 +1,5 @@
 ﻿using CateringCalculator.Core.Models;
-using CateringCalculator.UI.Resources.Internationalization;
+using CateringCalculator.Resources.Internationalization;
 using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Components;
@@ -14,7 +14,6 @@ public partial class PersonnelCostModal {
     private List<PersonnelCostItem> _items = new();
 
     protected override void OnParametersSet() {
-        // Lokale Kopie erzeugen, damit Änderungen beim Abbrechen verworfen werden
         _items = PersonnelItems.Select(x => new PersonnelCostItem {
             Id = x.Id,
             EventPlanId = x.EventPlanId,

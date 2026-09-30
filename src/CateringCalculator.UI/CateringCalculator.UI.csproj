@@ -88,21 +88,13 @@
 	<ItemGroup>
 		<ProjectReference Include="..\CateringCalculator.Core\CateringCalculator.Core.csproj" />
 		<ProjectReference Include="..\CateringCalculator.Infrastructure\CateringCalculator.Infrastructure.csproj" />
+		<ProjectReference Include="..\..\src\CateringCalculator.Resources\CateringCalculator.Resources.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Resources\Internationalization\AppResources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>AppResources.resx</DependentUpon>
-	  </Compile>
+	  <Folder Include="Resources\Internationalization\" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <EmbeddedResource Update="Resources\Internationalization\AppResources.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
-	</ItemGroup>
+  <!-- AppResources moved to shared CateringCalculator.Resources project. Keep project reference only. -->
 
 </Project>

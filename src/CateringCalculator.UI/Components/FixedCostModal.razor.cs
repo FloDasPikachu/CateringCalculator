@@ -1,5 +1,5 @@
 ﻿using CateringCalculator.Core.Models;
-using CateringCalculator.UI.Resources.Internationalization;
+using CateringCalculator.Resources.Internationalization;
 using Microsoft.AspNetCore.Components;
 
 namespace CateringCalculator.UI.Components;

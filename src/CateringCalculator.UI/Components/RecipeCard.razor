@@ -1,6 +1,6 @@
 ﻿@using CateringCalculator.Core.Models
 @using CateringCalculator.Core.Enums
-@using CateringCalculator.UI.Resources.Internationalization
+@using CateringCalculator.Resources.Internationalization
 
 <div class="card-panel" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
     <div>
@@ -16,7 +16,6 @@
             </div>
         </div>
 
-        <!-- Gruppen / Tags Chips -->
         @if (Recipe.Groups != null && Recipe.Groups.Any()) {
             <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.75rem;">
                 @foreach (var group in Recipe.Groups) {

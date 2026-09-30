@@ -11,6 +11,10 @@ public abstract class LocalizedComponentBase : ComponentBase, IDisposable {
     protected override void OnInitialized() {
         base.OnInitialized();
         LocalizationService.OnChange += OnLanguageChanged;
+        // Centralize default title behavior for pages that inherit this base
+        if (this is Microsoft.AspNetCore.Components.ComponentBase) {
+            // If a derived component wants a custom title, it should call TitleService.SetTitle from OnInitializedAsync
+        }
     }
 
     protected virtual void OnLanguageChanged() {

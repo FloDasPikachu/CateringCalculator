@@ -3,6 +3,7 @@ using CateringCalculator.Core.Models;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Fonts;
 using PdfSharpCore.Pdf;
+using CateringCalculator.Resources;
 
 namespace CateringCalculator.Infrastructure.Services;
 
@@ -50,13 +51,14 @@ public class ShoppingListPdfGenerator {
         var colRed = XColor.FromArgb(180, 40, 40);
         var colPurple = XColor.FromArgb(110, 40, 140);
 
-        // Fonts definieren
-        var fontTitle = new XFont("Arial", 16, XFontStyle.Bold);
-        var fontSubtitle = new XFont("Arial", 10, XFontStyle.Regular);
-        var fontSection = new XFont("Arial", 12, XFontStyle.Bold);
-        var fontHeader = new XFont("Arial", 9, XFontStyle.Bold);
-        var fontBody = new XFont("Arial", 9, XFontStyle.Regular);
-        var fontBodyBold = new XFont("Arial", 9, XFontStyle.Bold);
+        // Fonts definieren (use Unicode encoding so umlauts and € render correctly)
+        var fontOptions = new XPdfFontOptions(PdfFontEncoding.Unicode);
+        var fontTitle = new XFont("Arial", 16, XFontStyle.Bold, fontOptions);
+        var fontSubtitle = new XFont("Arial", 10, XFontStyle.Regular, fontOptions);
+        var fontSection = new XFont("Arial", 12, XFontStyle.Bold, fontOptions);
+        var fontHeader = new XFont("Arial", 9, XFontStyle.Bold, fontOptions);
+        var fontBody = new XFont("Arial", 9, XFontStyle.Regular, fontOptions);
+        var fontBodyBold = new XFont("Arial", 9, XFontStyle.Bold, fontOptions);
 
         // Standard-Format für Textboxen (verhindert den Baseline-Crash)
         var formatLeft = new XStringFormat { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
@@ -66,12 +68,11 @@ public class ShoppingListPdfGenerator {
         double usableWidth = page.Width - (2 * margin);
 
         // --- 1. HEADER ---
-        gfx.DrawString($"Ergebnis: {result.EventTitle}", fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
+        gfx.DrawString(string.Format(AppResourcesPdf.Header_ResultTitle, result.EventTitle), fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
         yPos += 22;
-
-        var subtitle = $"{result.TotalDrinksCount} zahlende Drinks";
+        var subtitle = string.Format(AppResourcesPdf.Header_PayingDrinks, result.TotalDrinksCount);
         if (result.FreeDrinksCount > 0) {
-            subtitle += $" (+ {result.FreeDrinksCount} Freigetränke)";
+            subtitle = string.Format(AppResourcesPdf.Header_PayingAndFreeDrinks, result.TotalDrinksCount, result.FreeDrinksCount);
         }
         gfx.DrawString(subtitle, fontSubtitle, new XSolidBrush(colGrayText), new XRect(margin, yPos, usableWidth, 18), formatLeft);
         yPos += 20;
@@ -93,8 +94,8 @@ public class ShoppingListPdfGenerator {
             gfx.DrawString(value, fontBodyBold, new XSolidBrush(valueColor), new XRect(x + 5, y + 18, boxWidth - 10, 15), formatLeft);
         }
 
-        DrawKpiBox(margin, yPos, "Wareneinsatz (Einkauf)", $"{result.TotalMaterialCost:C2}", colGreen);
-        DrawKpiBox(margin + boxWidth + 10, yPos, "Gesamtkosten (inkl. Fix/Pers)", $"{result.TotalEventCosts:C2}", colRed);
+        DrawKpiBox(margin, yPos, AppResourcesPdf.Kpi_MaterialCost, $"{result.TotalMaterialCost:C2}", colGreen);
+        DrawKpiBox(margin + boxWidth + 10, yPos, AppResourcesPdf.Kpi_TotalCosts, $"{result.TotalEventCosts:C2}", colRed);
         yPos += boxHeight + 8;
 
         DrawKpiBox(margin, yPos, "Ziel-Umsatz (inkl. Gewinn)", $"{result.TotalTargetRevenue:C2}", colPrimary);
@@ -102,12 +103,18 @@ public class ShoppingListPdfGenerator {
         yPos += boxHeight + 20;
 
         // --- 3. COCKTAIL-KALKULATION ---
-        gfx.DrawString("Cocktail-Kalkulation & Verkaufspreise", fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        gfx.DrawString(AppResourcesPdf.Section_CocktailCalculation, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
         // Tabellenkopf
         double[] colWidths1 = { 120, 50, 60, 95, 95 };
-        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, ["Cocktail", "Anteil", "Anzahl", "Real / Drink", "Empf. Preis"]);
+        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, [
+            AppResourcesPdf.Table_Recipe,
+            AppResourcesPdf.Table_Share,
+            AppResourcesPdf.Table_Count,
+            AppResourcesPdf.Table_RealPerDrink,
+            AppResourcesPdf.Table_RecommendedPrice
+        ]);
 
         foreach (var calc in result.RecipeCalculations) {
             DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths1, [
@@ -122,11 +129,17 @@ public class ShoppingListPdfGenerator {
         yPos += 15;
 
         // --- 4. EINKAUFSLISTE ---
-        gfx.DrawString("Automatische Einkaufsliste", fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        gfx.DrawString(AppResourcesPdf.Section_ShoppingList, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
         double[] colWidths2 = { 25, 130, 90, 115, 60 };
-        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths2, ["[ ]", "Zutat", "Gesamtbedarf", "Kaufm. Gebinde", "Kosten"]);
+        DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths2, [
+            AppResourcesPdf.Table_Checkbox,
+            AppResourcesPdf.Table_Ingredient,
+            AppResourcesPdf.Table_TotalNeeded,
+            AppResourcesPdf.Table_Package,
+            AppResourcesPdf.Table_Costs
+        ]);
 
         foreach (var item in result.ShoppingList) {
             DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths2, [
