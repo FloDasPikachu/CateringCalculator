@@ -283,6 +283,7 @@ namespace CateringCalculator.Resources.Internationalization {
         public static string Event_TableIngredient { get { return ResourceManager.GetString("Event_TableIngredient", resourceCulture); } }
         public static string Event_TableDemand { get { return ResourceManager.GetString("Event_TableDemand", resourceCulture); } }
         public static string Event_TablePackage { get { return ResourceManager.GetString("Event_TablePackage", resourceCulture); } }
+        public static string Event_Remaining { get { return ResourceManager.GetString("Event_Remaining", resourceCulture); } }
         public static string Event_TableTotalCost { get { return ResourceManager.GetString("Event_TableTotalCost", resourceCulture); } }
 
         // Many additional members are used; define a generic accessor to avoid missing properties.

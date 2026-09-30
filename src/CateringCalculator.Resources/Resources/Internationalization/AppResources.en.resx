@@ -1,6 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- Migrated from UI project's AppResources.en.resx: canonical English translation file for the shared resources project -->
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -59,8 +117,57 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- Full English translations migrated from UI project -->
-  <!-- Note: keep this file as the canonical AppResources.en.resx under CateringCalculator.Resources -->
+  <data name="Header_ResultTitle" xml:space="preserve">
+    <value>Result: {0}</value>
+  </data>
+  <data name="Header_PayingDrinks" xml:space="preserve">
+    <value>{0} paying drinks</value>
+  </data>
+  <data name="Header_PayingAndFreeDrinks" xml:space="preserve">
+    <value>{0} paying drinks (+ {1} free drinks)</value>
+  </data>
+  <data name="Kpi_MaterialCost" xml:space="preserve">
+    <value>Material cost (purchase)</value>
+  </data>
+  <data name="Kpi_TotalCosts" xml:space="preserve">
+    <value>Total costs (incl. fixed/personnel)</value>
+  </data>
+  <data name="Section_CocktailCalculation" xml:space="preserve">
+    <value>Cocktail calculation &amp; selling prices</value>
+  </data>
+  <data name="Table_Recipe" xml:space="preserve">
+    <value>Cocktail</value>
+  </data>
+  <data name="Table_Share" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="Table_Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Table_RealPerDrink" xml:space="preserve">
+    <value>Actual / Drink</value>
+  </data>
+  <data name="Table_RecommendedPrice" xml:space="preserve">
+    <value>Recommended price</value>
+  </data>
+  <data name="Section_ShoppingList" xml:space="preserve">
+    <value>Automatic shopping list</value>
+  </data>
+  <data name="Table_Checkbox" xml:space="preserve">
+    <value>[ ]</value>
+  </data>
+  <data name="Table_Ingredient" xml:space="preserve">
+    <value>Ingredient</value>
+  </data>
+  <data name="Table_TotalNeeded" xml:space="preserve">
+    <value>Total needed</value>
+  </data>
+  <data name="Table_Package" xml:space="preserve">
+    <value>Purchase package</value>
+  </data>
+  <data name="Table_Costs" xml:space="preserve">
+    <value>Costs</value>
+  </data>
   <data name="Button_Save" xml:space="preserve">
     <value>Save</value>
   </data>
@@ -94,7 +201,6 @@
   <data name="Nav_Ingredients" xml:space="preserve">
     <value>Ingredients</value>
   </data>
-  <!-- Additional keys (truncated here for brevity) are preserved from the UI source. If you need the full set, reopen this file in the editor. -->
   <data name="Ingredients_Title" xml:space="preserve">
     <value>Ingredient Management</value>
   </data>
@@ -390,10 +496,13 @@
     <value>Ingredient</value>
   </data>
   <data name="Event_TableDemand" xml:space="preserve">
-    <value>Demand (incl. buffer/free drinks)</value>
+    <value>Demand</value>
   </data>
   <data name="Event_TablePackage" xml:space="preserve">
     <value>Commercial Packages</value>
+  </data>
+  <data name="Event_Remaining" xml:space="preserve">
+    <value>Remaining</value>
   </data>
   <data name="Event_TableTotalCost" xml:space="preserve">
     <value>Total Cost</value>
@@ -502,56 +611,5 @@
   </data>
   <data name="Home_Note" xml:space="preserve">
     <value>Tip: You can export results as PDF and reload saved events later.</value>
-  </data>
-  <data name="Header_ResultTitle" xml:space="preserve">
-    <value>Result: {0}</value>
-  </data>
-  <data name="Header_PayingDrinks" xml:space="preserve">
-    <value>{0} paying drinks</value>
-  </data>
-  <data name="Header_PayingAndFreeDrinks" xml:space="preserve">
-    <value>{0} paying drinks (+ {1} free drinks)</value>
-  </data>
-  <data name="Kpi_MaterialCost" xml:space="preserve">
-    <value>Material cost (purchase)</value>
-  </data>
-  <data name="Kpi_TotalCosts" xml:space="preserve">
-    <value>Total costs (incl. fixed/personnel)</value>
-  </data>
-  <data name="Section_CocktailCalculation" xml:space="preserve">
-    <value>Cocktail calculation &amp; selling prices</value>
-  </data>
-  <data name="Table_Recipe" xml:space="preserve">
-    <value>Cocktail</value>
-  </data>
-  <data name="Table_Share" xml:space="preserve">
-    <value>Share</value>
-  </data>
-  <data name="Table_Count" xml:space="preserve">
-    <value>Count</value>
-  </data>
-  <data name="Table_RealPerDrink" xml:space="preserve">
-    <value>Actual / Drink</value>
-  </data>
-  <data name="Table_RecommendedPrice" xml:space="preserve">
-    <value>Recommended price</value>
-  </data>
-  <data name="Section_ShoppingList" xml:space="preserve">
-    <value>Automatic shopping list</value>
-  </data>
-  <data name="Table_Checkbox" xml:space="preserve">
-    <value>[ ]</value>
-  </data>
-  <data name="Table_Ingredient" xml:space="preserve">
-    <value>Ingredient</value>
-  </data>
-  <data name="Table_TotalNeeded" xml:space="preserve">
-    <value>Total needed</value>
-  </data>
-  <data name="Table_Package" xml:space="preserve">
-    <value>Purchase package</value>
-  </data>
-  <data name="Table_Costs" xml:space="preserve">
-    <value>Costs</value>
   </data>
 </root>

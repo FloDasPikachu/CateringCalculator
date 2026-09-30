@@ -11,4 +11,6 @@ public class IngredientShoppingItem {
     public decimal PackagePrice { get; set; }
     public int PackagesToBuy { get; set; }
     public decimal TotalCost => PackagesToBuy * PackagePrice;
+
+    public decimal RemainingAmount => (PackagesToBuy * PackageSize) - TotalAmountNeeded;
 }
