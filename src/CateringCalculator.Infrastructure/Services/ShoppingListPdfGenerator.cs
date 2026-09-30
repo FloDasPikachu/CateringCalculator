@@ -10,7 +10,6 @@ namespace CateringCalculator.Infrastructure.Services;
 public class ShoppingListPdfGenerator {
     private static bool _isInitialized = false;
 
-    // Statischer Konstruktor
     static ShoppingListPdfGenerator() {
         InitializeFontResolver();
     }
@@ -20,38 +19,31 @@ public class ShoppingListPdfGenerator {
             return;
 
         try {
-            // Manchmal wirft schon das Abfragen von GlobalFontSettings.FontResolver den Fehler,
-            // wenn noch kein Resolver gesetzt ist. Wir setzen ihn daher direkt per Zuweisung.
             GlobalFontSettings.FontResolver = new CustomFontResolver();
             _isInitialized = true;
         } catch (Exception) {
-            // Falls er bereits gesetzt wurde oder ein interner Konflikt auftritt, ignorieren
             _isInitialized = true;
         }
     }
 
     public static byte[] GeneratePdf(CalculationResult result) {
-        // Zur Sicherheit vor jedem PDF-Generieren nochmal aufrufen
         InitializeFontResolver();
 
         var document = new PdfDocument();
         document.Info.Title = $"Einkaufsliste - {result.EventTitle}";
 
-        // Seite hinzufügen (A4 Hochformat)
         var page = document.AddPage();
         page.Size = PdfSharpCore.PageSize.A4;
 
         var gfx = XGraphics.FromPdfPage(page);
 
-        // Farben definieren
-        var colPrimary = XColor.FromArgb(20, 50, 100); // Dunkelblau
+        var colPrimary = XColor.FromArgb(20, 50, 100);
         var colGrayText = XColor.FromArgb(100, 100, 100);
         var colLightGray = XColor.FromArgb(240, 240, 240);
         var colGreen = XColor.FromArgb(0, 120, 50);
         var colRed = XColor.FromArgb(180, 40, 40);
         var colPurple = XColor.FromArgb(110, 40, 140);
 
-        // Fonts definieren (use Unicode encoding so umlauts and € render correctly)
         var fontOptions = new XPdfFontOptions(PdfFontEncoding.Unicode);
         var fontTitle = new XFont("Arial", 16, XFontStyle.Bold, fontOptions);
         var fontSubtitle = new XFont("Arial", 10, XFontStyle.Regular, fontOptions);
@@ -60,14 +52,12 @@ public class ShoppingListPdfGenerator {
         var fontBody = new XFont("Arial", 9, XFontStyle.Regular, fontOptions);
         var fontBodyBold = new XFont("Arial", 9, XFontStyle.Bold, fontOptions);
 
-        // Standard-Format für Textboxen (verhindert den Baseline-Crash)
         var formatLeft = new XStringFormat { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
 
-        double margin = 40; // Seitenrand in Punkten
+        double margin = 40;
         double yPos = margin;
         double usableWidth = page.Width - (2 * margin);
 
-        // --- 1. HEADER ---
         gfx.DrawString(string.Format(AppResourcesPdf.Header_ResultTitle, result.EventTitle), fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
         yPos += 22;
         var subtitle = string.Format(AppResourcesPdf.Header_PayingDrinks, result.TotalDrinksCount);
@@ -77,15 +67,12 @@ public class ShoppingListPdfGenerator {
         gfx.DrawString(subtitle, fontSubtitle, new XSolidBrush(colGrayText), new XRect(margin, yPos, usableWidth, 18), formatLeft);
         yPos += 20;
 
-        // Trennlinie
         gfx.DrawLine(new XPen(XColors.LightGray, 1), margin, yPos, page.Width - margin, yPos);
         yPos += 15;
 
-        // --- 2. KENNZAHLEN (Kacheln) ---
         double boxWidth = (usableWidth - 10) / 2;
         double boxHeight = 35;
 
-        // Funktion zum Zeichnen einer Kennzahlen-Box
         void DrawKpiBox(double x, double y, string label, string value, XColor valueColor) {
             gfx.DrawRectangle(new XSolidBrush(colLightGray), x, y, boxWidth, boxHeight);
             gfx.DrawRectangle(new XPen(XColors.LightGray, 1), x, y, boxWidth, boxHeight);
@@ -94,19 +81,17 @@ public class ShoppingListPdfGenerator {
             gfx.DrawString(value, fontBodyBold, new XSolidBrush(valueColor), new XRect(x + 5, y + 18, boxWidth - 10, 15), formatLeft);
         }
 
-        DrawKpiBox(margin, yPos, AppResourcesPdf.Kpi_MaterialCost, $"{result.TotalMaterialCost:C2}", colGreen);
-        DrawKpiBox(margin + boxWidth + 10, yPos, AppResourcesPdf.Kpi_TotalCosts, $"{result.TotalEventCosts:C2}", colRed);
+        DrawKpiBox(margin, yPos, AppResourcesPdf.Kpi_MaterialCost, $"{result.TotalMaterialCost:N2} €", colGreen);
+        DrawKpiBox(margin + boxWidth + 10, yPos, AppResourcesPdf.Kpi_TotalCosts, $"{result.TotalEventCosts:N2} €", colRed);
         yPos += boxHeight + 8;
 
-        DrawKpiBox(margin, yPos, "Ziel-Umsatz (inkl. Gewinn)", $"{result.TotalTargetRevenue:C2}", colPrimary);
-        DrawKpiBox(margin + boxWidth + 10, yPos, "Ø Verkaufspreis / Drink", $"{result.TargetSalesPricePerDrink:C2}", colPurple);
+        DrawKpiBox(margin, yPos, "Ziel-Umsatz (inkl. Gewinn)", $"{result.TotalTargetRevenue:N2} €", colPrimary);
+        DrawKpiBox(margin + boxWidth + 10, yPos, "Ø Verkaufspreis / Drink", $"{result.TargetSalesPricePerDrink:N2} €", colPurple);
         yPos += boxHeight + 20;
 
-        // --- 3. COCKTAIL-KALKULATION ---
         gfx.DrawString(AppResourcesPdf.Section_CocktailCalculation, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
-        // Tabellenkopf
         double[] colWidths1 = { 120, 50, 60, 95, 95 };
         DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, [
             AppResourcesPdf.Table_Recipe,
@@ -121,14 +106,13 @@ public class ShoppingListPdfGenerator {
                 calc.RecipeName,
                 $"{calc.Percentage:0.##} %",
                 $"{calc.PayingDrinkCount} ({calc.FreeDrinkCount})",
-                $"{calc.RealCostPerDrink:C2}",
-                $"{calc.TargetSalesPrice:C2}"
+                $"{calc.RealCostPerDrink:N2} €",
+                $"{calc.TargetSalesPrice:N2} €"
             ]);
         }
 
         yPos += 15;
 
-        // --- 4. EINKAUFSLISTE ---
         gfx.DrawString(AppResourcesPdf.Section_ShoppingList, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
@@ -147,11 +131,10 @@ public class ShoppingListPdfGenerator {
                 item.IngredientName,
                 FormatAmount(item.TotalAmountNeeded, item.Unit),
                 $"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})",
-                $"{item.TotalCost:C2}"
+                $"{item.TotalCost:N2} €"
             ]);
         }
 
-        // Speicher-Stream generieren
         using var memoryStream = new MemoryStream();
         document.Save(memoryStream);
         return memoryStream.ToArray();
@@ -180,7 +163,6 @@ public class ShoppingListPdfGenerator {
         double currentX = startX;
         double height = 18;
 
-        // Untere Trennlinie für Zeile
         gfx.DrawLine(new XPen(XColors.LightGray, 0.5), startX, yPos + height, startX + totalWidth, yPos + height);
 
         for (int i = 0; i < values.Length; i++) {
