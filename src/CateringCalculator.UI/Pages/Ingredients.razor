@@ -47,8 +47,8 @@
                             <tr>
                                 <td><strong>@ingredient.Name</strong></td>
                                 <td><span class="badge badge-primary">@ingredient.Unit</span></td>
-                                <td>@ingredient.StockAmount.ToString("N2") @ingredient.Unit</td>
-                                <td>@ingredient.PackageSize.ToString("N2") @ingredient.Unit</td>
+                                <td>@FormatAmount(@ingredient.StockAmount, @ingredient.Unit)</td>
+                                <td>@FormatAmount(@ingredient.PackageSize, @ingredient.Unit)</td>
                                 <td>@ingredient.PackagePrice.ToString("N2") €</td>
                                 <td><strong>@ingredient.PricePerUnit.ToString("N4") €</strong> / @ingredient.Unit</td>
                                 <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
@@ -75,10 +75,10 @@
                         </div>
                         <div class="ingredient-card-body">
                             <span class="label">@AppResources.Ingredients_StockAmount:</span>
-                            <span class="value">@ingredient.StockAmount.ToString("N2") @ingredient.Unit</span>
+                            <span class="value">@FormatAmount(@ingredient.StockAmount, @ingredient.Unit)</span>
 
                             <span class="label">@AppResources.Ingredients_PackageSize:</span>
-                            <span class="value">@ingredient.PackageSize.ToString("N2") @ingredient.Unit</span>
+                            <span class="value">@FormatAmount(@ingredient.PackageSize, @ingredient.Unit)</span>
 
                             <span class="label">@AppResources.Ingredients_PackagePrice:</span>
                             <span class="value">@ingredient.PackagePrice.ToString("N2") €</span>

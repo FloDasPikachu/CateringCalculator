@@ -1,4 +1,4 @@
-﻿using CateringCalculator.Core.Enums;
+﻿using static CateringCalculator.Core.Helpers.FormattingHelper;
 using CateringCalculator.Core.Models;
 using CateringCalculator.Resources.Resources.Internationalization;
 using PdfSharpCore.Drawing;
@@ -129,7 +129,7 @@ public class ShoppingListPdfGenerator {
 
         foreach (var item in result.ShoppingList) {
             string packageText = item.PackagesToBuy > 0
-                ? $"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})"
+                ? $"{item.PackagesToBuy} x ({FormatAmount(item.PackageSize, item.Unit)})"
                 : "Komplett auf Lager";
 
             DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths2, [
@@ -183,23 +183,5 @@ public class ShoppingListPdfGenerator {
             currentX += colWidths[i];
         }
         yPos += height;
-    }
-
-    private static string FormatAmount(decimal amount, IngredientUnit unit) {
-        return unit switch {
-            IngredientUnit.Piece => $"{amount:0.##} Stk.",
-            IngredientUnit.Gram => amount >= 1000m ? $"{(amount / 1000m):0.##} kg" : $"{amount:0.##} g",
-            IngredientUnit.Milliliter => amount >= 1000m ? $"{(amount / 1000m):0.##} l" : $"{amount:0.##} ml",
-            _ => $"{amount:0.##}"
-        };
-    }
-
-    private static string FormatPackageSize(decimal packageSize, IngredientUnit unit) {
-        return unit switch {
-            IngredientUnit.Piece => $"{packageSize:0.##} Stk.",
-            IngredientUnit.Gram => packageSize >= 1000m ? $"{(packageSize / 1000m):0.##} kg" : $"{packageSize:0.##} g",
-            IngredientUnit.Milliliter => packageSize >= 1000m ? $"{(packageSize / 1000m):0.##} l" : $"{packageSize:0.##} ml",
-            _ => $"{packageSize:0.##}"
-        };
     }
 }
