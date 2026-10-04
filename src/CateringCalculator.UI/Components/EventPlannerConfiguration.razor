@@ -140,55 +140,75 @@
                         </button>
                     </div>
                 }
+
+                <div class="form-row mt-2" style="align-items: center; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked="@EventPlan.UseStock" @onchange="() => ToggleIngredientPanel()" />
+                            @AppResources.Event_IngredientStockTitle
+                        </label>
+                    </div>
+                </div>
             }
         </div>
     </details>
 
     <!-- 4. Inventory / Stock Management Panel -->
-    <details class="card-panel">
-        <summary class="panel-summary">
-            <h3 class="panel-title">
-                @AppResources.Event_StockManagementTitle
-            </h3>
-            <span class="panel-chevron">▼</span>
-        </summary>
+    @if (EventPlan.UseStock) {
+        <details class="card-panel">
+            <summary class="panel-summary">
+                <h3 class="panel-title">
+                    @AppResources.Event_StockManagementTitle
+                </h3>
+                <span class="panel-chevron">▼</span>
+            </summary>
 
-        <div class="panel-body">
-            <p class="text-muted text-sm mb-3">
-                @AppResources.Event_StockManagementHint
-            </p>
+            <div class="panel-body">
+                <p class="text-muted text-sm mb-3">
+                    @AppResources.Event_StockManagementHint
+                </p>
 
-            @if (EventPlan.SelectedRecipes.Count == 0) {
-                <div class="text-muted text-sm italic">
-                    @AppResources.Event_SelectRecipesFirst
-                </div>
-            } else {
-                <div class="table-scroll-container">
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>@AppResources.Ingredients_Name</th>
-                                <th class="text-right">@AppResources.Ingredients_StockAmount</th>
-                                <th class="unit-col">Einheit</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var ingredient in GetUniqueIngredientsForSelectedRecipes()) {
+                @if (EventPlan.SelectedRecipes.Count == 0) {
+                    <div class="text-muted text-sm italic">
+                        @AppResources.Event_SelectRecipesFirst
+                    </div>
+                } else {
+                    <div class="table-scroll-container">
+                        <table class="table-custom">
+                            <thead>
                                 <tr>
-                                    <td>@ingredient.Name</td>
-                                    <td class="text-right">
-                                        <input type="number" class="form-control input-xs text-right inline-input"
-                                               @bind="ingredient.StockAmount" min="0" step="0.1" />
-                                    </td>
-                                    <td class="text-muted">@ingredient.Unit</td>
+                                    <th>@AppResources.Ingredients_Name</th>
+                                    <th class="text-right">@AppResources.Ingredients_StockAmount</th>
+                                    <th class="unit-col">Einheit</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
-    </details>
+                            </thead>
+                            <tbody>
+                                @foreach (var ingredient in GetUniqueIngredientsForSelectedRecipes()) {
+                                    var isUsed = EventPlan.IngredientsUseStock.Contains(ingredient.Id);
+
+                                    <tr>
+                                        <td>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox"
+                                                       checked="@isUsed"
+                                                       @onchange="(e) => ToggleIngredientUseStock(ingredient.Id, e.Value)" />
+                                                <span>@ingredient.Name</span>
+                                            </label>
+                                        </td>
+                                        <td class="text-right">
+                                            <input type="number" class="form-control input-xs text-right inline-input"
+                                                   @bind="ingredient.StockAmount" min="0" step="0.1" />
+                                        </td>
+                                        <td class="text-muted">@ingredient.Unit</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </details>
+    }
 
     <div class="card-panel action-panel">
         <button type="button" class="btn-primary w-100 py-md"

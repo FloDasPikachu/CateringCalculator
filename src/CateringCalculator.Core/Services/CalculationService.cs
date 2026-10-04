@@ -118,9 +118,9 @@ public class CalculationService {
         foreach (var entry in context.IngredientAmounts.Values) {
             var ingredient = entry.Ingredient;
             decimal totalWithWaste = entry.TotalAmount * context.WasteMultiplier;
-
-            decimal amountToBuyNet = Math.Max(0m, totalWithWaste - ingredient.StockAmount);
-
+            var useStock = context.UseStock && context.IngredientsUseStock.Contains(ingredient.Id);
+            decimal effectiveStock = useStock ? ingredient.StockAmount : 0m;
+            decimal amountToBuyNet = Math.Max(0m, totalWithWaste - effectiveStock);
             int packagesToBuy = 0;
 
             if (ingredient.PackageSize > 0 && amountToBuyNet > 0) {
@@ -130,7 +130,6 @@ public class CalculationService {
             decimal totalCost = packagesToBuy * ingredient.PackagePrice;
             context.IngredientTotalShoppingCost[ingredient.Id] = totalCost;
             context.IngredientTotalAmountNeeded[ingredient.Id] = totalWithWaste;
-
             context.Result.ShoppingList.Add(new IngredientShoppingItem {
                 IngredientId = ingredient.Id,
                 IngredientName = ingredient.Name,
@@ -140,7 +139,8 @@ public class CalculationService {
                 AmountToBuyNet = Math.Round(amountToBuyNet, 2),
                 PackageSize = ingredient.PackageSize,
                 PackagePrice = ingredient.PackagePrice,
-                PackagesToBuy = packagesToBuy
+                PackagesToBuy = packagesToBuy,
+                IsStockUsed = useStock
             });
         }
     }
@@ -151,6 +151,7 @@ public class CalculationService {
         public int FreeDrinksCount { get; }
         public int TotalProductionDrinks { get; }
         public decimal WasteMultiplier { get; }
+        public bool UseStock { get; }
 
         public bool IsValid => PayingDrinksCount > 0 && _hasRecipes;
 
@@ -160,6 +161,7 @@ public class CalculationService {
         public Dictionary<Guid, Dictionary<Guid, decimal>> RecipeIngredientUsage { get; } = new();
         public Dictionary<Guid, decimal> IngredientTotalShoppingCost { get; } = new();
         public Dictionary<Guid, decimal> IngredientTotalAmountNeeded { get; } = new();
+        public HashSet<Guid> IngredientsUseStock { get; } = new();
 
         public CalculationContext(EventPlan eventPlan) {
             PayingDrinksCount = eventPlan.TotalDrinksToServe;
@@ -167,6 +169,7 @@ public class CalculationService {
             TotalProductionDrinks = PayingDrinksCount + FreeDrinksCount;
             WasteMultiplier = 1m + (eventPlan.WasteBufferPercent / 100m);
             _hasRecipes = eventPlan.SelectedRecipes.Count > 0;
+            UseStock = eventPlan.UseStock;
 
             Result = new CalculationResult {
                 EventPlanId = eventPlan.Id,
@@ -177,6 +180,12 @@ public class CalculationService {
                 PersonnelCosts = eventPlan.PersonnelCosts,
                 TargetProfit = eventPlan.TargetProfit
             };
+
+            if (UseStock && eventPlan.IngredientsUseStock != null) {
+                foreach (var id in eventPlan.IngredientsUseStock) {
+                    IngredientsUseStock.Add(id);
+                }
+            }
         }
     }
 }

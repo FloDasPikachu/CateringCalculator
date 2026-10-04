@@ -630,4 +630,13 @@
   <data name="Event_TableStock" xml:space="preserve">
     <value>In Stock</value>
   </data>
+  <data name="Event_IngredientStockTitle" xml:space="preserve">
+    <value>Consider existing ingredients</value>
+  </data>
+  <data name="Event_SelectAllIngredients" xml:space="preserve">
+    <value>Consider all ingredients</value>
+  </data>
+  <data name="Event_DeductStock" xml:space="preserve">
+    <value>Deduct Stock</value>
+  </data>
 </root>

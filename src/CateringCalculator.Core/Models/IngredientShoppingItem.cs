@@ -9,6 +9,11 @@ public class IngredientShoppingItem {
 
     public decimal TotalAmountNeeded { get; set; }
     public decimal StockAmount { get; set; }
+
+    public bool IsStockUsed { get; set; }
+
+    public decimal EffectiveStockDisplay => IsStockUsed ? StockAmount : 0m;
+
     public decimal AmountToBuyNet { get; set; }
 
     public decimal PackageSize { get; set; }

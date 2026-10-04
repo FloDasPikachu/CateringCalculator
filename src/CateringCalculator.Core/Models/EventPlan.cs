@@ -15,12 +15,15 @@ public class EventPlan {
     public List<EventRecipe> SelectedRecipes { get; set; } = [];
     public int TotalDrinksToServe => GuestCount * AverageDrinksPerGuest;
 
-    public List<FixedCostItem> FixedCostItems { get; set; } = new();
-    public List<PersonnelCostItem> PersonnelCostItems { get; set; } = new();
+    public List<FixedCostItem> FixedCostItems { get; set; } = [];
+    public List<PersonnelCostItem> PersonnelCostItems { get; set; } = [];
+    public bool UseStock { get; set; } = false;
+    public List<Guid> IngredientsUseStock { get; set; } = [];
 
     public void UpdateDetails(string title, int guestCount, int averageDrinksPerGuest,
       decimal wasteBufferPercent, decimal fixedCosts, decimal personnelCosts,
-      decimal targetProfit, int freeDrinksCount) {
+      decimal targetProfit, int freeDrinksCount, bool useStock,
+      List<Guid> ingredientsUseStock) {
         Title = title ?? throw new ArgumentNullException(nameof(title));
         GuestCount = guestCount;
         AverageDrinksPerGuest = averageDrinksPerGuest;
@@ -29,5 +32,7 @@ public class EventPlan {
         PersonnelCosts = personnelCosts;
         TargetProfit = targetProfit;
         FreeDrinksCount = freeDrinksCount;
+        UseStock = useStock;
+        IngredientsUseStock = ingredientsUseStock ?? [];
     }
 }

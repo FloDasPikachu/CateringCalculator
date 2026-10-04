@@ -79,4 +79,20 @@ public partial class EventPlannerConfiguration {
             DistributeEvenly();
         }
     }
+
+    private void ToggleIngredientPanel() {
+        EventPlan.UseStock = !EventPlan.UseStock;
+    }
+
+    private void ToggleIngredientUseStock(Guid ingredientId, object? value) {
+        bool isChecked = value is bool b && b;
+
+        if (isChecked) {
+            if (!EventPlan.IngredientsUseStock.Contains(ingredientId)) {
+                EventPlan.IngredientsUseStock.Add(ingredientId);
+            }
+        } else {
+            EventPlan.IngredientsUseStock.Remove(ingredientId);
+        }
+    }
 }

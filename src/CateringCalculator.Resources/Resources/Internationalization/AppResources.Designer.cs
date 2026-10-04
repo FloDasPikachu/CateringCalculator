@@ -196,6 +196,15 @@ namespace CateringCalculator.Resources.Resources.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bestand abziehen.
+        /// </summary>
+        public static string Event_DeductStock {
+            get {
+                return ResourceManager.GetString("Event_DeductStock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Gleichmäßig verteilen.
         /// </summary>
         public static string Event_DistributeEvenly {
@@ -264,6 +273,15 @@ namespace CateringCalculator.Resources.Resources.Internationalization {
         public static string Event_GuestCount {
             get {
                 return ResourceManager.GetString("Event_GuestCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vorhandene Zutaten berücksichtigen.
+        /// </summary>
+        public static string Event_IngredientStockTitle {
+            get {
+                return ResourceManager.GetString("Event_IngredientStockTitle", resourceCulture);
             }
         }
         
@@ -417,6 +435,15 @@ namespace CateringCalculator.Resources.Resources.Internationalization {
         public static string Event_Section3Title {
             get {
                 return ResourceManager.GetString("Event_Section3Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alle Zutaten berücksichtigen.
+        /// </summary>
+        public static string Event_SelectAllIngredients {
+            get {
+                return ResourceManager.GetString("Event_SelectAllIngredients", resourceCulture);
             }
         }
         

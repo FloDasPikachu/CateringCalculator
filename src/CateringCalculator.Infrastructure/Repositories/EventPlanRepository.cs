@@ -52,9 +52,9 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
         }
     }
 
-    private static void AddNewEventPlan(EventPlan eventPlan) {
+    private void AddNewEventPlan(EventPlan eventPlan) {
         foreach (var selected in eventPlan.SelectedRecipes) {
-            selected.Recipe = null!; // Referenz entkoppeln für FK-Insert
+            selected.Recipe = null!;
         }
 
         foreach (var item in eventPlan.FixedCostItems) {
@@ -64,12 +64,14 @@ public class EventPlanRepository(AppDbContext context) : IEventPlanRepository {
         foreach (var item in eventPlan.PersonnelCostItems) {
             item.EventPlanId = eventPlan.Id;
         }
+
+        context.EventPlans.Add(eventPlan);
     }
 
     private void UpdateExistingEventPlan(EventPlan existingPlan, EventPlan updatedPlan) {
         existingPlan.UpdateDetails(updatedPlan.Title, updatedPlan.GuestCount, updatedPlan.AverageDrinksPerGuest,
           updatedPlan.WasteBufferPercent, updatedPlan.FixedCosts, updatedPlan.PersonnelCosts,
-          updatedPlan.TargetProfit, updatedPlan.FreeDrinksCount);
+          updatedPlan.TargetProfit, updatedPlan.FreeDrinksCount, updatedPlan.UseStock, updatedPlan.IngredientsUseStock);
         SyncSelectedRecipes(existingPlan, updatedPlan);
         SyncFixedCostItems(existingPlan, updatedPlan);
         SyncPersonnelCostItems(existingPlan, updatedPlan);

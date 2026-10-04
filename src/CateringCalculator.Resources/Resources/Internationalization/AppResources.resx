@@ -630,4 +630,13 @@
   <data name="Event_TableStock" xml:space="preserve">
     <value>Vorhanden</value>
   </data>
+  <data name="Event_IngredientStockTitle" xml:space="preserve">
+    <value>Vorhandene Zutaten berücksichtigen</value>
+  </data>
+  <data name="Event_SelectAllIngredients" xml:space="preserve">
+    <value>Alle Zutaten berücksichtigen</value>
+  </data>
+  <data name="Event_DeductStock" xml:space="preserve">
+    <value>Bestand abziehen</value>
+  </data>
 </root>

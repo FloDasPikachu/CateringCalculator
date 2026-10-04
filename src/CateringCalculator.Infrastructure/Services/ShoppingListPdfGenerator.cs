@@ -94,11 +94,11 @@ public class ShoppingListPdfGenerator {
 
         double[] colWidths1 = { 120, 50, 60, 95, 95 };
         DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, [
-            AppResources.Table_Recipe,
-            AppResources.Table_Share,
-            AppResources.Table_Count,
-            AppResources.Table_RealPerDrink,
-            AppResources.Table_RecommendedPrice
+            AppResources.Event_TableCocktail,
+            AppResources.Event_TableShare,
+            AppResources.Event_TableCount,
+            AppResources.Event_TableRealPerDrink,
+            AppResources.Event_TableRecommendedPrice
         ]);
 
         foreach (var calc in result.RecipeCalculations) {
@@ -116,21 +116,28 @@ public class ShoppingListPdfGenerator {
         gfx.DrawString(AppResources.Section_ShoppingList, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
-        double[] colWidths2 = { 25, 130, 90, 115, 60 };
+        // Angepasste Spaltenbreiten inkl. Bestandsspalte (Gesamtsumme entspricht usableWidth)
+        double[] colWidths2 = { 20, 110, 65, 65, 105, 50 };
         DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths2, [
             AppResources.Table_Checkbox,
-            AppResources.Table_Ingredient,
-            AppResources.Table_TotalNeeded,
-            AppResources.Table_Package,
-            AppResources.Table_Costs
+            AppResources.Event_TableIngredient,
+            AppResources.Event_TableNeeded,
+            AppResources.Event_TableStock,
+            AppResources.Event_TablePackage,
+            AppResources.Event_TableTotalCost
         ]);
 
         foreach (var item in result.ShoppingList) {
+            string packageText = item.PackagesToBuy > 0
+                ? $"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})"
+                : "Komplett auf Lager";
+
             DrawTableRow(gfx, fontBody, margin, ref yPos, usableWidth, colWidths2, [
                 "[  ]",
                 item.IngredientName,
                 FormatAmount(item.TotalAmountNeeded, item.Unit),
-                $"{item.PackagesToBuy} x ({FormatPackageSize(item.PackageSize, item.Unit)})",
+                FormatAmount(item.EffectiveStockDisplay, item.Unit),
+                packageText,
                 $"{item.TotalCost:N2} €"
             ]);
         }
@@ -149,7 +156,7 @@ public class ShoppingListPdfGenerator {
         for (int i = 0; i < headers.Length; i++) {
             var rect = new XRect(currentX + 3, yPos + 3, colWidths[i] - 6, height - 3);
             var format = new XStringFormat {
-                Alignment = i >= 3 ? XStringAlignment.Far : (i == 1 && headers[i] == "Anteil" ? XStringAlignment.Center : XStringAlignment.Near),
+                Alignment = i >= 2 && i != 4 ? XStringAlignment.Far : (i == 4 ? XStringAlignment.Center : XStringAlignment.Near),
                 LineAlignment = XLineAlignment.Near
             };
 
@@ -168,7 +175,7 @@ public class ShoppingListPdfGenerator {
         for (int i = 0; i < values.Length; i++) {
             var rect = new XRect(currentX + 3, yPos + 3, colWidths[i] - 6, height - 3);
             var format = new XStringFormat {
-                Alignment = i >= 3 ? XStringAlignment.Far : XStringAlignment.Near,
+                Alignment = i >= 2 && i != 4 ? XStringAlignment.Far : (i == 4 ? XStringAlignment.Center : XStringAlignment.Near),
                 LineAlignment = XLineAlignment.Near
             };
 
