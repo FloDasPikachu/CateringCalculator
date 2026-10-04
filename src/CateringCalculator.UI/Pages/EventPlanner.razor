@@ -246,7 +246,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var calc in _calculationResult.RecipeCalculations) {
+                                @foreach (var calc in _calculationResult.RecipeCalculations.OrderBy(c => c.RecipeName)) {
                                     <tr>
                                         <td><strong>@calc.RecipeName</strong></td>
                                         <td data-label="@AppResources.Event_TableShare" style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
@@ -278,7 +278,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in _calculationResult.ShoppingList) {
+                                @foreach (var item in _calculationResult.ShoppingList.OrderBy(i => i.IngredientName)) {
                                     <tr>
                                         <td><strong>@item.IngredientName</strong></td>
                                         <td>@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
@@ -287,7 +287,6 @@
                                                 @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
                                             </span>
                                         </td>
-                                        <!-- NEU: Anzeige des Restes mit dezenter Hervorhebung -->
                                         <td style="text-align: center;">
                                             @if (item.RemainingAmount > 0) {
                                                 <span class="text-muted" style="font-size: 0.85rem;">

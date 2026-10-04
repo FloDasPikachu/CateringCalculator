@@ -11,6 +11,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository {
             .Include(r => r.Items)
             .ThenInclude(i => i.Ingredient)
             .AsNoTracking()
+            .OrderBy(r => r.Name)
             .ToListAsync();
     }
 
@@ -74,7 +75,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository {
     }
 
     public async Task<List<Ingredient>> GetAllIngredientsAsync() {
-        return await context.Ingredients.AsNoTracking().ToListAsync();
+        return await context.Ingredients.AsNoTracking().OrderBy(i => i.Name).ToListAsync();
     }
 
     public async Task AddIngredientAsync(Ingredient ingredient) {
