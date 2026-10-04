@@ -1,9 +1,9 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
+using CateringCalculator.Resources.Resources.Internationalization;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Fonts;
 using PdfSharpCore.Pdf;
-using CateringCalculator.Resources;
 
 namespace CateringCalculator.Infrastructure.Services;
 
@@ -58,11 +58,11 @@ public class ShoppingListPdfGenerator {
         double yPos = margin;
         double usableWidth = page.Width - (2 * margin);
 
-        gfx.DrawString(string.Format(AppResourcesPdf.Header_ResultTitle, result.EventTitle), fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
+        gfx.DrawString(string.Format(AppResources.Header_ResultTitle, result.EventTitle), fontTitle, new XSolidBrush(colPrimary), new XRect(margin, yPos, usableWidth, 25), formatLeft);
         yPos += 22;
-        var subtitle = string.Format(AppResourcesPdf.Header_PayingDrinks, result.TotalDrinksCount);
+        var subtitle = string.Format(AppResources.Header_PayingDrinks, result.TotalDrinksCount);
         if (result.FreeDrinksCount > 0) {
-            subtitle = string.Format(AppResourcesPdf.Header_PayingAndFreeDrinks, result.TotalDrinksCount, result.FreeDrinksCount);
+            subtitle = string.Format(AppResources.Header_PayingAndFreeDrinks, result.TotalDrinksCount, result.FreeDrinksCount);
         }
         gfx.DrawString(subtitle, fontSubtitle, new XSolidBrush(colGrayText), new XRect(margin, yPos, usableWidth, 18), formatLeft);
         yPos += 20;
@@ -81,24 +81,24 @@ public class ShoppingListPdfGenerator {
             gfx.DrawString(value, fontBodyBold, new XSolidBrush(valueColor), new XRect(x + 5, y + 18, boxWidth - 10, 15), formatLeft);
         }
 
-        DrawKpiBox(margin, yPos, AppResourcesPdf.Kpi_MaterialCost, $"{result.TotalMaterialCost:N2} €", colGreen);
-        DrawKpiBox(margin + boxWidth + 10, yPos, AppResourcesPdf.Kpi_TotalCosts, $"{result.TotalEventCosts:N2} €", colRed);
+        DrawKpiBox(margin, yPos, AppResources.Kpi_MaterialCost, $"{result.TotalMaterialCost:N2} €", colGreen);
+        DrawKpiBox(margin + boxWidth + 10, yPos, AppResources.Kpi_TotalCosts, $"{result.TotalEventCosts:N2} €", colRed);
         yPos += boxHeight + 8;
 
         DrawKpiBox(margin, yPos, "Ziel-Umsatz (inkl. Gewinn)", $"{result.TotalTargetRevenue:N2} €", colPrimary);
         DrawKpiBox(margin + boxWidth + 10, yPos, "Ø Verkaufspreis / Drink", $"{result.TargetSalesPricePerDrink:N2} €", colPurple);
         yPos += boxHeight + 20;
 
-        gfx.DrawString(AppResourcesPdf.Section_CocktailCalculation, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        gfx.DrawString(AppResources.Section_CocktailCalculation, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
         double[] colWidths1 = { 120, 50, 60, 95, 95 };
         DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths1, [
-            AppResourcesPdf.Table_Recipe,
-            AppResourcesPdf.Table_Share,
-            AppResourcesPdf.Table_Count,
-            AppResourcesPdf.Table_RealPerDrink,
-            AppResourcesPdf.Table_RecommendedPrice
+            AppResources.Table_Recipe,
+            AppResources.Table_Share,
+            AppResources.Table_Count,
+            AppResources.Table_RealPerDrink,
+            AppResources.Table_RecommendedPrice
         ]);
 
         foreach (var calc in result.RecipeCalculations) {
@@ -113,16 +113,16 @@ public class ShoppingListPdfGenerator {
 
         yPos += 15;
 
-        gfx.DrawString(AppResourcesPdf.Section_ShoppingList, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
+        gfx.DrawString(AppResources.Section_ShoppingList, fontSection, XBrushes.Black, new XRect(margin, yPos, usableWidth, 20), formatLeft);
         yPos += 22;
 
         double[] colWidths2 = { 25, 130, 90, 115, 60 };
         DrawTableHeader(gfx, fontHeader, colLightGray, margin, ref yPos, usableWidth, colWidths2, [
-            AppResourcesPdf.Table_Checkbox,
-            AppResourcesPdf.Table_Ingredient,
-            AppResourcesPdf.Table_TotalNeeded,
-            AppResourcesPdf.Table_Package,
-            AppResourcesPdf.Table_Costs
+            AppResources.Table_Checkbox,
+            AppResources.Table_Ingredient,
+            AppResources.Table_TotalNeeded,
+            AppResources.Table_Package,
+            AppResources.Table_Costs
         ]);
 
         foreach (var item in result.ShoppingList) {

@@ -1,6 +1,6 @@
 ﻿using CateringCalculator.Core.Interfaces;
 using CateringCalculator.Core.Models;
-using CateringCalculator.Resources.Internationalization;
+using CateringCalculator.Resources.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using CateringCalculator.UI.Shared;
 using Microsoft.AspNetCore.Components;

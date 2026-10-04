@@ -39,6 +39,16 @@ public partial class EventPlannerConfiguration {
         }
     }
 
+    private IEnumerable<Ingredient> GetUniqueIngredientsForSelectedRecipes() {
+        return EventPlan.SelectedRecipes
+            .Where(er => er.Recipe?.Items != null)
+            .SelectMany(er => er.Recipe!.Items)
+            .Where(item => item.Ingredient != null)
+            .Select(item => item.Ingredient!)
+            .DistinctBy(i => i.Id)
+            .OrderBy(i => i.Name);
+    }
+
     private void OpenFixedModal() => _showFixedModal = true;
 
     private void OpenPersonnelModal() => _showPersonnelModal = true;

@@ -45,8 +45,7 @@
     --surface: #1e293b;
     --surface-hover: #334155;
     --text-main: #f8fafc;
-    /* Improve contrast for muted text in dark mode to make subtitles and helper text more readable */
-    --text-muted: #cbd5e1;
+    --text-muted: #cbd5e1; /* Verbesserter Kontrast im Dark Mode */
     --border: #334155;
     --success: #34d399;
     --success-light: rgba(52, 211, 153, 0.15);
@@ -54,12 +53,9 @@
     --danger-light: rgba(248, 113, 113, 0.15);
 }
 
-/* Bootstrap uses its own .text-muted which can reference Bootstrap CSS variables.
-   Ensure our dark-theme muted text is applied with higher specificity so subtitles
-   and helper text are readable. */
-.app-shell.dark-theme .text-muted {
-    color: var(--text-muted) !important;
-}
+    .app-shell.dark-theme .text-muted {
+        color: var(--text-muted) !important;
+    }
 
 /* ==========================================================================
    2. BASE RESET & TYPOGRAPHY
@@ -129,6 +125,10 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.25rem;
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.25rem;
+}
+
+details.card-panel > summary::-webkit-details-marker {
+    display: none;
 }
 
 .btn-primary {
@@ -214,52 +214,6 @@ h1, h2, h3, h4, h5, h6 {
         box-shadow: 0 0 0 3px var(--primary-light);
     }
 
-/* Modal utilities extracted from inline styles to enable centralized theming */
-.modal-backdrop-custom {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-card {
-    background: var(--surface);
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.modal-card.wide {
-    max-width: 700px;
-}
-
-.modal-header {
-    margin-top: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primary);
-}
-
-.modal-body {
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    line-height: 1.4;
-}
-
-.btn-close-custom {
-    background: none;
-    border: none;
-    font-size: 1.15rem;
-    cursor: pointer;
-}
-
 .tag-chip {
     background-color: rgba(99, 102, 241, 0.15);
     color: var(--primary);
@@ -272,15 +226,15 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
 }
 
-.tag-chip button {
-    background: none;
-    border: none;
-    color: var(--primary);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0;
-    line-height: 1;
-}
+    .tag-chip button {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 0;
+        line-height: 1;
+    }
 
 .suggestion-button {
     background-color: rgba(99, 102, 241, 0.08);
@@ -305,11 +259,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .table-custom th[width-140] {
     width: 140px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
 }
 
 .table-custom {
@@ -453,7 +402,6 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
-/* Permanente Desktop-Leiste standardmäßig anzeigen */
 .desktop-menu {
     display: flex;
     align-items: center;
@@ -488,7 +436,6 @@ h1, h2, h3, h4, h5, h6 {
             background-color: var(--primary-light);
         }
 
-/* Hamburger Button (standardmäßig auf großem Desktop versteckt) */
 .hamburger-btn {
     display: none;
     background: none;
@@ -510,7 +457,6 @@ h1, h2, h3, h4, h5, h6 {
         transition: all 0.2s ease;
     }
 
-/* Desktop Dropdown-Menü (bei Klick auf Hamburger) */
 .desktop-nav {
     display: none;
     position: absolute;
@@ -563,7 +509,6 @@ h1, h2, h3, h4, h5, h6 {
                 font-weight: 600;
             }
 
-/* MEDIA QUERY: Ab Fensterbreite unter 950px schaltet die Desktop-Ansicht komplett auf Hamburger um */
 @media (max-width: 950px) {
     .desktop-menu {
         display: none !important;
@@ -574,7 +519,6 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* Sprachschalter */
 .language-switcher {
     display: flex;
     background: var(--background);
@@ -626,7 +570,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .content-body.mobile-padding {
-    padding-bottom: 75px;
+    padding-bottom: 90px !important;
 }
 
 .mobile-menu .nav-links {
@@ -684,7 +628,12 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border);
     overflow: hidden;
     animation: modalFadeIn 0.15s ease-out;
+    padding: 0; /* padding wird über header/body gelöst */
 }
+
+    .modal-card.wide {
+        max-width: 700px;
+    }
 
 @keyframes modalFadeIn {
     from {
@@ -704,6 +653,10 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: 0;
 }
 
 .btn-close-custom {
@@ -723,9 +676,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .modal-body {
     padding: 1.5rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 0;
 }
 
-/* Rows used inside modals for list items (fixed costs, personnel items). Adapts to dark mode. */
 .modal-item-row {
     display: flex;
     gap: 0.5rem;
@@ -736,11 +691,11 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--surface-hover);
 }
 
-.modal-item-row .form-control {
-    background: var(--surface);
-    color: var(--text-main);
-    border: 1px solid var(--border);
-}
+    .modal-item-row .form-control {
+        background: var(--surface);
+        color: var(--text-main);
+        border: 1px solid var(--border);
+    }
 
 .modal-footer {
     padding: 1rem 1.5rem;
@@ -795,10 +750,6 @@ h1, h2, h3, h4, h5, h6 {
         }
 }
 
-.content-body.mobile-padding {
-    padding-bottom: 90px !important;
-}
-
 @media (max-width: 950px) {
     .page-container,
     .content-wrapper,
@@ -826,9 +777,6 @@ h1, h2, h3, h4, h5, h6 {
         margin-top: 0;
         border: none;
         width: 100%;
-        /* Allow table cells to wrap on larger screens so the table adapts
-           to the available container width and avoids unnecessary
-           horizontal scrolling. */
         white-space: normal;
         table-layout: auto;
     }
@@ -836,8 +784,6 @@ h1, h2, h3, h4, h5, h6 {
         .table-responsive .table-custom th,
         .table-responsive .table-custom td {
             padding: 0.85rem 1rem;
-            /* Allow long cell contents (names, numbers) to wrap and break
-               cleanly instead of forcing horizontal scroll. */
             word-break: break-word;
         }
 
@@ -884,7 +830,6 @@ h1, h2, h3, h4, h5, h6 {
         gap: 0.4rem 1rem;
         font-size: 0.9rem;
         color: var(--text-muted);
-        padding: 0.25rem 0;
         border-top: 1px solid var(--border);
         border-bottom: 1px solid var(--border);
         margin-top: 0.25rem;
@@ -970,4 +915,215 @@ h1, h2, h3, h4, h5, h6 {
             text-align: left;
             margin-right: 1rem;
         }
+}
+
+/* ==========================================================================
+   10. EVENT PLANNER LAYOUT & COMPONENTS (Ergänzungen für Cocktail-Planer)
+   ========================================================================== */
+.event-plan-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.panel-summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .panel-summary::-webkit-details-marker {
+        display: none;
+    }
+
+.panel-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.panel-chevron {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+details.card-panel[open] .panel-chevron {
+    transform: rotate(180deg);
+}
+
+.panel-body {
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.85rem;
+}
+
+/* Flex & Utility Helpers */
+.flex-1 {
+    flex: 1;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mt-xs {
+    margin-top: 0.2rem !important;
+}
+
+.text-sm {
+    font-size: 0.85rem !important;
+}
+
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.py-md {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--text-muted);
+}
+
+.input-group-action {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    padding: 0.35rem 0.6rem;
+    white-space: nowrap;
+}
+
+/* Recipe Selection List */
+.recipe-list-container {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.recipe-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface);
+    transition: background-color 0.15s ease;
+}
+
+    .recipe-item:last-child {
+        border-bottom: none;
+    }
+
+    .recipe-item.selected {
+        background-color: var(--primary-light);
+    }
+
+.recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.recipe-share-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+}
+
+.recipe-range {
+    flex: 1;
+}
+
+.recipe-percentage-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    width: 75px;
+}
+
+.input-sm {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.85rem !important;
+}
+
+.input-xs {
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.85rem !important;
+    width: 100px;
+    display: inline-block;
+}
+
+/* Distribution Status Box */
+.distribution-status-box {
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+    .distribution-status-box.success {
+        background-color: var(--success-light);
+        border: 1px solid var(--success);
+        color: var(--success);
+    }
+
+    .distribution-status-box.danger {
+        background-color: var(--danger-light);
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+
+.distribution-status-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Table Scroll & Stock Management */
+.table-scroll-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.unit-col {
+    width: 60px;
 }

@@ -76,7 +76,8 @@
                         <thead>
                             <tr>
                                 <th>@AppResources.Event_TableIngredient</th>
-                                <th>@AppResources.Event_TableDemand</th>
+                                <th style="text-align: right;">@AppResources.Event_TableNeeded</th>
+                                <th style="text-align: right;">@AppResources.Event_TableStock</th>
                                 <th style="text-align: center;">@AppResources.Event_TablePackage</th>
                                 <th style="text-align: center;">@AppResources.Event_Remaining</th>
                                 <th style="text-align: right;">@AppResources.Event_TableTotalCost</th>
@@ -86,11 +87,16 @@
                             @foreach (var item in CalculationResult.ShoppingList) {
                                 <tr>
                                     <td><strong>@item.IngredientName</strong></td>
-                                    <td>@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
+                                    <td style="text-align: right;">@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
+                                    <td style="text-align: right; color: #6c757d;">@item.StockAmount.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
                                     <td style="text-align: center;">
-                                        <span class="badge badge-primary">
-                                            @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
-                                        </span>
+                                        @if (item.PackagesToBuy > 0) {
+                                            <span class="badge badge-primary">
+                                                @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
+                                            </span>
+                                        } else {
+                                            <span style="color: #28a745; font-size: 0.85rem; font-weight: 500;">✓ Komplett auf Lager</span>
+                                        }
                                     </td>
                                     <td style="text-align: center;">
                                         @if (item.RemainingAmount > 0) {
@@ -98,7 +104,7 @@
                                                 @item.RemainingAmount.ToString("0.##") @GetUnitSuffix(item.Unit)
                                             </span>
                                         } else {
-                                            <span style="color: #28a745; font-size: 0.85rem;">0 @GetUnitSuffix(item.Unit)</span>
+                                            <span style="color: #dc3545; font-size: 0.85rem;">0 @GetUnitSuffix(item.Unit)</span>
                                         }
                                     </td>
                                     <td style="text-align: right;"><strong>@item.TotalCost.ToString("N2") €</strong></td>

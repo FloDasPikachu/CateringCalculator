@@ -1,6 +1,6 @@
 ﻿using CateringCalculator.Core.Enums;
 using CateringCalculator.Core.Models;
-using CateringCalculator.Resources.Internationalization;
+using CateringCalculator.Resources.Resources.Internationalization;
 using CateringCalculator.UI.Services;
 using CateringCalculator.UI.Shared;
 using Microsoft.AspNetCore.Components;
@@ -28,7 +28,6 @@ public partial class Ingredients : LocalizedComponentBase, IAsyncDisposable {
     private DotNetObjectReference<Ingredients>? _dotNetRef;
 
     protected override async Task OnInitializedAsync() {
-        // Localization handled by LocalizedComponentBase
         TitleService.SetTitle("Catering Calculator");
         await LoadIngredientsAsync();
     }
@@ -59,6 +58,7 @@ public partial class Ingredients : LocalizedComponentBase, IAsyncDisposable {
             Id = Guid.NewGuid(),
             Name = "",
             Unit = IngredientUnit.Milliliter,
+            StockAmount = 0m,
             PackageSize = 1000m,
             PackagePrice = 0m
         };
@@ -70,6 +70,7 @@ public partial class Ingredients : LocalizedComponentBase, IAsyncDisposable {
             Id = ingredient.Id,
             Name = ingredient.Name,
             Unit = ingredient.Unit,
+            StockAmount = ingredient.StockAmount,
             PackageSize = ingredient.PackageSize,
             PackagePrice = ingredient.PackagePrice
         };
@@ -125,8 +126,6 @@ public partial class Ingredients : LocalizedComponentBase, IAsyncDisposable {
         _showInfoModal = false;
         _infoMessage = string.Empty;
     }
-
-    // Localization unsubscribe handled by LocalizedComponentBase.Dispose()
 
     public async ValueTask DisposeAsync() {
         if (_jsModule != null) {

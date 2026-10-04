@@ -612,4 +612,22 @@
   <data name="Home_Note" xml:space="preserve">
     <value>Tipp: Du kannst Ergebnisse als PDF exportieren und gespeicherte Events später wieder laden.</value>
   </data>
+  <data name="Ingredients_StockAmount" xml:space="preserve">
+    <value>Lagerbestand</value>
+  </data>
+  <data name="Event_StockManagementTitle" xml:space="preserve">
+    <value>4. Lagerbestand &amp; Vorrat</value>
+  </data>
+  <data name="Event_StockManagementHint" xml:space="preserve">
+    <value>Hier siehst du den aktuellen Lagerbestand der benötigten Zutaten. Passe Werte bei Bedarf für dieses Event an.</value>
+  </data>
+  <data name="Event_SelectRecipesFirst" xml:space="preserve">
+    <value>Bitte wähle zuerst Rezepte aus, um den Lagerbestand zu sehen.</value>
+  </data>
+  <data name="Event_TableNeeded" xml:space="preserve">
+    <value>Benötigt</value>
+  </data>
+  <data name="Event_TableStock" xml:space="preserve">
+    <value>Vorhanden</value>
+  </data>
 </root>

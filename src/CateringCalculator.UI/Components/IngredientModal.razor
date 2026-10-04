@@ -1,6 +1,5 @@
 ﻿@using CateringCalculator.Core.Enums
 @using CateringCalculator.Core.Models
-@using CateringCalculator.Resources.Internationalization
 
 @if (IsVisible) {
     <div class="modal-backdrop">
@@ -28,6 +27,11 @@
                                 <option value="@unit">@unit</option>
                             }
                         </InputSelect>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">@AppResources.Ingredients_StockAmount (@Ingredient.Unit)</label>
+                        <InputNumber class="form-control" @bind-Value="Ingredient.StockAmount" step="0.01" min="0" required />
                     </div>
 
                     <div class="form-row">

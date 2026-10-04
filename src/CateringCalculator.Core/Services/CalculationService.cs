@@ -119,14 +119,15 @@ public class CalculationService {
             var ingredient = entry.Ingredient;
             decimal totalWithWaste = entry.TotalAmount * context.WasteMultiplier;
 
-            int packagesToBuy = 0;
-            decimal totalCost = 0m;
+            decimal amountToBuyNet = Math.Max(0m, totalWithWaste - ingredient.StockAmount);
 
-            if (ingredient.PackageSize > 0) {
-                packagesToBuy = (int)Math.Ceiling(totalWithWaste / ingredient.PackageSize);
-                totalCost = packagesToBuy * ingredient.PackagePrice;
+            int packagesToBuy = 0;
+
+            if (ingredient.PackageSize > 0 && amountToBuyNet > 0) {
+                packagesToBuy = (int)Math.Ceiling(amountToBuyNet / ingredient.PackageSize);
             }
 
+            decimal totalCost = packagesToBuy * ingredient.PackagePrice;
             context.IngredientTotalShoppingCost[ingredient.Id] = totalCost;
             context.IngredientTotalAmountNeeded[ingredient.Id] = totalWithWaste;
 
@@ -135,6 +136,8 @@ public class CalculationService {
                 IngredientName = ingredient.Name,
                 Unit = ingredient.Unit,
                 TotalAmountNeeded = Math.Round(totalWithWaste, 2),
+                StockAmount = ingredient.StockAmount,
+                AmountToBuyNet = Math.Round(amountToBuyNet, 2),
                 PackageSize = ingredient.PackageSize,
                 PackagePrice = ingredient.PackagePrice,
                 PackagesToBuy = packagesToBuy

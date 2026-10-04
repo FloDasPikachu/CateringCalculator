@@ -612,4 +612,22 @@
   <data name="Home_Note" xml:space="preserve">
     <value>Tip: You can export results as PDF and reload saved events later.</value>
   </data>
+  <data name="Ingredients_StockAmount" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="Event_StockManagementTitle" xml:space="preserve">
+    <value>4. Inventory &amp; Stock</value>
+  </data>
+  <data name="Event_StockManagementHint" xml:space="preserve">
+    <value>Here you can see the current stock of the required ingredients. Adjust values if needed for this event.</value>
+  </data>
+  <data name="Event_SelectRecipesFirst" xml:space="preserve">
+    <value>Please select recipes first to view the inventory.</value>
+  </data>
+  <data name="Event_TableNeeded" xml:space="preserve">
+    <value>Needed</value>
+  </data>
+  <data name="Event_TableStock" xml:space="preserve">
+    <value>In Stock</value>
+  </data>
 </root>

@@ -9,4 +9,5 @@ public class Ingredient {
     public decimal PackageSize { get; set; }
     public decimal PackagePrice { get; set; }
     public decimal PricePerUnit => PackageSize > 0 ? PackagePrice / PackageSize : 0;
+    public decimal StockAmount { get; set; }
 }

@@ -91,10 +91,6 @@
 		<ProjectReference Include="..\..\src\CateringCalculator.Resources\CateringCalculator.Resources.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Resources\Internationalization\" />
-	</ItemGroup>
-
   <!-- AppResources moved to shared CateringCalculator.Resources project. Keep project reference only. -->
 
 </Project>

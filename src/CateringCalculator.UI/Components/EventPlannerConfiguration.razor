@@ -1,137 +1,199 @@
-﻿<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+﻿<div class="event-plan-container">
+
     <!-- 1. Event-Parameters Panel -->
-    <div class="card-panel">
-        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-            @AppResources.Event_Section1Title
-        </h3>
+    <details class="card-panel" open>
+        <summary class="panel-summary">
+            <h3 class="panel-title">
+                @AppResources.Event_Section1Title
+            </h3>
+            <span class="panel-chevron">▼</span>
+        </summary>
 
-        <div class="form-group">
-            <label class="form-label">@AppResources.Event_NameLabel</label>
-            <input type="text" class="form-control" @bind="EventPlan.Title" placeholder="z. B. Sommerfest 2026" />
-        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="form-label">@AppResources.Event_NameLabel</label>
+                <input type="text" class="form-control" @bind="EventPlan.Title" placeholder="z. B. Sommerfest 2026" />
+            </div>
 
-        <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_GuestCount</label>
-                <input type="number" class="form-control" @bind="EventPlan.GuestCount" min="1" />
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_GuestCount</label>
+                    <input type="number" class="form-control" @bind="EventPlan.GuestCount" min="1" />
+                </div>
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_DrinksPerGuest</label>
+                    <input type="number" class="form-control" @bind="EventPlan.AverageDrinksPerGuest" min="1" />
+                </div>
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_DrinksPerGuest</label>
-                <input type="number" class="form-control" @bind="EventPlan.AverageDrinksPerGuest" min="1" />
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_FreeDrinks</label>
-                <input type="number" class="form-control" @bind="EventPlan.FreeDrinksCount" min="0" />
-                <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_FreeDrinksHint</span>
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_WasteBuffer</label>
-                <input type="number" class="form-control" @bind="EventPlan.WasteBufferPercent" min="0" max="50" />
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_FreeDrinks</label>
+                    <input type="number" class="form-control" @bind="EventPlan.FreeDrinksCount" min="0" />
+                    <span class="form-hint">@AppResources.Event_FreeDrinksHint</span>
+                </div>
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_WasteBuffer</label>
+                    <input type="number" class="form-control" @bind="EventPlan.WasteBufferPercent" min="0" max="50" />
+                </div>
             </div>
         </div>
-    </div>
+    </details>
 
     <!-- 2. Financial Parameters -->
-    <div class="card-panel">
-        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-            @AppResources.Event_Section2Title
-        </h3>
+    <details class="card-panel" open>
+        <summary class="panel-summary">
+            <h3 class="panel-title">
+                @AppResources.Event_Section2Title
+            </h3>
+            <span class="panel-chevron">▼</span>
+        </summary>
 
-        <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_FixedCosts</label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <input type="number" class="form-control" @bind="EventPlan.FixedCosts" min="0" step="10" style="flex: 1;" />
-                    <button type="button" class="btn-secondary" @onclick="OpenFixedModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Fixkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
+        <div class="panel-body">
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_FixedCosts</label>
+                    <div class="input-group-action">
+                        <input type="number" class="form-control" @bind="EventPlan.FixedCosts" min="0" step="10" />
+                        <button type="button" class="btn-secondary btn-action" @onclick="OpenFixedModal" title="Fixkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
+                    </div>
+                    <span class="form-hint">@AppResources.Event_FixedCostsHint</span>
                 </div>
-                <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_FixedCostsHint</span>
+
+                <div class="form-group flex-1">
+                    <label class="form-label">@AppResources.Event_PersonnelCosts</label>
+                    <div class="input-group-action">
+                        <input type="number" class="form-control" @bind="EventPlan.PersonnelCosts" min="0" step="10" />
+                        <button type="button" class="btn-secondary btn-action" @onclick="OpenPersonnelModal" title="Personalkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
+                    </div>
+                    <span class="form-hint">@AppResources.Event_PersonnelCostsHint</span>
+                </div>
             </div>
 
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">@AppResources.Event_PersonnelCosts</label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <input type="number" class="form-control" @bind="EventPlan.PersonnelCosts" min="0" step="10" style="flex: 1;" />
-                    <button type="button" class="btn-secondary" @onclick="OpenPersonnelModal" style="padding: 0.35rem 0.6rem; white-space: nowrap;" title="Personalkosten im Detail berechnen">⚙️ @AppResources.Button_Details</button>
-                </div>
-                <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.2rem;">@AppResources.Event_PersonnelCostsHint</span>
+            <div class="form-group mb-0">
+                <label class="form-label">@AppResources.Event_TargetProfit</label>
+                <input type="number" class="form-control" @bind="EventPlan.TargetProfit" min="0" step="50" />
+                <span class="form-hint mt-xs">
+                    @AppResources.Event_TargetProfitHint
+                </span>
             </div>
         </div>
-
-        <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label">@AppResources.Event_TargetProfit</label>
-            <input type="number" class="form-control" @bind="EventPlan.TargetProfit" min="0" step="50" />
-            <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.25rem;">
-                @AppResources.Event_TargetProfitHint
-            </span>
-        </div>
-    </div>
+    </details>
 
     <!-- 3. Cocktails selection Panel -->
-    <div class="card-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">@AppResources.Event_Section3Title</h3>
-            @if (EventPlan.SelectedRecipes.Count > 0) {
-                <button type="button" class="btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" @onclick="DistributeEvenly">
-                    ⚖️ @AppResources.Event_DistributeEvenly
-                </button>
-            }
-        </div>
+    <details class="card-panel" open>
+        <summary class="panel-summary">
+            <h3 class="panel-title">@AppResources.Event_Section3Title</h3>
+            <span class="panel-chevron">▼</span>
+        </summary>
 
-        @if (_availableRecipes.Count == 0) {
-            <div style="background-color: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; padding: 0.75rem; font-size: 0.875rem; color: #856404;">
-                @AppResources.Event_NoRecipesWarning
-            </div>
-        } else {
-            <div style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px;">
-                @foreach (var recipe in _availableRecipes) {
-                    var selection = EventPlan.SelectedRecipes.FirstOrDefault(r => r.RecipeId == recipe.Id);
-                    var isSelected = selection != null;
+        <div class="panel-body">
+            @if (_availableRecipes.Count == 0) {
+                <div class="warning-box mb-3">
+                    @AppResources.Event_NoRecipesWarning
+                </div>
+            } else {
+                <div class="recipe-list-container">
+                    @foreach (var recipe in _availableRecipes) {
+                        var selection = EventPlan.SelectedRecipes.FirstOrDefault(r => r.RecipeId == recipe.Id);
+                        var isSelected = selection != null;
 
-                    <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(0,0,0,0.05); background-color: @(isSelected ? "rgba(var(--primary-rgb, 13, 110, 253), 0.05)" : "transparent");">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; margin: 0; font-size: 0.95rem;">
-                                <input type="checkbox"
-                                       checked="@isSelected"
-                                       @onchange="() => ToggleRecipeSelection(recipe)" />
-                                @recipe.Name
-                            </label>
-                            <span class="badge badge-primary">
-                                @recipe.TotalCostPerDrink.ToString("N2") € / Drink
-                            </span>
-                        </div>
-
-                        @if (isSelected && selection != null) {
-                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.1);">
-                                <span class="text-muted" style="font-size: 0.8rem;">@AppResources.Event_ShareLabel</span>
-                                <input type="range" style="flex: 1;" min="0" max="100" step="5"
-                                       @bind="selection.Percentage" @bind:event="oninput" />
-                                <div style="display: flex; align-items: center; gap: 0.2rem; width: 75px;">
-                                    <input type="number" class="form-control" style="padding: 0.2rem 0.4rem; font-size: 0.85rem; text-align: right;" min="0" max="100"
-                                           @bind="selection.Percentage" />
-                                    <span style="font-size: 0.85rem;">%</span>
-                                </div>
+                        <div class="recipe-item @(isSelected ? "selected" : "")">
+                            <div class="recipe-header">
+                                <label class="recipe-label">
+                                    <input type="checkbox"
+                                           checked="@isSelected"
+                                           @onchange="() => ToggleRecipeSelection(recipe)" />
+                                    @recipe.Name
+                                </label>
+                                <span class="badge badge-primary">
+                                    @recipe.TotalCostPerDrink.ToString("N2") € / Drink
+                                </span>
                             </div>
-                        }
+
+                            @if (isSelected && selection != null) {
+                                <div class="recipe-share-row">
+                                    <span class="text-muted text-sm">@AppResources.Event_ShareLabel</span>
+                                    <input type="range" class="recipe-range" min="0" max="100" step="5"
+                                           @bind="selection.Percentage" @bind:event="oninput" />
+                                    <div class="recipe-percentage-input-group">
+                                        <input type="number" class="form-control input-sm text-right" min="0" max="100"
+                                               @bind="selection.Percentage" />
+                                        <span class="text-sm">%</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (EventPlan.SelectedRecipes.Count > 0) {
+                    var totalPercent = TotalPercentage;
+                    var is100 = totalPercent == 100m;
+                    <div class="distribution-status-box @(is100 ? "success" : "danger")">
+                        <div class="distribution-status-text">
+                            <span>@AppResources.Event_TotalDistribution</span>
+                            <strong>@totalPercent % @(is100 ? "✓" : AppResources.Event_MustBe100)</strong>
+                        </div>
+                        <button type="button" class="btn-secondary btn-sm" @onclick="DistributeEvenly">
+                            ⚖️ @AppResources.Event_DistributeEvenly
+                        </button>
                     </div>
                 }
-            </div>
+            }
+        </div>
+    </details>
 
-            @if (EventPlan.SelectedRecipes.Count > 0) {
-                var totalPercent = TotalPercentage;
-                var is100 = totalPercent == 100m;
-                <div style="background-color: @(is100 ? "rgba(40, 167, 69, 0.1)" : "rgba(220, 53, 69, 0.1)"); border: 1px solid @(is100 ? "rgba(40, 167, 69, 0.3)" : "rgba(220, 53, 69, 0.3)"); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.85rem; color: @(is100 ? "#155724" : "#721c24"); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <span>@AppResources.Event_TotalDistribution</span>
-                    <strong>@totalPercent % @(is100 ? "✓" : AppResources.Event_MustBe100)</strong>
+    <!-- 4. Inventory / Stock Management Panel -->
+    <details class="card-panel">
+        <summary class="panel-summary">
+            <h3 class="panel-title">
+                @AppResources.Event_StockManagementTitle
+            </h3>
+            <span class="panel-chevron">▼</span>
+        </summary>
+
+        <div class="panel-body">
+            <p class="text-muted text-sm mb-3">
+                @AppResources.Event_StockManagementHint
+            </p>
+
+            @if (EventPlan.SelectedRecipes.Count == 0) {
+                <div class="text-muted text-sm italic">
+                    @AppResources.Event_SelectRecipesFirst
+                </div>
+            } else {
+                <div class="table-scroll-container">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>@AppResources.Ingredients_Name</th>
+                                <th class="text-right">@AppResources.Ingredients_StockAmount</th>
+                                <th class="unit-col">Einheit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ingredient in GetUniqueIngredientsForSelectedRecipes()) {
+                                <tr>
+                                    <td>@ingredient.Name</td>
+                                    <td class="text-right">
+                                        <input type="number" class="form-control input-xs text-right inline-input"
+                                               @bind="ingredient.StockAmount" min="0" step="0.1" />
+                                    </td>
+                                    <td class="text-muted">@ingredient.Unit</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             }
-        }
+        </div>
+    </details>
 
-        <button type="button" class="btn-primary" style="width: 100%; padding: 0.75rem;"
+    <div class="card-panel action-panel">
+        <button type="button" class="btn-primary w-100 py-md"
                 @onclick="CalculateEvent"
-                disabled="@(EventPlan.SelectedRecipes.Count == 0 || EventPlan.GuestCount <= 0 || TotalPercentage != 100m)">
+                disabled="@(EventPlan.SelectedRecipes.Count == 0 || EventPlan.GuestCount <= 1 || TotalPercentage != 100m)">
             🧮 @AppResources.Event_CalculateBtn
         </button>
     </div>
