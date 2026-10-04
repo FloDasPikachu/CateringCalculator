@@ -1,0 +1,113 @@
+﻿<div>
+    @if (CalculationResult == null) {
+        <div class="card-panel text-center" style="padding: 4rem 2rem;">
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">@AppResources.Event_NoCalculationYet</p>
+            <p class="text-muted" style="margin-bottom: 0;">@AppResources.Event_NoCalculationHint</p>
+        </div>
+    } else {
+        <div class="card-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@AppResources.Event_ResultPrefix @CalculationResult.EventTitle</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="badge badge-primary">@CalculationResult.TotalDrinksCount @AppResources.Event_PayingDrinksCount</span>
+                    <button type="button" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" @onclick="ExportPdf">
+                        📄 @AppResources.Event_ExportPdf
+                    </button>
+                </div>
+            </div>
+
+            <!-- Key Performance Indicator Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                    <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_MaterialCostTotal</span>
+                    <strong style="color: #28a745; font-size: 1.1rem;">@CalculationResult.TotalMaterialCost.ToString("N2") €</strong>
+                </div>
+                <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                    <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TotalEventCosts</span>
+                    <strong style="color: #d9534f; font-size: 1.1rem;">@CalculationResult.TotalEventCosts.ToString("N2") €</strong>
+                </div>
+                <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                    <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_TargetRevenue</span>
+                    <strong style="color: var(--primary); font-size: 1.1rem;">@CalculationResult.TotalTargetRevenue.ToString("N2") €</strong>
+                </div>
+                <div class="price-preview-box text-center" style="padding: 0.6rem;">
+                    <span class="text-muted" style="display: block; font-size: 0.75rem; margin-bottom: 0.1rem;">@AppResources.Event_AvgSalesPrice</span>
+                    <strong style="color: #6f42c1; font-size: 1.1rem;">@CalculationResult.TargetSalesPricePerDrink.ToString("N2") €</strong>
+                </div>
+            </div>
+
+            <!-- 1. Table: Calculation per Recipe -->
+            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🍹 @AppResources.Event_CocktailCalcTitle</h4>
+            <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+                <div class="table-responsive stack-on-mobile">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>@AppResources.Event_TableCocktail</th>
+                                <th style="text-align: center;">@AppResources.Event_TableShare</th>
+                                <th style="text-align: center;">@AppResources.Event_TableCount</th>
+                                <th style="text-align: right;">@AppResources.Event_TableRealPerDrink</th>
+                                <th style="text-align: right; color: #6f42c1;">@AppResources.Event_TableRecommendedPrice</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var calc in CalculationResult.RecipeCalculations) {
+                                <tr>
+                                    <td><strong>@calc.RecipeName</strong></td>
+                                    <td data-label="@AppResources.Event_TableShare" style="text-align: center;">@calc.Percentage.ToString("0.##") %</td>
+                                    <td data-label="@AppResources.Event_TableCount" style="text-align: center;">@calc.PayingDrinkCount (@calc.FreeDrinkCount) Stk.</td>
+                                    <td data-label="@AppResources.Event_TableRealPerDrink" style="text-align: right; color: #28a745;">@calc.RealCostPerDrink.ToString("N2") €</td>
+                                    <td data-label="@AppResources.Event_TableRecommendedPrice" style="text-align: right; font-weight: bold; color: #6f42c1;">@calc.TargetSalesPrice.ToString("N2") €</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <span class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.35rem;">
+                    @AppResources.Event_CalcDisclaimer
+                </span>
+            </div>
+
+            <!-- 2. Table: Shoppinglist -->
+            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">🛒 @AppResources.Event_ShoppingListTitle</h4>
+            <div style="overflow-x: auto;">
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>@AppResources.Event_TableIngredient</th>
+                                <th>@AppResources.Event_TableDemand</th>
+                                <th style="text-align: center;">@AppResources.Event_TablePackage</th>
+                                <th style="text-align: center;">@AppResources.Event_Remaining</th>
+                                <th style="text-align: right;">@AppResources.Event_TableTotalCost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in CalculationResult.ShoppingList) {
+                                <tr>
+                                    <td><strong>@item.IngredientName</strong></td>
+                                    <td>@item.TotalAmountNeeded.ToString("0.##") @GetUnitSuffix(item.Unit)</td>
+                                    <td style="text-align: center;">
+                                        <span class="badge badge-primary">
+                                            @item.PackagesToBuy x (@item.PackageSize.ToString("0.##") @GetUnitSuffix(item.Unit))
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        @if (item.RemainingAmount > 0) {
+                                            <span class="text-muted" style="font-size: 0.85rem;">
+                                                @item.RemainingAmount.ToString("0.##") @GetUnitSuffix(item.Unit)
+                                            </span>
+                                        } else {
+                                            <span style="color: #28a745; font-size: 0.85rem;">0 @GetUnitSuffix(item.Unit)</span>
+                                        }
+                                    </td>
+                                    <td style="text-align: right;"><strong>@item.TotalCost.ToString("N2") €</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
